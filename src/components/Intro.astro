@@ -34,8 +34,20 @@
     if (p && p.catch) p.catch(reveal);
   }
 
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) reveal();
-  else playIntro();
+  // a abertura toca só na primeira visita da sessão e nunca quando se chega por âncora (#quem-somos)
+  let seen = false;
+  try { seen = sessionStorage.getItem('pv-intro') === '1'; sessionStorage.setItem('pv-intro', '1'); } catch (e) {}
+  const skip = seen || !!location.hash || window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (skip) {
+    done = true;
+    intro.style.display = 'none';
+    body.classList.remove('locked');
+    body.classList.add('ready');
+    if (location.hash) {
+      const el = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (el) requestAnimationFrame(() => el.scrollIntoView());
+    }
+  } else playIntro();
 
   v.addEventListener('ended', reveal);
   v.addEventListener('timeupdate', () => {
