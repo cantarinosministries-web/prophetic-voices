@@ -1,8 +1,31 @@
 ---
 import Base from '../layouts/Base.astro';
 import PageHero from '../components/PageHero.astro';
+import { artigos } from '../data/artigos.js';
 ---
 <Base page="artigos" title="Artigos — The Prophetic Voices">
-  <PageHero k="art" soon eyebrow="Revista The Prophetic Voices" title="Artigos"
+  <PageHero k="art" eyebrow="Revista The Prophetic Voices" title="Artigos"
     lede="Estudos em profetismo bíblico: artigos produzidos e traduzidos pela equipe, com rigor acadêmico e sensibilidade ao Espírito. A revista abrirá, no futuro, para submissões de pesquisadores." />
+  <section class="pad" style="padding-top:10px;border-top:none">
+    <div class="wrap">
+      <div class="eyebrow" style="margin-bottom:26px" data-i18n="list_vol">VOL. 1 · TRADUÇÕES</div>
+      <div class="art-list">
+        {artigos.map((a) => (
+          <article class="art-item">
+            <a href={`/artigos/${a.slug}.html`} class="art-thumb" aria-hidden="true" tabindex="-1"><img src={a.capa} alt="" width="160" height="226" loading="lazy" /></a>
+            <div class="art-info">
+              <span class="m">{a.periodico.toUpperCase()} · {a.ano} · {a.area.toUpperCase()}</span>
+              <h2><a href={`/artigos/${a.slug}.html`}>{a.titulo}</a></h2>
+              <p class="by">{a.autor} · <span data-i18n="art_trad">Tradução</span>: {a.tradutor}</p>
+              <p class="abs">{a.resumo}</p>
+              <div class="links">
+                <a href={`/artigos/${a.slug}.html`} class="btn btn-creme" style="height:44px;padding:0 20px;font-size:14px" data-i18n="list_read">Ler artigo</a>
+                <a href={a.pdf} download class="btn btn-ghost" style="height:44px;padding:0 20px;font-size:14px">PDF ↓</a>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
 </Base>

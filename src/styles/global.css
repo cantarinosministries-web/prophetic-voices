@@ -275,3 +275,51 @@ body.ready .eagle-wrap{opacity:1}
 .soon::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--cobre);animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:.35}50%{opacity:1}}
 .nav-active{color:var(--creme)!important}
+
+/* ---------- revista: lista e página de artigo ---------- */
+.art-list{display:flex;flex-direction:column;gap:28px}
+.art-item{display:grid;grid-template-columns:160px minmax(0,1fr);gap:32px;padding:28px;border:1px solid var(--line);border-radius:24px;background:#050504;transition:border-color .4s}
+.art-item:hover{border-color:rgba(191,137,87,.55)}
+@media(max-width:640px){.art-item{grid-template-columns:1fr}.art-thumb{max-width:160px}}
+.art-thumb img{width:100%;height:auto;border-radius:6px;display:block;box-shadow:0 14px 30px rgba(0,0,0,.5)}
+.art-info{display:flex;flex-direction:column;gap:12px}
+.art-info .m{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--cobre)}
+.art-info h2{margin:0;font-family:var(--serif);font-weight:400;font-size:clamp(28px,3vw,40px);line-height:1.1}
+.art-info h2 a:hover{color:var(--cobre)}
+.art-info .by{margin:0;color:var(--creme);font-size:15px}
+.art-info .abs{margin:0;color:var(--areia);font-size:16px;line-height:1.65;font-weight:300;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.art-info .links{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+
+.art-head{padding:150px 0 56px;border-bottom:1px solid var(--line);background:radial-gradient(ellipse at 70% 120%,rgba(191,137,87,.22),transparent 60%)}
+.crumbs{display:flex;gap:10px;font-family:var(--mono);font-size:12px;letter-spacing:.12em;color:var(--areia)}
+.crumbs a:hover{color:var(--creme)}
+.art-title{margin:14px 0 0;font-family:var(--serif);font-weight:400;font-size:clamp(40px,5.4vw,76px);line-height:1.04;max-width:960px}
+.art-author{margin:22px 0 0;font-size:20px;color:var(--creme)}
+.art-author span{color:var(--areia)}
+.art-src{margin:8px 0 0;font-size:15px;color:var(--areia)}
+.art-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:32px}
+.art-body{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:48px;padding-top:56px;padding-bottom:110px}
+@media(max-width:980px){.art-body{grid-template-columns:1fr}}
+.art-block{margin-bottom:56px}
+.art-block h2{margin:0 0 18px;font-family:var(--disp);font-weight:300;text-transform:uppercase;font-size:26px;letter-spacing:.04em}
+.art-block>p{margin:0;font-size:18px;line-height:1.75;color:var(--areia);font-weight:300;max-width:760px}
+.art-note{margin-top:14px!important;font-size:13px!important;color:#8C7D6E!important}
+.art-note a{color:var(--creme);border-bottom:1px solid var(--line)}
+.kw{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+.kw span{height:34px;display:inline-flex;align-items:center;padding:0 14px;border-radius:999px;border:1px solid var(--line);font-size:13px;color:var(--areia)}
+.reader-bar{display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap}
+.reader-open{font-family:var(--mono);font-size:12px;letter-spacing:.12em;color:var(--areia)}
+.reader-open:hover{color:var(--creme)}
+.reader{border:1px solid var(--line);border-radius:18px;overflow:hidden;background:#1a1612;height:min(88vh,1100px)}
+.reader iframe{width:100%;height:100%;border:0;display:block;background:#fff}
+.art-side{display:flex;flex-direction:column;gap:20px;align-self:start;position:sticky;top:110px}
+@media(max-width:980px){.art-side{position:static}}
+.meta-card{border:1px solid var(--line);border-radius:20px;padding:24px;background:#050504}
+.meta-card img{width:100%;height:auto;border-radius:6px;display:block;margin-bottom:22px}
+.meta-card dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:10px 14px;font-size:14px}
+.meta-card dt{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--cobre);padding-top:2px}
+.meta-card dd{margin:0;color:var(--creme);line-height:1.45}
+.meta-card dd a{border-bottom:1px solid var(--line)}
+.meta-card .rights{margin:20px 0 0;padding-top:16px;border-top:1px solid var(--line);font-size:12px;line-height:1.55;color:var(--areia)}
+.meta-card.cite h3{margin:0 0 10px;font-family:var(--mono);font-weight:400;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--cobre)}
+.meta-card.cite p{margin:0;font-size:14px;line-height:1.6;color:var(--areia)}

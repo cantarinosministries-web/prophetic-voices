@@ -1,0 +1,98 @@
+---
+import Base from '../../layouts/Base.astro';
+import { artigos } from '../../data/artigos.js';
+
+const a = artigos.find((x) => x.slug === 'jastrow-roeh-hozeh')!;
+const citacao = `JASTROW JR., Morris. ${a.titulo}. Tradução de ${a.tradutor}. The Prophetic Voices, 2026. Original: ${a.periodico}, v. ${a.volume}, n. ${a.numero}, p. ${a.paginasOriginal}, ${a.ano}.`;
+---
+<Base page="artigos" title={`${a.titulo} — ${a.autor} | The Prophetic Voices`} description={a.resumo}>
+  <article class="art-page">
+    <div class="art-head">
+      <div class="wrap">
+        <div class="crumbs">
+          <a href="/artigos.html" data-i18n="nav_articles">Artigos</a><span aria-hidden="true">/</span><span>{a.periodico} · {a.ano}</span>
+        </div>
+        <div class="eyebrow" style="margin-top:28px">{a.area}</div>
+        <h1 class="art-title">{a.titulo}</h1>
+        <p class="art-author">{a.autor} <span>· {a.afiliacao}</span></p>
+        <p class="art-src">{a.periodico}, vol. {a.volume}, nº {a.numero} ({a.ano}), pp. {a.paginasOriginal} · <span data-i18n="art_trad">Tradução</span>: {a.tradutor}</p>
+        <div class="art-actions">
+          <a href="#leitor" class="btn btn-creme"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2 5h7a3 3 0 0 1 3 3v12a2 2 0 0 0-2-2H2z"/><path d="M22 5h-7a3 3 0 0 0-3 3v12a2 2 0 0 1 2-2h8z"/></svg><span data-i18n="art_read">Ler online</span></a>
+          <a href={a.pdf} download="Jastrow-1909-Roeh-e-Hozeh-no-Antigo-Testamento.pdf" class="btn btn-ghost"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5"/><path d="M4 19h16"/></svg><span data-i18n="art_dl">Baixar PDF</span> <small style="opacity:.7">({a.paginasPdf} p.)</small></a>
+          <button type="button" class="btn btn-ghost" id="citeBtn"><span data-i18n="art_cite">Copiar citação</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="wrap art-body">
+      <div class="art-main">
+        <section class="art-block">
+          <h2 data-i18n="art_abs_h">Resumo</h2>
+          <p id="absText">{a.resumo}</p>
+          <p class="art-note" data-i18n="art_abs_note">Resumo editorial da The Prophetic Voices; o artigo original não tem resumo.</p>
+          <div class="kw">{a.palavrasChave.map((k) => <span>{k}</span>)}</div>
+        </section>
+
+        <section class="art-block" id="leitor">
+          <div class="reader-bar">
+            <h2 data-i18n="art_reader_h">Leitura</h2>
+            <a href={a.pdf} target="_blank" rel="noopener" class="reader-open" data-i18n="art_open">Abrir em tela cheia ↗</a>
+          </div>
+          <div class="reader">
+            <iframe src={`${a.pdf}#view=FitH&toolbar=1`} title={`${a.titulo} — PDF`} loading="lazy"></iframe>
+          </div>
+          <p class="art-note"><span data-i18n="art_reader_fb">Se o documento não aparecer no seu aparelho,</span> <a href={a.pdf} target="_blank" rel="noopener" data-i18n="art_reader_fb2">abra o PDF aqui</a>.</p>
+        </section>
+      </div>
+
+      <aside class="art-side" aria-label="Informações do artigo">
+        <div class="meta-card">
+          <img src={a.capa} alt="Primeira página do artigo" width="300" height="424" loading="lazy" />
+          <dl>
+            <dt data-i18n="m_author">Autor</dt><dd>{a.autor}</dd>
+            <dt data-i18n="m_orig_title">Título original</dt><dd><i>{a.tituloOriginal}</i></dd>
+            <dt data-i18n="m_journal">Periódico</dt><dd>{a.periodico}, vol. {a.volume}, nº {a.numero}</dd>
+            <dt data-i18n="m_year">Ano</dt><dd>{a.ano}</dd>
+            <dt data-i18n="m_pages">Páginas (original)</dt><dd>{a.paginasOriginal}</dd>
+            <dt data-i18n="m_pub">Editora original</dt><dd>{a.editoraOriginal}</dd>
+            <dt data-i18n="m_trans">Tradução</dt><dd>{a.tradutor}</dd>
+            <dt data-i18n="m_lang">Idioma</dt><dd data-i18n="m_lang_v">Português</dd>
+            <dt data-i18n="m_date">Publicado na revista</dt><dd data-i18n="m_date_v">{a.publicadoEm}</dd>
+            <dt data-i18n="m_stable">Original</dt><dd><a href={a.urlOriginal} target="_blank" rel="noopener">JSTOR 4617104 ↗</a></dd>
+          </dl>
+          <p class="rights" data-i18n="m_rights">{a.direitos}</p>
+        </div>
+        <div class="meta-card cite">
+          <h3 data-i18n="art_cite_h">Como citar</h3>
+          <p id="citeText">{citacao}</p>
+        </div>
+      </aside>
+    </div>
+  </article>
+</Base>
+
+<script>
+  import { t, currentLang } from '../../scripts/i18n.js';
+  import { artigos } from '../../data/artigos.js';
+  const a = artigos.find((x) => x.slug === 'jastrow-roeh-hozeh')!;
+
+  const btn = document.getElementById('citeBtn') as HTMLButtonElement;
+  btn.addEventListener('click', async () => {
+    const txt = (document.getElementById('citeText') as HTMLElement).innerText;
+    try { await navigator.clipboard.writeText(txt); } catch (e) {}
+    const label = btn.querySelector('span') as HTMLElement;
+    label.textContent = t().art_copied;
+    setTimeout(() => { label.textContent = t().art_cite; }, 2000);
+  });
+
+  function render() {
+    const en = currentLang() === 'en';
+    (document.getElementById('absText') as HTMLElement).textContent = en ? a.resumoEn : a.resumo;
+    const r = document.querySelector('[data-i18n="m_rights"]') as HTMLElement;
+    r.textContent = en ? a.direitosEn : a.direitos;
+    const d = document.querySelector('[data-i18n="m_date_v"]') as HTMLElement;
+    d.textContent = en ? a.publicadoEmEn : a.publicadoEm;
+  }
+  window.addEventListener('pv:lang', render);
+  render();
+</script>
