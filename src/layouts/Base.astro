@@ -1,0 +1,134 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  page?: 'home' | 'artigos' | 'cursos' | 'loja';
+}
+const {
+  title = 'The Prophetic Voices — His word, our voice.',
+  description = 'Preparando uma geração para serem Vozes Proféticas no tempo do fim.',
+  page = 'home',
+} = Astro.props;
+
+const SCHOOL = 'https://thepropheticvoices.hotmart.host/escola-de-profetas';
+const IG = 'https://www.instagram.com/thepropheticvoices/';
+const WA1 = 'https://chat.whatsapp.com/KU6aVf2D7h5L2ZXfK08SOa';
+const WA2 = 'https://chat.whatsapp.com/LMVCHliI9AQ3mj7flYstud';
+const isHome = page === 'home';
+---
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <link rel="icon" type="image/png" href="/media/symbol-creme.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200;300;400&family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+</head>
+<body class={isHome ? 'locked' : 'ready'}>
+  <div class="grain" aria-hidden="true"></div>
+
+  <slot name="intro" />
+
+  <header id="top-nav">
+    <nav class="wrap">
+      <a href="/index.html" class="logo" aria-label="The Prophetic Voices — Home"><img src="/media/logo-creme.png" alt="The Prophetic Voices" /></a>
+      <div class="links">
+        <a href="/index.html" data-i18n="nav_home" class:list={[{ 'nav-active': isHome }]}>Home</a>
+        <a href="/index.html#quem-somos" data-i18n="nav_about">Quem Somos</a>
+        <a href={SCHOOL} target="_blank" rel="noopener" data-i18n="nav_school">Escola de Profetas</a>
+        <a href="/artigos.html" data-i18n="nav_articles" class:list={[{ 'nav-active': page === 'artigos' }]}>Artigos</a>
+        <a href="/cursos.html" data-i18n="nav_courses" class:list={[{ 'nav-active': page === 'cursos' }]}>Cursos</a>
+        <a href="/loja.html" data-i18n="nav_store" class:list={[{ 'nav-active': page === 'loja' }]}>Loja</a>
+      </div>
+      <div class="acts">
+        <div class="lang" role="group" aria-label="Idioma / Language">
+          <button type="button" data-lang="pt" aria-pressed="true" aria-label="Português">
+            <svg width="22" height="15" viewBox="0 0 22 15" aria-hidden="true"><rect width="22" height="15" fill="#009B3A"/><path d="M11 1.6 20 7.5 11 13.4 2 7.5z" fill="#FEDF00"/><circle cx="11" cy="7.5" r="3.4" fill="#002776"/><path d="M7.8 6.9c2.2-.5 4.5-.2 6.4.9" stroke="#fff" stroke-width=".6" fill="none"/></svg><span>PT</span>
+          </button>
+          <button type="button" data-lang="en" aria-pressed="false" aria-label="English">
+            <svg width="22" height="15" viewBox="0 0 22 15" aria-hidden="true"><rect width="22" height="15" fill="#fff"/><g fill="#B22234"><rect y="0" width="22" height="1.15"/><rect y="2.3" width="22" height="1.15"/><rect y="4.6" width="22" height="1.15"/><rect y="6.9" width="22" height="1.15"/><rect y="9.2" width="22" height="1.15"/><rect y="11.5" width="22" height="1.15"/><rect y="13.85" width="22" height="1.15"/></g><rect width="9.4" height="8.05" fill="#3C3B6E"/></svg><span>EN</span>
+          </button>
+        </div>
+        <a href="/loja.html" class="icon-btn" aria-label="Carrinho"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M6 7h12l-1 13H7L6 7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg><span class="count" id="cartCount">0</span></a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <slot />
+
+    <section id="comunidade" class="pad">
+      <div class="wrap comm rv">
+        <div>
+          <div class="eyebrow" data-i18n="comm_eyebrow">Comunidade</div>
+          <h2 class="disp" style="font-size:clamp(46px,5.4vw,84px);margin-top:18px"><span data-i18n="comm_h1">Viva o profético</span><br /><span class="serif it" style="text-transform:none;color:var(--cobre)" data-i18n="comm_h2">em comunidade.</span></h2>
+          <p style="color:var(--areia);font-size:19px;line-height:1.6;font-weight:300;margin-top:20px;max-width:520px" data-i18n="comm_p">Entre na comunidade The Prophetic Voices no WhatsApp e acompanhe pelo Instagram.</p>
+        </div>
+        <div class="comm-links">
+          <a href={WA1} target="_blank" rel="noopener" class="comm-card"><span>WhatsApp</span><b data-i18n="g1">WhatsApp · Grupo 1</b><i>→</i></a>
+          <a href={WA2} target="_blank" rel="noopener" class="comm-card"><span>WhatsApp</span><b data-i18n="g2">WhatsApp · Grupo 2</b><i>→</i></a>
+          <a href={IG} target="_blank" rel="noopener" class="comm-card"><span>Instagram</span><b>@thepropheticvoices</b><i>→</i></a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer id="contato">
+    <div class="wrap">
+      <div class="foot-top">
+        <div style="flex:1 1 420px">
+          <h2 class="serif" style="margin:0;font-size:44px;line-height:1.05"><span data-i18n="news_h1">Receba os novos artigos</span> <span class="it" style="color:var(--cobre)" data-i18n="news_h2">da revista.</span></h2>
+          <form class="news" onsubmit="return false">
+            <label for="em" class="sr">E-mail</label>
+            <input id="em" type="email" data-i18n-ph="news_ph" placeholder="seu@email.com" />
+            <button type="submit" class="btn btn-creme" style="height:54px" data-i18n="news_btn">Inscrever</button>
+          </form>
+        </div>
+        <div class="cols">
+          <div><span data-i18n="f_nav">NAVEGAR</span><a href="/index.html#quem-somos" data-i18n="nav_about">Quem Somos</a><a href={SCHOOL} target="_blank" rel="noopener" data-i18n="nav_school">Escola de Profetas</a><a href="/artigos.html" data-i18n="nav_articles">Artigos</a><a href="/cursos.html" data-i18n="nav_courses">Cursos</a><a href="/loja.html" data-i18n="nav_store">Loja</a></div>
+          <div><span data-i18n="f_contact">CONTATO</span><a href="https://wa.me/5599920017003" target="_blank" rel="noopener">WhatsApp · +55 99 92001-7003</a><a href="https://wa.me/5511960578932" target="_blank" rel="noopener"><span data-i18n="f_agenda">Agenda</span> · +55 11 96057-8932</a><a href={IG} target="_blank" rel="noopener">Instagram · @thepropheticvoices</a></div>
+          <div><span data-i18n="f_comm">COMUNIDADE</span><a href={WA1} target="_blank" rel="noopener" data-i18n="g1">WhatsApp · Grupo 1</a><a href={WA2} target="_blank" rel="noopener" data-i18n="g2">WhatsApp · Grupo 2</a></div>
+        </div>
+      </div>
+      <p class="sign" data-i18n-html="sign">Vozes proféticas<br />no tempo do fim.</p>
+      <div class="legal">
+        <span>THE PROPHETIC VOICES · 2026</span>
+        {isHome ? <button type="button" id="replay" data-i18n="replay">↺ REVER ABERTURA</button> : <span></span>}
+        <span data-i18n="legal">TERMOS · PRIVACIDADE</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    import { initLang } from '../scripts/i18n.js';
+
+    const nav = document.getElementById('top-nav');
+    const onScroll = () => nav && nav.classList.toggle('solid', window.scrollY > 60);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((en) => { if (en.isIntersecting) { en.target.classList.add('on'); io.unobserve(en.target); } });
+    }, { threshold: 0.15 });
+    document.querySelectorAll('.rv').forEach((el) => io.observe(el));
+
+    // contador do carrinho compartilhado entre páginas
+    const cc = document.getElementById('cartCount');
+    const showCart = () => {
+      let n = 0;
+      try { n = JSON.parse(localStorage.getItem('pv-cart') || '[]').length; } catch (e) {}
+      if (cc) { cc.textContent = String(n); cc.style.display = n ? 'inline-flex' : 'none'; }
+    };
+    window.addEventListener('pv:cart', showCart);
+    showCart();
+
+    initLang();
+  </script>
+</body>
+</html>

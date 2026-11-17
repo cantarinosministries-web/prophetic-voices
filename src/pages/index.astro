@@ -1,0 +1,144 @@
+---
+import Base from '../layouts/Base.astro';
+import Intro from '../components/Intro.astro';
+import Eagle from '../components/Eagle.astro';
+
+const SCHOOL = 'https://thepropheticvoices.hotmart.host/escola-de-profetas';
+const letters = 'PROPHETIC.'.split('');
+const HE = [
+  { he: 'נָבִיא', tr: 'NĀḆÎʾ' },
+  { he: 'רֹאֶה', tr: 'RŌʾEH' },
+  { he: 'חֹזֶה', tr: 'ḤŌZEH' },
+  { he: 'אִישׁ הָאֱלֹהִים', tr: 'ʾÎŠ HĀʾĔLŌHÎM', long: true },
+];
+---
+<Base page="home">
+  <Intro slot="intro" />
+
+  <!-- HERO -->
+  <section id="hero" style="border-top:none">
+    <div class="dawn" aria-hidden="true"></div>
+    <div class="horizon" aria-hidden="true"></div>
+    <div class="hero-in wrap hero-split">
+      <div class="hero-text">
+        <div class="eyebrow">The Prophetic Voices</div>
+        <h1 class="disp prophetic" aria-label="Prophetic.">
+          {letters.map((c, i) => <span aria-hidden="true" style={`transition-delay:${(0.35 + i * 0.07).toFixed(2)}s`}>{c}</span>)}
+        </h1>
+        <p class="tag">His word, our voice.</p>
+      </div>
+      <Eagle />
+    </div>
+    <a href="#quem-somos" class="scroll-hint" aria-label="Rolar"><span data-i18n="scroll">ROLE</span><i></i></a>
+  </section>
+
+  <!-- QUEM SOMOS + MANIFESTO -->
+  <section id="quem-somos" class="pad">
+    <div class="wrap" id="manifesto">
+      <img class="about-logo rv" src="/media/pv07-cobre.png" alt="Símbolo The Prophetic Voices" width="120" height="120" />
+      <div class="eyebrow rv" data-i18n="about_eyebrow">Quem somos</div>
+      <div class="about-text rv">
+        <p data-i18n-html="about_p1">O Prophetic Voices, fundado por <b>Gabriel e Priscila Cantarino</b>, é um ministério que existe para ser uma plataforma de formação profética a serviço da Igreja e da sociedade no tempo do fim.</p>
+        <p data-i18n="about_p2">Nosso sonho é ver pessoas capacitadas pelo Espírito nos dons extraordinários e sobrenaturais, e serem forjadas por uma teologia bíblica, acadêmica e viva, que as capacita a edificar comunidades que vivem o profético de maneira sobrenatural, saudável e relevante para a sociedade.</p>
+        <p data-i18n="about_p3">Cremos que todos os santos, crentes em Cristo Jesus, movidos pelo Espírito Santo, são chamados a ser vozes proféticas onde quer que estejam: na igreja local, no campo missionário, no mercado de trabalho, na família ou nas nações.</p>
+      </div>
+      <p class="lead-in rv" data-i18n="lead_in">É assim que estamos</p>
+      <p class="big" id="manifestoText"></p>
+      <div class="verse rv"><span class="l"></span><q data-i18n="verse">Eis que ponho na tua boca as minhas palavras.</q><small data-i18n="verse_ref">JR 1.9</small></div>
+    </div>
+  </section>
+
+  <!-- LÉXICO -->
+  <section class="pad">
+    <div class="wrap lex">
+      <div class="rv">
+        <div class="eyebrow" data-i18n="lex_eyebrow">Léxico profético</div>
+        <h2 class="disp" style="font-size:clamp(48px,5.4vw,84px);margin-top:20px"><span data-i18n="lex_h1">Quatro palavras,</span><br /><span class="serif it" style="text-transform:none;color:var(--cobre)" data-i18n="lex_h2">um ofício.</span></h2>
+        <p style="color:var(--areia);font-size:18px;line-height:1.6;font-weight:300;max-width:420px;margin-top:20px" data-i18n="lex_sub">Antes de qualquer método, a linguagem. Toque em cada termo hebraico.</p>
+        <div class="tabs" role="tablist" id="lexTabs">
+          {HE.map((h, i) => <button type="button" role="tab" class:list={['tab', { long: h.long }]} lang="he" dir="rtl" data-i={i} aria-selected={i === 0 ? 'true' : 'false'}>{h.he}</button>)}
+        </div>
+      </div>
+      <div class="card rv" id="lexCard" role="tabpanel"></div>
+    </div>
+  </section>
+
+  <!-- PORTAIS -->
+  <section id="portais" class="pad">
+    <div class="wrap">
+      <div class="head rv">
+        <div>
+          <div class="eyebrow" data-i18n="portals_eyebrow">Explore</div>
+          <h2 class="disp" style="margin-top:18px;font-size:clamp(44px,5vw,76px)" data-i18n="portals_h">Por onde começar</h2>
+        </div>
+      </div>
+      <div class="portals rv">
+        <a class="portal" href={SCHOOL} target="_blank" rel="noopener">
+          <div><span class="n">01</span><h3 style="margin-top:18px" data-i18n="p_school_t">Escola de Profetas</h3><p data-i18n="p_school_d">Formação profética em dois semestres. Turma 2027 com 50 vagas.</p></div>
+          <div class="go"><span data-i18n="p_go_ext">INSCRIÇÕES</span><i>↗</i></div>
+        </a>
+        <a class="portal" href="/artigos.html">
+          <div><span class="n">02</span><h3 style="margin-top:18px" data-i18n="p_art_t">Artigos</h3><p data-i18n="p_art_d">Estudos em profetismo bíblico, em formato de revista.</p></div>
+          <div class="go"><span data-i18n="p_go">ACESSAR</span><i>→</i></div>
+        </a>
+        <a class="portal" href="/cursos.html">
+          <div><span class="n">03</span><h3 style="margin-top:18px" data-i18n="p_course_t">Cursos</h3><p data-i18n="p_course_d">Cursos digitais para formação no seu tempo.</p></div>
+          <div class="go"><span data-i18n="p_go">ACESSAR</span><i>→</i></div>
+        </a>
+        <a class="portal" href="/loja.html">
+          <div><span class="n">04</span><h3 style="margin-top:18px" data-i18n="p_store_t">Loja</h3><p data-i18n="p_store_d">Livros, materiais e vestuário.</p></div>
+          <div class="go"><span data-i18n="p_go">ACESSAR</span><i>→</i></div>
+        </a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<script>
+  import { t } from '../scripts/i18n.js';
+
+  // Manifesto: palavras acendem conforme a rolagem
+  const mt = document.getElementById('manifestoText') as HTMLElement;
+  let words: NodeListOf<HTMLElement>;
+  function light() {
+    if (!words) return;
+    const r = mt.getBoundingClientRect(), vh = window.innerHeight;
+    let p = (vh * 0.85 - r.top) / (r.height + vh * 0.35);
+    p = Math.max(0, Math.min(1, p));
+    const n = Math.round(p * words.length);
+    words.forEach((w, i) => w.classList.toggle('lit', i < n));
+  }
+  function buildManifesto() {
+    const s: string = t().manifesto;
+    mt.setAttribute('aria-label', s.replace(/\|/g, ''));
+    mt.innerHTML = s.split(' ').map((w) => {
+      const k = /^\|.*\|$/.test(w);
+      return '<span class="w' + (k ? ' k' : '') + '" aria-hidden="true">' + w.replace(/\|/g, '') + '</span>';
+    }).join(' ');
+    words = mt.querySelectorAll('.w');
+    light();
+  }
+  window.addEventListener('scroll', light, { passive: true });
+
+  // Léxico
+  const HE = [
+    { he: 'נָבִיא', tr: 'NĀḆÎʾ' },
+    { he: 'רֹאֶה', tr: 'RŌʾEH' },
+    { he: 'חֹזֶה', tr: 'ḤŌZEH' },
+    { he: 'אִישׁ הָאֱלֹהִים', tr: 'ʾÎŠ HĀʾĔLŌHÎM', long: true },
+  ];
+  const tabs = document.querySelectorAll<HTMLButtonElement>('#lexTabs .tab');
+  const card = document.getElementById('lexCard') as HTMLElement;
+  let lexI = 0;
+  function showLex(i: number) {
+    lexI = i;
+    tabs.forEach((b, j) => b.setAttribute('aria-selected', String(j === i)));
+    const h = HE[i], x = t().lex[i];
+    card.innerHTML = '<div class="fade" style="display:flex;flex-direction:column;gap:20px;height:100%"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap"><span class="he" lang="he" dir="rtl"' + (h.long ? ' style="font-size:68px"' : '') + '>' + h.he + '</span><span class="tr">' + h.tr + '</span></div><div class="gl">' + x.gl + '</div><p>' + x.body + '</p><div class="ref">' + x.ref + '</div></div>';
+  }
+  tabs.forEach((b, i) => b.addEventListener('click', () => showLex(i)));
+
+  function render() { buildManifesto(); showLex(lexI); }
+  window.addEventListener('pv:lang', render);
+  render();
+</script>

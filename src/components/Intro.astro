@@ -1,0 +1,48 @@
+---
+// Abertura em vídeo: toca uma vez ao abrir a home e revela o site
+// quando a cortina preta do final fecha.
+---
+<div id="intro" aria-label="The Prophetic Voices">
+  <video id="introVideo" muted playsinline preload="auto" src="/media/pv-intro.mp4"></video>
+  <div class="bar" id="bar"></div>
+</div>
+
+<script>
+  const body = document.body;
+  const intro = document.getElementById('intro') as HTMLDivElement;
+  const v = document.getElementById('introVideo') as HTMLVideoElement;
+  const bar = document.getElementById('bar') as HTMLDivElement;
+  let done = false;
+
+  function reveal() {
+    if (done) return;
+    done = true;
+    intro.classList.add('out');
+    body.classList.remove('locked');
+    setTimeout(() => body.classList.add('ready'), 250);
+    setTimeout(() => { intro.style.display = 'none'; }, 1100);
+  }
+  function playIntro() {
+    done = false;
+    body.classList.remove('ready');
+    body.classList.add('locked');
+    intro.style.display = 'flex';
+    intro.classList.remove('out');
+    window.scrollTo(0, 0);
+    v.currentTime = 0;
+    const p = v.play();
+    if (p && p.catch) p.catch(reveal);
+  }
+
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) reveal();
+  else playIntro();
+
+  v.addEventListener('ended', reveal);
+  v.addEventListener('timeupdate', () => {
+    if (!v.duration) return;
+    bar.style.width = (v.currentTime / v.duration) * 100 + '%';
+    if (v.duration - v.currentTime < 0.35) reveal();
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !done) reveal(); });
+  document.getElementById('replay')?.addEventListener('click', playIntro);
+</script>

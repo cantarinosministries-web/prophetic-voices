@@ -1,0 +1,13 @@
+---
+interface Props { eyebrow: string; title: string; lede: string; k: string; soon?: boolean }
+const { eyebrow, title, lede, k, soon = false } = Astro.props;
+---
+<section class="page-hero">
+  <div class="dawn" aria-hidden="true"></div>
+  <div class="wrap" style="position:relative;z-index:2">
+    <div class="eyebrow" data-i18n={`${k}_eyebrow`}>{eyebrow}</div>
+    <h1 class="disp" data-i18n={`${k}_h1`}>{title}</h1>
+    <p class="lede" data-i18n={`${k}_lede`}>{lede}</p>
+    {soon && <span class="soon" data-i18n="soon">EM BREVE</span>}
+  </div>
+</section>
