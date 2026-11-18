@@ -323,3 +323,5 @@ body.ready .eagle-wrap{opacity:1}
 .meta-card .rights{margin:20px 0 0;padding-top:16px;border-top:1px solid var(--line);font-size:12px;line-height:1.55;color:var(--areia)}
 .meta-card.cite h3{margin:0 0 10px;font-family:var(--mono);font-weight:400;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--cobre)}
 .meta-card.cite p{margin:0;font-size:14px;line-height:1.6;color:var(--areia)}
+#quem-somos{padding-bottom:70px}
+#lexico{padding-top:80px}
