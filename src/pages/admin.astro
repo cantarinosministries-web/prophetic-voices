@@ -1,5 +1,5 @@
 ---
-// Painel da plataforma: login, artigos, usuários e histórico. Toda a lógica está em src/scripts/admin.js
+// Painel da plataforma: login, artigos, loja, usuários e histórico. Toda a lógica está em src/scripts/admin.js
 // e os dados vêm da API do Worker (/api/...). A página em si é estática e não contém dados.
 ---
 <!doctype html>
@@ -17,10 +17,11 @@
 </head>
 <body>
   <header class="bar">
-    <a href="/index.html" class="logo" aria-label="Ir para o site"><img src="/media/logo-creme.png" alt="The Prophetic Voices" /></a>
-    <span class="bar-t">Painel</span>
+    <a href="/index.html" class="logo" aria-label="Ir para o site" id="menuLogoSite"><img src="/media/logo-creme.png" alt="The Prophetic Voices" /></a>
+    <a class="bar-t" id="menuLogo" href="#artigos" style="color:inherit;text-decoration:none">Painel</a>
     <nav id="menu" hidden>
-      <a href="#artigos" data-r="artigos">Artigos</a>
+      <a href="#artigos" data-r="artigos" data-perm="ver_revista">Artigos</a>
+      <a href="#loja" data-r="loja" data-perm="loja_ver">Loja</a>
       <a href="#usuarios" data-r="usuarios" data-perm="gerir_usuarios">Usuários</a>
       <a href="#historico" data-r="historico" data-perm="ver_historico">Histórico</a>
       <a href="#papeis" data-r="papeis">Papéis</a>

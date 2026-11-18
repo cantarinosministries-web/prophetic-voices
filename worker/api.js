@@ -1,6 +1,7 @@
 // API do painel: /api/...
 import { aleatorio, sha256, hashSenha, iguais, senhaValida, lerCookie, cookieSessao, COOKIE, json, erro } from './seguranca.js';
-import { PAPEIS, pode, podeAtribuir, permissoesDe } from './permissoes.js';
+import { PAPEIS, PAPEIS_LOJA, pode, podeAtribuir, permissoesDe } from './permissoes.js';
+import { apiLoja } from './loja.js';
 
 const DIAS_SESSAO = 14;
 const AREAS = ['Antigo Testamento', 'Novo Testamento', 'Teologia bíblica', 'História'];
@@ -12,7 +13,11 @@ const CAMPOS = ['tipo', 'titulo', 'titulo_original', 'autor', 'autor_citacao', '
 // ---------------------------------------------------------------- utilidades
 const agora = () => new Date().toISOString().replace('T', ' ').slice(0, 19);
 const daqui = (h) => new Date(Date.now() + h * 3600e3).toISOString().replace('T', ' ').slice(0, 19);
-const publicoUsuario = (u) => u && { id: u.id, email: u.email, nome: u.nome, papel: u.papel, ativo: !!u.ativo, criado_em: u.criado_em, ultimo_acesso: u.ultimo_acesso };
+const publicoUsuario = (u) => u && { id: u.id, email: u.email, nome: u.nome, papel: u.papel, revista: u.revista !== 0, papel_loja: u.papel_loja || 'nenhum',
+  ativo: !!u.ativo, criado_em: u.criado_em, ultimo_acesso: u.ultimo_acesso };
+const lojaValida = (x) => (PAPEIS_LOJA[x] ? x : 'nenhum');
+const descreverAcesso = (papel, revista, loja) =>
+  `revista: ${revista === 0 || revista === false ? 'sem acesso' : PAPEIS[papel].nome} · loja: ${PAPEIS_LOJA[lojaValida(loja)].nome}`;
 
 async function corpo(req) {
   try { return await req.json(); } catch (e) { return {}; }
@@ -108,7 +113,7 @@ export async function api(req, env, url) {
   if (p === '/sessao' && m === 'GET') {
     const u = await usuarioDaSessao(env, req);
     const n = (await env.DB.prepare('SELECT COUNT(*) n FROM usuarios').first()).n;
-    return json({ usuario: publicoUsuario(u), permissoes: u ? permissoesDe(u) : null, papeis: PAPEIS, configurar: n === 0, chave_configurada: !!env.CHAVE_CONFIGURACAO });
+    return json({ usuario: publicoUsuario(u), permissoes: u ? permissoesDe(u) : null, papeis: PAPEIS, papeis_loja: PAPEIS_LOJA, configurar: n === 0, chave_configurada: !!env.CHAVE_CONFIGURACAO });
   }
 
   if (p === '/configurar' && m === 'POST') {
@@ -120,7 +125,7 @@ export async function api(req, env, url) {
     if (!d.nome || !/^\S+@\S+\.\S+$/.test(d.email || '')) return erro('Informe nome e e-mail válidos.');
     if (!senhaValida(d.senha)) return erro('A senha precisa ter pelo menos 10 caracteres.');
     const { hash, sal } = await hashSenha(d.senha);
-    const r = await env.DB.prepare("INSERT INTO usuarios (email, nome, papel, senha_hash, senha_sal) VALUES (?,?,'proprietario',?,?) RETURNING *")
+    const r = await env.DB.prepare("INSERT INTO usuarios (email, nome, papel, papel_loja, senha_hash, senha_sal) VALUES (?,?,'proprietario','gerente',?,?) RETURNING *")
       .bind(d.email.trim(), d.nome.trim(), hash, sal).first();
     await registrar(env, r, 'configurou a plataforma', r.email);
     return json({ ok: true }, 200, { 'Set-Cookie': await criarSessao(env, r) });
@@ -152,9 +157,9 @@ export async function api(req, env, url) {
 
   if (p === '/convite' && m === 'GET') {
     const tok = url.searchParams.get('token') || '';
-    const c = await env.DB.prepare("SELECT tipo, email, nome, papel FROM convites WHERE token_hash = ? AND usado_em IS NULL AND expira_em > datetime('now')")
+    const c = await env.DB.prepare("SELECT tipo, email, nome, papel, revista, papel_loja FROM convites WHERE token_hash = ? AND usado_em IS NULL AND expira_em > datetime('now')")
       .bind(await sha256(tok)).first();
-    return c ? json({ convite: { ...c, papel_nome: c.papel ? PAPEIS[c.papel].nome : null } }) : erro('Link inválido ou expirado.', 404);
+    return c ? json({ convite: { ...c, papel_nome: c.papel ? descreverAcesso(c.papel, c.revista, c.papel_loja) : null } }) : erro('Link inválido ou expirado.', 404);
   }
 
   if (p === '/convite' && m === 'POST') {
@@ -167,9 +172,9 @@ export async function api(req, env, url) {
     let u;
     if (c.tipo === 'convite') {
       if (await env.DB.prepare('SELECT 1 FROM usuarios WHERE email = ?').bind(c.email).first()) return erro('Já existe um usuário com este e-mail.', 409);
-      u = await env.DB.prepare('INSERT INTO usuarios (email, nome, papel, senha_hash, senha_sal) VALUES (?,?,?,?,?) RETURNING *')
-        .bind(c.email, String(d.nome || c.nome || c.email).trim().slice(0, 120), c.papel, hash, sal).first();
-      await registrar(env, u, 'aceitou o convite', u.email, PAPEIS[u.papel].nome);
+      u = await env.DB.prepare('INSERT INTO usuarios (email, nome, papel, revista, papel_loja, senha_hash, senha_sal) VALUES (?,?,?,?,?,?,?) RETURNING *')
+        .bind(c.email, String(d.nome || c.nome || c.email).trim().slice(0, 120), c.papel, c.revista === 0 ? 0 : 1, lojaValida(c.papel_loja), hash, sal).first();
+      await registrar(env, u, 'aceitou o convite', u.email, descreverAcesso(u.papel, u.revista, u.papel_loja));
     } else {
       await env.DB.prepare('UPDATE usuarios SET senha_hash = ?, senha_sal = ? WHERE id = ?').bind(hash, sal, c.usuario_id).run();
       await env.DB.prepare('DELETE FROM sessoes WHERE usuario_id = ?').bind(c.usuario_id).run();
@@ -207,7 +212,10 @@ export async function api(req, env, url) {
   }
 
   // ---------------- artigos
+  if (seg[0] === 'loja') return apiLoja(req, env, url, seg.slice(1), u, { corpo, registrar });
+
   if (seg[0] === 'artigos') {
+    if (!pode(u, 'ver_rascunhos')) return erro('Você não tem acesso à revista.', 403);
     if (seg.length === 1 && m === 'GET') {
       const r = await env.DB.prepare(
         `SELECT a.id, a.slug, a.status, a.tipo, a.titulo, a.autor, a.tradutor, a.periodico, a.ano, a.area, a.capa_url, a.criado_por, a.atualizado_em, a.publicado_em,
@@ -336,7 +344,7 @@ export async function api(req, env, url) {
 
     if (seg[0] === 'usuarios' && seg.length === 1 && m === 'GET') {
       const r = await env.DB.prepare('SELECT * FROM usuarios ORDER BY ativo DESC, nome').all();
-      const c = await env.DB.prepare("SELECT rowid AS id, tipo, email, nome, papel, criado_em, expira_em FROM convites WHERE usado_em IS NULL AND expira_em > datetime('now') ORDER BY criado_em DESC").all();
+      const c = await env.DB.prepare("SELECT rowid AS id, tipo, email, nome, papel, revista, papel_loja, criado_em, expira_em FROM convites WHERE usado_em IS NULL AND expira_em > datetime('now') ORDER BY criado_em DESC").all();
       return json({
         usuarios: r.results.map((x) => ({ ...publicoUsuario(x), editavel: x.id !== u.id && podeAtribuir(u, x.papel, x) })),
         convites: c.results,
@@ -349,9 +357,10 @@ export async function api(req, env, url) {
       if (!podeAtribuir(u, d.papel, null)) return erro('Você não pode atribuir esse papel.', 403);
       if (await env.DB.prepare('SELECT 1 FROM usuarios WHERE email = ?').bind(email).first()) return erro('Já existe um usuário com este e-mail.', 409);
       const tok = aleatorio(32);
-      await env.DB.prepare("INSERT INTO convites (token_hash, tipo, email, nome, papel, criado_por, expira_em) VALUES (?, 'convite', ?, ?, ?, ?, ?)")
-        .bind(await sha256(tok), email, String(d.nome || '').trim().slice(0, 120) || null, d.papel, u.id, daqui(24 * 7)).run();
-      await registrar(env, u, 'convidou', email, PAPEIS[d.papel].nome);
+      const revista = d.revista === false ? 0 : 1, loja = lojaValida(d.papel_loja);
+      await env.DB.prepare("INSERT INTO convites (token_hash, tipo, email, nome, papel, revista, papel_loja, criado_por, expira_em) VALUES (?, 'convite', ?, ?, ?, ?, ?, ?, ?)")
+        .bind(await sha256(tok), email, String(d.nome || '').trim().slice(0, 120) || null, d.papel, revista, loja, u.id, daqui(24 * 7)).run();
+      await registrar(env, u, 'convidou', email, descreverAcesso(d.papel, revista, loja));
       return json({ link: `${base}#convite=${tok}`, expira: '7 dias' }, 201);
     }
     if (seg[0] === 'convites' && seg[1] && m === 'DELETE') {
@@ -371,6 +380,14 @@ export async function api(req, env, url) {
           if (!podeAtribuir(u, d.papel, alvo)) return erro('Você não pode atribuir esse papel.', 403);
           await env.DB.prepare('UPDATE usuarios SET papel = ? WHERE id = ?').bind(d.papel, alvo.id).run();
           await registrar(env, u, 'mudou o papel de', alvo.email, `${PAPEIS[alvo.papel].nome} → ${PAPEIS[d.papel].nome}`);
+        }
+        if (typeof d.revista === 'boolean' && d.revista !== (alvo.revista !== 0)) {
+          await env.DB.prepare('UPDATE usuarios SET revista = ? WHERE id = ?').bind(d.revista ? 1 : 0, alvo.id).run();
+          await registrar(env, u, d.revista ? 'deu acesso à revista para' : 'tirou o acesso à revista de', alvo.email);
+        }
+        if (d.papel_loja && PAPEIS_LOJA[d.papel_loja] && d.papel_loja !== alvo.papel_loja) {
+          await env.DB.prepare('UPDATE usuarios SET papel_loja = ? WHERE id = ?').bind(d.papel_loja, alvo.id).run();
+          await registrar(env, u, 'mudou o acesso à loja de', alvo.email, `${PAPEIS_LOJA[lojaValida(alvo.papel_loja)].nome} → ${PAPEIS_LOJA[d.papel_loja].nome}`);
         }
         if (typeof d.ativo === 'boolean' && d.ativo !== !!alvo.ativo) {
           await env.DB.prepare('UPDATE usuarios SET ativo = ? WHERE id = ?').bind(d.ativo ? 1 : 0, alvo.id).run();

@@ -1,10 +1,12 @@
 // Painel The Prophetic Voices — interface (sem bibliotecas; pdf.js só é carregado ao enviar um PDF).
+import { instalarLoja, ACOES_LOJA } from './admin-loja.js';
 const app = document.getElementById('app');
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-let S = { usuario: null, permissoes: null, papeis: {} };
+let S = { usuario: null, permissoes: null, papeis: {}, papeis_loja: {} };
+const inicio = () => (S.permissoes && !S.permissoes.ver_revista && S.permissoes.loja_ver ? 'loja' : 'artigos');
 
 const STATUS = { rascunho: 'Rascunho', revisao: 'Em revisão', publicado: 'Publicado', arquivado: 'Arquivado' };
 const AREAS = ['Antigo Testamento', 'Novo Testamento', 'Teologia bíblica', 'História'];
@@ -69,6 +71,7 @@ function mostrarMenu() {
   $('#who').hidden = !u;
   if (!u) return;
   $('#whoName').innerHTML = `${esc(u.nome)} <span class="papel">${esc(nomePapel(u.papel))}</span>`;
+  $('#menuLogo').href = '#' + inicio();
   $$('#menu a').forEach((a) => { a.hidden = a.dataset.perm ? !S.permissoes[a.dataset.perm] : false; });
 }
 function marcarMenu(r) { $$('#menu a').forEach((a) => a.classList.toggle('on', a.dataset.r === r)); }
@@ -81,7 +84,7 @@ $('#sair').addEventListener('click', async () => {
 // ---------------------------------------------------------------- telas sem login
 function telaEntrar() {
   app.innerHTML = `<div class="auth"><div class="card">
-    <h1>Entrar</h1><p class="muted small">Painel da revista The Prophetic Voices.</p>
+    <h1>Entrar</h1><p class="muted small">Painel The Prophetic Voices — revista e loja.</p>
     <form id="f" class="stack" style="margin-top:18px">
       <label class="f"><span>E-mail</span><input type="email" name="email" autocomplete="username" required autofocus></label>
       <label class="f"><span>Senha</span><input type="password" name="senha" autocomplete="current-password" required></label>
@@ -92,7 +95,7 @@ function telaEntrar() {
   $('#f').addEventListener('submit', async (e) => {
     e.preventDefault();
     const d = Object.fromEntries(new FormData(e.target));
-    try { await api('/entrar', { method: 'POST', body: d, publico: true }); await carregarSessao(); ir('artigos'); }
+    try { await api('/entrar', { method: 'POST', body: d, publico: true }); await carregarSessao(); ir(inicio()); }
     catch (er) { $('#err').textContent = er.message; }
   });
 }
@@ -124,7 +127,7 @@ async function telaConvite(token, tipo) {
   const novo = c.tipo === 'convite';
   app.innerHTML = `<div class="auth"><div class="card">
     <h1>${novo ? 'Bem-vindo' : 'Nova senha'}</h1>
-    <p class="muted small">${novo ? `Você foi convidado como <b>${esc(c.papel_nome)}</b> na revista The Prophetic Voices.` : 'Crie uma nova senha para a sua conta.'}</p>
+    <p class="muted small">${novo ? `Você foi convidado para a plataforma The Prophetic Voices (${esc(c.papel_nome)}).` : 'Crie uma nova senha para a sua conta.'}</p>
     <form id="f" class="stack" style="margin-top:18px">
       <label class="f"><span>E-mail</span><input value="${esc(c.email)}" disabled></label>
       ${novo ? `<label class="f"><span>Seu nome</span><input name="nome" value="${esc(c.nome || '')}" required></label>` : ''}
@@ -137,7 +140,7 @@ async function telaConvite(token, tipo) {
     e.preventDefault();
     const d = Object.fromEntries(new FormData(e.target));
     if (d.senha !== d.senha2) { $('#err').textContent = 'As senhas não conferem.'; return; }
-    try { await api('/convite', { method: 'POST', body: { token, nome: d.nome, senha: d.senha }, publico: true }); history.replaceState(null, '', location.pathname); await carregarSessao(); toast(novo ? 'Conta criada.' : 'Senha alterada.'); ir('artigos'); }
+    try { await api('/convite', { method: 'POST', body: { token, nome: d.nome, senha: d.senha }, publico: true }); history.replaceState(null, '', location.pathname); await carregarSessao(); toast(novo ? 'Conta criada.' : 'Senha alterada.'); ir(inicio()); }
     catch (er) { $('#err').textContent = er.message; }
   });
 }
@@ -348,14 +351,17 @@ async function telaUsuarios() {
   if (!S.permissoes.gerir_usuarios) return ir('artigos');
   app.innerHTML = '<p class="muted center">Carregando…</p>';
   const { usuarios, convites } = await api('/usuarios');
+  const nomeLoja = (p) => (S.papeis_loja[p] ? S.papeis_loja[p].nome : p);
+  const opLoja = (sel) => ['nenhum', 'visualizador', 'expedicao', 'gerente'].map((p) => `<option value="${p}" ${p === sel ? 'selected' : ''}>${esc(nomeLoja(p))}</option>`).join('');
   const opPapeis = (sel) => S.permissoes.papeis_atribuiveis.map((p) => `<option value="${p}" ${p === sel ? 'selected' : ''}>${esc(nomePapel(p))}</option>`).join('');
   app.innerHTML = `
     <div class="head"><div><h1>Usuários</h1><p class="muted">${usuarios.filter((u) => u.ativo).length} ativos · cada pessoa entra com o próprio e-mail e senha.</p></div></div>
     <div class="grid2">
-      <div class="card" style="padding:6px 12px"><table class="tb"><thead><tr><th>Pessoa</th><th>Papel</th><th>Último acesso</th><th></th></tr></thead><tbody>
+      <div class="card" style="padding:6px 12px"><table class="tb"><thead><tr><th>Pessoa</th><th>Revista</th><th>Loja</th><th>Último acesso</th><th></th></tr></thead><tbody>
       ${usuarios.map((u) => `<tr data-id="${u.id}" style="${u.ativo ? '' : 'opacity:.5'}">
         <td><b style="font-weight:500">${esc(u.nome)}</b>${u.id === S.usuario.id ? ' <span class="papel">você</span>' : ''}<div class="small muted">${esc(u.email)}${u.ativo ? '' : ' · desativado'}</div></td>
-        <td>${u.editavel ? `<select data-papel style="padding:6px 10px;font-size:14px">${S.permissoes.papeis_atribuiveis.includes(u.papel) ? '' : `<option value="${u.papel}" selected>${esc(nomePapel(u.papel))}</option>`}${opPapeis(u.papel)}</select>` : `<span class="papel">${esc(nomePapel(u.papel))}</span>`}</td>
+        <td>${u.editavel ? `<select data-papel style="padding:6px 10px;font-size:14px">${S.permissoes.papeis_atribuiveis.includes(u.papel) ? '' : `<option value="${u.papel}" selected>${esc(nomePapel(u.papel))}</option>`}${opPapeis(u.papel)}</select>${['proprietario', 'administrador'].includes(u.papel) ? '' : `<label class="small muted" style="display:flex;gap:6px;align-items:center;margin-top:6px"><input type="checkbox" data-revista ${u.revista ? 'checked' : ''}> acesso à revista</label>`}` : `<span class="papel">${u.revista || ['proprietario', 'administrador'].includes(u.papel) ? esc(nomePapel(u.papel)) : 'sem acesso'}</span>`}</td>
+        <td>${['proprietario', 'administrador'].includes(u.papel) ? '<span class="papel">acesso total</span>' : u.editavel ? `<select data-loja style="padding:6px 10px;font-size:14px">${opLoja(u.papel_loja)}</select>` : `<span class="papel">${esc(nomeLoja(u.papel_loja))}</span>`}</td>
         <td class="small muted">${data(u.ultimo_acesso)}</td>
         <td style="text-align:right;white-space:nowrap">${u.editavel ? `<button class="btn sm" data-reset>Nova senha</button> <button class="btn sm ${u.ativo ? 'dng' : ''}" data-ativo="${u.ativo ? 0 : 1}">${u.ativo ? 'Desativar' : 'Reativar'}</button>` : ''}</td></tr>`).join('')}
       </tbody></table><div id="linkReset"></div></div>
@@ -363,20 +369,29 @@ async function telaUsuarios() {
         <form class="card" id="fconv"><h3>Convidar pessoa</h3><div class="form">
           <label class="f"><span>E-mail</span><input type="email" name="email" required></label>
           <label class="f"><span>Nome</span><input name="nome" placeholder="opcional"></label>
-          <label class="f"><span>Papel</span><select name="papel">${opPapeis('autor')}</select><small><a href="#papeis">O que cada papel pode fazer</a></small></label>
+          <label class="f"><span>Papel na revista</span><select name="papel">${opPapeis('leitor')}</select></label>
+          <label class="f check"><input type="checkbox" name="revista" checked> Acesso à revista (artigos)</label>
+          <label class="f"><span>Papel na loja</span><select name="papel_loja">${opLoja('nenhum')}</select><small><a href="#papeis">O que cada papel pode fazer</a></small></label>
           <div class="f"><button class="btn pri" type="submit">Gerar convite</button></div>
         </div><div id="linkConv"></div></form>
-        ${convites.length ? `<div class="card"><h3>Links pendentes</h3>${convites.map((c) => `<div class="com"><header><span><b>${esc(c.email)}</b> <span class="papel">${c.tipo === 'convite' ? esc(nomePapel(c.papel)) : 'nova senha'}</span></span><button class="lnk small" data-cancel="${c.id}">cancelar</button></header><p class="small muted">expira ${data(c.expira_em)}</p></div>`).join('')}</div>` : ''}
+        ${convites.length ? `<div class="card"><h3>Links pendentes</h3>${convites.map((c) => `<div class="com"><header><span><b>${esc(c.email)}</b> <span class="papel">${c.tipo === 'convite' ? (c.revista === 0 ? 'sem revista' : esc(nomePapel(c.papel))) + (c.papel_loja && c.papel_loja !== 'nenhum' ? ' · loja: ' + esc(nomeLoja(c.papel_loja)) : '') : 'nova senha'}</span></span><button class="lnk small" data-cancel="${c.id}">cancelar</button></header><p class="small muted">expira ${data(c.expira_em)}</p></div>`).join('')}</div>` : ''}
       </div>
     </div>`;
   $('#fconv').addEventListener('submit', async (e) => {
     e.preventDefault();
-    try { const r = await api('/usuarios/convite', { method: 'POST', body: Object.fromEntries(new FormData(e.target)) }); e.target.reset(); $('#linkConv').innerHTML = caixaLink(r.link, r.expira); } catch (er) { toast(er.message, true); }
+    const d = Object.fromEntries(new FormData(e.target)); d.revista = e.target.revista.checked;
+    try { const r = await api('/usuarios/convite', { method: 'POST', body: d }); e.target.reset(); $('#linkConv').innerHTML = caixaLink(r.link, r.expira); } catch (er) { toast(er.message, true); }
   });
   $$('tr[data-id]').forEach((tr) => {
     const id = tr.dataset.id;
     $('[data-papel]', tr)?.addEventListener('change', async (e) => {
       try { await api('/usuarios/' + id, { method: 'PUT', body: { papel: e.target.value } }); toast('Papel alterado.'); } catch (er) { toast(er.message, true); telaUsuarios(); }
+    });
+    $('[data-revista]', tr)?.addEventListener('change', async (e) => {
+      try { await api('/usuarios/' + id, { method: 'PUT', body: { revista: e.target.checked } }); toast('Acesso à revista atualizado.'); } catch (er) { toast(er.message, true); telaUsuarios(); }
+    });
+    $('[data-loja]', tr)?.addEventListener('change', async (e) => {
+      try { await api('/usuarios/' + id, { method: 'PUT', body: { papel_loja: e.target.value } }); toast('Acesso à loja atualizado.'); } catch (er) { toast(er.message, true); telaUsuarios(); }
     });
     $('[data-ativo]', tr)?.addEventListener('click', async (e) => {
       const ativo = e.target.dataset.ativo === '1';
@@ -394,7 +409,7 @@ async function telaUsuarios() {
 function telaConta() {
   marcarMenu('');
   const u = S.usuario;
-  app.innerHTML = `<div class="head"><div><h1>Minha conta</h1><p class="muted">${esc(u.email)} · <span class="papel">${esc(nomePapel(u.papel))}</span></p></div></div>
+  app.innerHTML = `<div class="head"><div><h1>Minha conta</h1><p class="muted">${esc(u.email)} · revista: <span class="papel">${S.permissoes.ver_revista ? esc(nomePapel(u.papel)) : 'sem acesso'}</span> · loja: <span class="papel">${S.permissoes.loja_gerir ? 'gerente' : S.permissoes.loja_expedir ? 'expedição' : S.permissoes.loja_ver ? 'visualizador' : 'sem acesso'}</span></p></div></div>
   <div class="grid2" style="grid-template-columns:1fr 1fr">
     <form class="card" id="fn"><h3>Nome</h3><div class="form"><label class="f"><span>Como aparece na equipe</span><input name="nome" value="${esc(u.nome)}" required></label><div class="f"><button class="btn" type="submit">Salvar nome</button></div></div></form>
     <form class="card" id="fs"><h3>Trocar senha</h3><div class="form">
@@ -424,15 +439,18 @@ async function telaHistorico() {
 
 function telaPapeis() {
   marcarMenu('papeis');
-  app.innerHTML = `<div class="head"><div><h1>Papéis</h1><p class="muted">Como num Drive compartilhado: cada pessoa tem um papel, e o papel define o que ela pode fazer.</p></div></div>
+  app.innerHTML = `<div class="head"><div><h1>Papéis</h1><p class="muted">Como num Drive compartilhado: cada pessoa tem um papel em cada área, e o papel define o que ela pode fazer.</p></div></div><h2 style="margin:0 0 14px">Revista</h2>
   <div class="roles">${Object.entries(S.papeis).sort((x, y) => y[1].nivel - x[1].nivel).map(([k, p]) => `<div class="card"><span class="papel">nível ${p.nivel}</span><b>${esc(p.nome)}</b><p class="small muted" style="margin:6px 0 0">${esc(p.descricao)}</p><ul>${ACOES_PAPEL[k].map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>`).join('')}</div>
+  <div class="head" style="margin-top:34px"><div><h2>Loja</h2><p class="muted">O acesso à loja é separado do acesso à revista: uma pessoa pode cuidar só do estoque, sem ver os artigos. Proprietários e administradores têm acesso total às duas áreas.</p></div></div>
+  <div class="roles">${Object.entries(S.papeis_loja).sort((x, y) => y[1].nivel - x[1].nivel).map(([k, p]) => `<div class="card"><b>${esc(p.nome)}</b><p class="small muted" style="margin:6px 0 0">${esc(p.descricao)}</p><ul>${(ACOES_LOJA[k] || []).map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>`).join('')}</div>
+  <div class="card" style="margin-top:20px"><h3>Fluxo de um pedido</h3><p class="muted" style="margin:0">Aguardando pagamento → Pago (o estoque sai automaticamente quando o Mercado Pago confirma) → Em separação (etiqueta gerada) → Enviado → Entregue. Cancelar ou reembolsar um pedido pago devolve os itens ao estoque.</p></div>
   <div class="card" style="margin-top:20px"><h3>Fluxo de um artigo</h3><p class="muted" style="margin:0">Rascunho → Em revisão → Publicado (aparece no site na hora) → Arquivado (sai do site, continua no painel). Autores levam o artigo até “Em revisão”; editores e acima publicam.</p></div>`;
 }
 
 // ---------------------------------------------------------------- navegação
 async function carregarSessao() {
   const s = await api('/sessao', { publico: true });
-  S = { usuario: s.usuario, permissoes: s.permissoes, papeis: s.papeis, configurar: s.configurar, chave: s.chave_configurada };
+  S = { usuario: s.usuario, permissoes: s.permissoes, papeis: s.papeis, papeis_loja: s.papeis_loja || {}, configurar: s.configurar, chave: s.chave_configurada };
   mostrarMenu();
   return s;
 }
@@ -444,6 +462,8 @@ async function rotear() {
     if (h.startsWith('redefinir=')) return telaConvite(h.slice(10));
     if (S.configurar) return telaConfigurar(S.chave);
     if (!S.usuario) return telaEntrar();
+    if (h === 'loja' || h.startsWith('loja/') || h.startsWith('loja?')) return await rotaLoja(h);
+    if (!S.permissoes.ver_revista && ['', 'artigos'].includes(h) || h.startsWith('artigo/') && !S.permissoes.ver_revista) return S.permissoes.loja_ver ? ir('loja') : telaConta();
     if (h.startsWith('artigo/')) return await telaArtigo(h.slice(7));
     if (h === 'usuarios') return await telaUsuarios();
     if (h === 'historico') return await telaHistorico();
@@ -451,9 +471,10 @@ async function rotear() {
     if (h === 'papeis') return telaPapeis();
     return await telaArtigos();
   } catch (e) {
-    app.innerHTML = `<div class="card"><h2>Algo deu errado</h2><p class="muted">${esc(e.message)}</p><a class="btn" href="#artigos">Voltar</a></div>`;
+    app.innerHTML = `<div class="card"><h2>Algo deu errado</h2><p class="muted">${esc(e.message)}</p><a class="btn" href="#${inicio()}">Voltar</a></div>`;
   }
 }
 
+const rotaLoja = instalarLoja({ app, $, $$, esc, api, toast, data, ir, marcarMenu, get S() { return S; } });
 window.addEventListener('hashchange', rotear);
 carregarSessao().then(rotear).catch((e) => { app.innerHTML = `<div class="auth card"><h2>Painel indisponível</h2><p class="muted">${esc(e.message)}</p></div>`; });

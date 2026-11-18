@@ -1,0 +1,101 @@
+/* The Prophetic Voices — Loja */
+:root{--line2:rgba(202,181,160,.32)}
+#loja{min-height:40vh}
+.lj-sec{padding:28px 0 110px;border-top:none}
+.chip{all:unset;cursor:pointer;height:36px;display:inline-flex;align-items:center;padding:0 16px;border-radius:999px;border:1px solid var(--line);font-size:14px;color:var(--areia);transition:all .25s}
+.chip:hover{border-color:var(--cobre);color:var(--creme)}
+.chip[aria-pressed=true]{background:var(--creme);border-color:var(--creme);color:#000}
+.chip:disabled{opacity:.35;cursor:not-allowed;text-decoration:line-through}
+.flabel{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:#8C7D6E;margin-bottom:10px}
+.btn.sm{height:46px;padding:0 18px;font-size:14px}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.lj-teste{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:#000;background:var(--cobre);border-radius:12px;padding:10px 16px;margin-bottom:24px}
+.lj-aviso{border:1px solid var(--cobre);border-radius:14px;padding:14px 18px;margin-bottom:24px;color:var(--creme)}
+.lj-cats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:28px}
+.lj-grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(260px,100%),1fr));gap:22px}
+.lj-col,.lj-info,.lj-galeria,.lj-f,.lj-dupla>*{min-width:0}
+.lj-teste{overflow-wrap:anywhere}
+.lj-card{color:inherit;text-decoration:none}
+.lj-card.off{opacity:.6}
+.lj-img{position:relative;aspect-ratio:4/5;border-radius:14px;overflow:hidden;background:#0b0a08;display:flex;align-items:center;justify-content:center}
+.lj-img>img{width:100%;height:100%;object-fit:cover;display:block}
+.lj-img.grande{aspect-ratio:1/1}
+.lj-img.mini{width:70px;flex:none;border-radius:10px}
+.semfoto{width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 40%,rgba(191,137,87,.25),transparent 70%)}
+.semfoto img{width:34%;opacity:.7}
+.selo{position:absolute;left:12px;top:12px;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;background:var(--creme);color:#000;border-radius:999px;padding:6px 10px}
+.lj-nome{font-size:17px;padding:0 6px;line-height:1.35}
+.pr b s,.lj-preco s{color:#8C7D6E;font-size:.6em;margin-right:6px}
+.lj-vazio{text-align:center;padding:60px 0;color:var(--areia);display:flex;flex-direction:column;align-items:center;gap:22px}
+.lj-erro{color:#e8a48a}
+.lj-dica{color:var(--areia);font-size:14px;line-height:1.6}
+.lj-voltar{display:inline-block;margin-bottom:24px;color:var(--areia);font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-decoration:none}
+.lj-voltar:hover{color:var(--creme)}
+/* produto */
+.lj-produto{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:56px;align-items:start}
+.lj-miniaturas{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+.lj-miniaturas button{all:unset;cursor:pointer;width:72px;height:72px;border-radius:10px;overflow:hidden;border:1px solid var(--line);opacity:.6}
+.lj-miniaturas button[aria-pressed=true]{opacity:1;border-color:var(--cobre)}
+.lj-miniaturas img{width:100%;height:100%;object-fit:cover}
+.lj-info h1{font-family:var(--serif);font-weight:400;font-size:clamp(34px,4vw,52px);line-height:1.05;margin:12px 0 18px}
+.lj-preco b{font-family:var(--disp);font-weight:300;font-size:40px}
+.lj-campo{margin:26px 0}
+.lj-vars{display:flex;gap:10px;flex-wrap:wrap}
+.lj-qtd{display:inline-flex;align-items:center;border:1px solid var(--line2);border-radius:999px;overflow:hidden}
+.lj-qtd button{all:unset;cursor:pointer;width:44px;height:44px;text-align:center;font-size:18px;color:var(--creme)}
+.lj-qtd input,.lj-qtd span{width:46px;text-align:center;background:transparent;border:none;color:var(--creme);font:400 16px var(--sans);-moz-appearance:textfield}
+.lj-qtd input::-webkit-inner-spin-button{-webkit-appearance:none}
+.lj-qtd.sm button{width:34px;height:34px}
+.lj-qtd.sm span{width:28px}
+.lj-msg{min-height:22px;margin:14px 0 0;color:var(--cobre);font-size:14px}
+.lj-msg a{color:var(--creme)}
+.lj-desc{margin-top:26px;color:var(--areia);line-height:1.75;font-size:16px;border-top:1px solid var(--line);padding-top:24px}
+.lj-seguro{font-size:13px;color:#8C7D6E;line-height:1.6;margin-top:18px}
+/* carrinho */
+.lj-checkout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:56px;align-items:start}
+.lj-col h2,.lj-pedido h2{font-family:var(--mono);font-weight:400;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--cobre);margin:0 0 16px}
+.lj-col h2:not(:first-child){margin-top:38px}
+.lj-itens{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:18px;overflow:hidden}
+.lj-item{display:flex;align-items:center;gap:14px;padding:12px;border-bottom:1px solid var(--line)}
+.lj-item:last-child{border-bottom:none}
+.lj-item-t{flex:1;display:flex;flex-direction:column;gap:3px;font-size:14px}
+.lj-item-t span{color:var(--areia);font-size:13px}
+.lj-x{all:unset;cursor:pointer;width:32px;height:32px;text-align:center;color:var(--areia);font-size:20px}
+.lj-x:hover{color:var(--creme)}
+.lj-cep{display:flex;gap:10px;align-items:flex-end}
+.lj-cep .lj-f{flex:1;margin:0}
+.lj-fretes{display:flex;flex-direction:column;gap:10px;margin-top:14px}
+.lj-op{display:flex;align-items:center;gap:14px;border:1px solid var(--line);border-radius:14px;padding:14px 16px;cursor:pointer}
+.lj-op:has(input:checked){border-color:var(--cobre);background:rgba(191,137,87,.08)}
+.lj-op input{accent-color:var(--cobre)}
+.lj-op span{flex:1;display:flex;flex-direction:column;gap:2px;font-size:14px}
+.lj-op small{color:var(--areia);font-size:12.5px}
+.lj-op em{font-style:normal;font-family:var(--disp);font-size:18px}
+.lj-form{display:flex;flex-direction:column;gap:12px}
+.lj-dupla{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.lj-f{display:flex;flex-direction:column;gap:6px;margin-top:12px}
+.lj-form .lj-f{margin:0}
+.lj-f span{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#8C7D6E}
+.lj-f input,.lj-f textarea{width:100%;box-sizing:border-box;min-width:0;height:48px;border-radius:12px;border:1px solid var(--line2);background:#0b0a08;color:var(--creme);font:300 16px var(--sans);padding:0 14px;outline:none}
+.lj-f textarea{height:auto;padding:12px 14px;resize:vertical}
+.lj-f input:focus,.lj-f textarea:focus{border-color:var(--cobre)}
+.lj-totais{border:1px solid var(--line);border-radius:18px;padding:6px 18px;margin:26px 0 18px}
+.lj-totais div{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:15px}
+.lj-totais div:last-child{border-bottom:none}
+.lj-totais span{color:var(--areia)}
+.lj-totais .tot b{font-family:var(--disp);font-weight:300;font-size:28px}
+.lj-pagar{width:100%}
+/* pedido */
+.lj-pedido{max-width:760px}
+.lj-pedido h1{font-family:var(--serif);font-weight:400;font-size:clamp(34px,4.5vw,56px);line-height:1.05;margin:12px 0 26px}
+.lj-etapas{list-style:none;padding:0;margin:0 0 20px;display:grid;grid-template-columns:repeat(5,1fr);gap:6px;counter-reset:e}
+.lj-etapas li{counter-increment:e;font-size:12px;color:#8C7D6E;border-top:2px solid var(--line);padding-top:10px}
+.lj-etapas li.feito{color:var(--areia);border-color:var(--cobre)}
+.lj-etapas li.atual{color:var(--creme);border-color:var(--creme)}
+.lj-acoes{display:flex;gap:12px;flex-wrap:wrap;margin:22px 0}
+.lj-dl{display:grid;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:18px;overflow:hidden;margin:26px 0 34px}
+.lj-dl div{background:#000;padding:14px 18px;display:grid;grid-template-columns:160px 1fr;gap:12px}
+.lj-dl dt{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#8C7D6E;padding-top:3px}
+.lj-dl dd{margin:0;line-height:1.55}
+.lj-dl a{color:var(--cobre)}
+@media(max-width:860px){.lj-produto,.lj-checkout{grid-template-columns:minmax(0,1fr);gap:34px}.lj-dl div{grid-template-columns:1fr;gap:4px}.lj-etapas li{font-size:10px}}

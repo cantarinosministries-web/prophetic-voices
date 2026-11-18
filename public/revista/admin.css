@@ -89,3 +89,19 @@ tr.click{cursor:pointer}tr.click:hover td{background:rgba(248,233,183,.03)}
 #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--creme);color:#000;padding:12px 20px;border-radius:999px;font-size:14px;opacity:0;transition:all .3s;pointer-events:none;z-index:50;max-width:90vw}
 #toast.on{opacity:1;transform:translateX(-50%)}
 #toast.err{background:var(--perigo)}
+/* loja */
+.lj-abas{margin-bottom:20px}
+.lj-abas a.chip{text-decoration:none}
+.lj-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:18px}
+.lj-kpis .card{display:flex;flex-direction:column;gap:6px;text-decoration:none;color:inherit}
+.lj-kpis b{font-family:Oswald,sans-serif;font-weight:300;font-size:34px;line-height:1.1;color:#F8E9B7}
+a.card:hover{border-color:#BF8957}
+.lj-var{display:grid;grid-template-columns:1fr 1fr auto auto;gap:8px;align-items:center}
+.lj-var input{padding:8px 10px}
+.lj-fotos{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px}
+.lj-foto{display:flex;flex-direction:column;gap:6px}
+.lj-foto img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;border:1px solid rgba(248,233,183,.12)}
+.lj-foto div{display:flex;justify-content:space-between;gap:6px}
+.lj-linha{display:flex;gap:10px;flex-wrap:wrap}
+.form .f.check{flex-direction:row;align-items:center;justify-content:flex-start;grid-column:1/-1;text-align:left}
+.tb label.small{white-space:nowrap}

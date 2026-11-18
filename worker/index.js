@@ -3,11 +3,13 @@
 //   /api/*          API do painel (usuários, artigos, comentários)
 //   /artigos.html   lista da revista, montada a partir do banco
 //   /artigos/<x>    página de cada artigo (PDFs e capas estáticos seguem para os arquivos)
-//   /arquivos/*     PDFs e capas enviados pelo painel (R2)
+//   /arquivos/*     PDFs e capas enviados pelo painel e fotos da loja (R2)
+//   /api/loja/*     loja virtual (ver worker/loja.js)
 import { api, usuarioDaSessao } from './api.js';
 import { paginaLista, paginaArtigo } from './paginas.js';
 import { origemOk, erro, cabecalhos } from './seguranca.js';
 import { pode } from './permissoes.js';
+import { apiLojaPublica, webhookMercadoPago } from './loja.js';
 
 function html(texto, status = 200) {
   const h = cabecalhos(new Headers({ 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' }));
@@ -28,8 +30,10 @@ export default {
     const url = new URL(req.url);
     const path = url.pathname;
     try {
+      if (path === '/api/loja/mp/webhook') return await webhookMercadoPago(req, env, url);
       if (path.startsWith('/api/')) {
         if (!origemOk(req)) return erro('Pedido recusado.', 403);
+        if (path.startsWith('/api/loja/publico/')) return await apiLojaPublica(req, env, url);
         return await api(req, env, url);
       }
 
@@ -57,6 +61,15 @@ export default {
 
       if (path.startsWith('/arquivos/')) {
         const chave = decodeURIComponent(path.slice('/arquivos/'.length));
+        if (/^loja\/[\w.-]+$/.test(chave)) {
+          const obj = await env.ARQUIVOS.get(chave);
+          if (!obj) return naoEncontrado(env, req);
+          const h = cabecalhos(new Headers());
+          obj.writeHttpMetadata(h);
+          h.set('ETag', obj.httpEtag);
+          h.set('Cache-Control', 'public, max-age=604800');
+          return new Response(obj.body, { headers: h });
+        }
         if (!/^artigos\/[\w.-]+$/.test(chave)) return naoEncontrado(env, req);
         const ref = '/arquivos/' + chave;
         const a = await env.DB.prepare('SELECT status FROM artigos WHERE pdf_url = ? OR capa_url = ?').bind(ref, ref).first();

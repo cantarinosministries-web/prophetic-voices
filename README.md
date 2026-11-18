@@ -45,3 +45,10 @@ Configuração inicial (uma vez): veja `docs/CONFIGURAR-CLOUDFLARE.md`.
 - Cores oficiais: começo de `src/styles/global.css`.
 - Estilos da revista: `public/revista/revista.css`; do painel: `public/revista/admin.css`.
 - Mudança na estrutura do banco: crie um arquivo novo em `migrations/` (nunca edite os antigos).
+
+
+## Loja virtual (/loja, /produto, /carrinho, /pedido e painel → Loja)
+- Código: `worker/loja.js` (API pública, webhook do Mercado Pago e API do painel), `public/loja/` (vitrine e checkout),
+  `src/scripts/admin-loja.js` (telas do painel). Banco: `migrations/0003_loja.sql`.
+- Integrações por segredos no Cloudflare: `MP_ACCESS_TOKEN`, `MP_WEBHOOK_SECRET`, `MELHOR_ENVIO_TOKEN` (e `ME_AMBIENTE=sandbox` para testes).
+  Sem eles, a loja fica em modo de teste e só a equipe logada consegue simular compras. Passo a passo: `docs/CONFIGURAR-LOJA.md`.

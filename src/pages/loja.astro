@@ -1,54 +1,13 @@
 ---
+// Vitrine da loja. Os produtos vêm do banco (painel /admin → Loja), então cadastrar
+// produto, foto, preço ou estoque não exige novo deploy.
 import Base from '../layouts/Base.astro';
 import PageHero from '../components/PageHero.astro';
 ---
 <Base page="loja" title="Loja — The Prophetic Voices">
+  <Fragment slot="head"><link rel="stylesheet" href="/loja/loja.css" /></Fragment>
   <PageHero k="store" eyebrow="Loja The Prophetic Voices" title="Loja"
-    lede="Livros, materiais e vestuário. Frete calculado pelo CEP; pagamento por PIX ou cartão via Mercado Pago." />
-  <section class="pad" style="padding-top:20px;border-top:none">
-    <div class="wrap">
-      <div class="grid4" id="prods" style="grid-template-columns:repeat(auto-fill,minmax(280px,1fr))">
-        <div class="tile">
-          <div class="prod" style="background:#BF8957;color:#000">
-            <div class="book"><span class="bk-a">GABRIEL CANTARINO</span><span class="bk-t">Igreja<br />do Fim</span><img src="/media/symbol-creme.png" alt="" /></div>
-          </div>
-          <span class="s" style="color:var(--areia)" data-p="0" data-f="0">LIVRO</span>
-          <span style="font-size:17px;padding:0 6px" data-p="0" data-f="1">Igreja do Fim · Gabriel Cantarino</span>
-          <div class="pr"><b data-i18n="price">[PREÇO]</b><button type="button" class="add" data-id="livro-igreja-do-fim" data-i18n="add">Adicionar</button></div>
-        </div>
-        <div class="tile">
-          <div class="prod" style="background:#000;padding:0"><img class="tee-img" src="/media/tee-back.jpg" alt="Camiseta Anti False Prophet Club, costas" /></div>
-          <span class="s" style="color:var(--areia)" data-p="1" data-f="0">CAMISETA</span>
-          <span style="font-size:17px;padding:0 6px" data-p="1" data-f="1">Anti-False Prophet Club</span>
-          <div class="pr"><b data-i18n="price">[PREÇO]</b><button type="button" class="add" data-id="camiseta-afpc" data-i18n="add">Adicionar</button></div>
-        </div>
-      </div>
-    </div>
-  </section>
+    lede="Livros, materiais e vestuário. Frete calculado pelo CEP; pagamento por Pix, cartão de crédito, débito ou boleto via Mercado Pago." />
+  <section class="pad lj-sec"><div class="wrap" id="loja" data-pagina="vitrine"></div></section>
+  <Fragment slot="scripts"><script is:inline src="/loja/loja.js"></script></Fragment>
 </Base>
-
-<script>
-  import { t } from '../scripts/i18n.js';
-  const getCart = (): string[] => { try { return JSON.parse(localStorage.getItem('pv-cart') || '[]'); } catch (e) { return []; } };
-  function render() {
-    const d = t();
-    document.querySelectorAll<HTMLElement>('[data-p]').forEach((el) => {
-      el.textContent = d.prods[+el.dataset.p!][+el.dataset.f!];
-    });
-    const cart = getCart();
-    document.querySelectorAll<HTMLButtonElement>('.add').forEach((b) => {
-      const inCart = cart.includes(b.dataset.id!);
-      b.classList.toggle('done', inCart);
-      b.textContent = inCart ? d.added : d.add;
-    });
-  }
-  document.querySelectorAll<HTMLButtonElement>('.add').forEach((b) => b.addEventListener('click', () => {
-    const cart = getCart();
-    if (!cart.includes(b.dataset.id!)) cart.push(b.dataset.id!);
-    try { localStorage.setItem('pv-cart', JSON.stringify(cart)); } catch (e) {}
-    window.dispatchEvent(new Event('pv:cart'));
-    render();
-  }));
-  window.addEventListener('pv:lang', render);
-  render();
-</script>
