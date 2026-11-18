@@ -5,7 +5,7 @@ Tempo: uns 10 minutos. Tudo no painel do Cloudflare (conta cantarinosministries@
 ## 1. Criar o banco de dados (D1)
 1. Menu da esquerda → **Storage & Databases → D1 SQL Database** → **Create**.
 2. Nome: `pv-db` → **Create**.
-3. Copie o **Database ID** (um código como `3f2a…`) e mande para o Claude, ou cole em `wrangler.jsonc` no lugar de `COLE-AQUI-O-ID-DO-BANCO`.
+3. Feito em 18/11/2026: Database ID `2841ef76-ecba-4510-ba9a-53b9e2b2b8a3`, já registrado em `wrangler.jsonc`.
 
 ## 2. Criar o armazenamento de arquivos (R2)
 1. Menu → **R2 Object Storage**. Se pedir, ative o R2 (o plano gratuito cobre 10 GB; pode pedir um cartão, sem cobrança dentro do limite).

@@ -15,7 +15,7 @@
     {
       "binding": "DB",
       "database_name": "pv-db",
-      "database_id": "COLE-AQUI-O-ID-DO-BANCO",
+      "database_id": "2841ef76-ecba-4510-ba9a-53b9e2b2b8a3",
       "migrations_dir": "migrations"
     }
   ],
