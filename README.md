@@ -1,35 +1,47 @@
 # The Prophetic Voices — site oficial
 
-Site em [Astro](https://astro.build). Gera páginas estáticas que podem ser hospedadas em Vercel, Netlify ou Cloudflare Pages.
+Site em [Astro](https://astro.build) publicado no **Cloudflare** (Worker + arquivos estáticos), com banco de dados **D1** e armazenamento **R2** para a revista e o painel.
+
+## Como funciona
+
+| Parte | O que é | Onde está |
+|---|---|---|
+| Páginas fixas | Home, Cursos, Loja | `src/pages/*.astro` (geradas no build) |
+| Revista | Lista e páginas dos artigos | Montadas a cada visita pelo Worker a partir do banco (`worker/paginas.js`), dentro dos modelos `src/pages/artigos.astro` e `src/pages/artigos/modelo.astro` |
+| Painel | `/admin` — login, artigos, usuários, histórico | `src/pages/admin.astro` + `src/scripts/admin.js` (interface) e `worker/api.js` (API) |
+| Banco | Usuários, sessões, convites, artigos, comentários, histórico | Cloudflare D1 `pv-db`, estrutura em `migrations/` |
+| Arquivos | PDFs e capas enviados pelo painel | Cloudflare R2 `pv-arquivos`, servidos em `/arquivos/...` |
+
+Publicar um artigo pelo painel **não exige novo deploy**: ele aparece no site na hora.
+
+## Papéis do painel
+
+Proprietário › Administrador › Editor › Autor › Revisor › Leitor. Regras em `worker/permissoes.js`; resumo na aba **Papéis** do painel.
+Fluxo do artigo: Rascunho → Em revisão → Publicado → Arquivado.
 
 ## Rodar no computador
 
 ```bash
 npm install
-npm run dev      # abre em http://localhost:4321
-npm run build    # gera o site final na pasta dist/
+npm run banco:local      # cria o banco local com o acervo inicial
+echo 'CHAVE_CONFIGURACAO=uma-chave-qualquer' > .dev.vars
+npm run servidor:local   # site + painel em http://localhost:8787
 ```
 
-## Estrutura
+`npm run dev` continua servindo só as páginas do Astro (sem revista dinâmica nem painel).
 
-```
-public/media/            vídeo de abertura, logos, imagens da loja
-src/layouts/Base.astro   menu, comunidade, rodapé e idioma (todas as páginas)
-src/components/          Intro (vídeo), Eagle (águia 3D), PageHero
-src/pages/               index (home), artigos, cursos, loja
-src/scripts/i18n.js      todos os textos em português e inglês
-src/styles/global.css    cores, fontes e estilos
-src/data/eagle.json      pontos da águia 3D (gerados da silhueta da logo)
-```
+## Publicação
+
+O Cloudflare publica sozinho a cada push na branch `main` (Workers Builds):
+- **Build command:** `npm run build`
+- **Deploy command:** `npm run deploy` (aplica as migrações do banco e publica o Worker)
+
+Configuração inicial (uma vez): veja `docs/CONFIGURAR-CLOUDFLARE.md`.
 
 ## Onde mexer
 
-- Textos: `src/scripts/i18n.js` (PT e EN lado a lado).
+- Textos fixos PT/EN: `src/scripts/i18n.js` (site) e `public/revista/revista.js` (revista).
 - Links da Escola, WhatsApp e Instagram: topo de `src/layouts/Base.astro`.
-- Cores oficiais: começo de `src/styles/global.css` (preto, branco, creme #F8E9B7, cobre #BF8957, areia #CAB5A0).
-
-## Pendências
-
-- Logo oficial em SVG para o menu (hoje é um recorte do vídeo).
-- Capa oficial do livro *Igreja do Fim* e preços da loja.
-- Conteúdo de Artigos e Cursos; integração Hotmart e Mercado Pago.
+- Cores oficiais: começo de `src/styles/global.css`.
+- Estilos da revista: `public/revista/revista.css`; do painel: `public/revista/admin.css`.
+- Mudança na estrutura do banco: crie um arquivo novo em `migrations/` (nunca edite os antigos).

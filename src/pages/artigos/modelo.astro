@@ -1,0 +1,10 @@
+---
+// Modelo da página de cada artigo (preenchido pelo Worker; não é acessível ao público).
+import Base from '../../layouts/Base.astro';
+const slot = (k: string) => `<pv-slot data-k="${k}"></pv-slot>`;
+---
+<Base page="artigos" title="__PV_TITLE__" description="__PV_DESC__">
+  <Fragment slot="head"><link rel="stylesheet" href="/revista/revista.css" /><Fragment set:html={slot('head')} /></Fragment>
+  <Fragment set:html={slot('main')} />
+  <Fragment slot="scripts" set:html={slot('scripts')} />
+</Base>

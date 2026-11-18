@@ -1,0 +1,39 @@
+---
+// Painel da plataforma: login, artigos, usuários e histórico. Toda a lógica está em src/scripts/admin.js
+// e os dados vêm da API do Worker (/api/...). A página em si é estática e não contém dados.
+---
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Painel — The Prophetic Voices</title>
+  <link rel="icon" type="image/png" href="/media/symbol-creme.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200;300;400&family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/revista/admin.css" />
+</head>
+<body>
+  <header class="bar">
+    <a href="/index.html" class="logo" aria-label="Ir para o site"><img src="/media/logo-creme.png" alt="The Prophetic Voices" /></a>
+    <span class="bar-t">Painel</span>
+    <nav id="menu" hidden>
+      <a href="#artigos" data-r="artigos">Artigos</a>
+      <a href="#usuarios" data-r="usuarios" data-perm="gerir_usuarios">Usuários</a>
+      <a href="#historico" data-r="historico" data-perm="ver_historico">Histórico</a>
+      <a href="#papeis" data-r="papeis">Papéis</a>
+    </nav>
+    <div class="who" id="who" hidden>
+      <a href="#conta" id="whoName"></a>
+      <button type="button" id="sair" class="lnk">Sair</button>
+    </div>
+  </header>
+  <main id="app" aria-live="polite"><p class="muted center">Carregando…</p></main>
+  <div id="toast" role="status"></div>
+  <script>
+    import '../scripts/admin.js';
+  </script>
+</body>
+</html>
