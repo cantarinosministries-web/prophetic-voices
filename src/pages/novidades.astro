@@ -1,0 +1,68 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import { novidades, LINKS } from '../data/novidades.js';
+const ext = (u: string) => /^https?:/.test(u);
+---
+<Base page="novidades" title="Novidades — The Prophetic Voices" description="Eventos, lançamentos e notícias do ministério The Prophetic Voices.">
+  <PageHero k="nov" eyebrow="Novidades do ministério" title="Novidades"
+    lede="Eventos, lançamentos e o que Deus tem feito por meio do The Prophetic Voices." />
+
+  <section class="pad nov-sec">
+    <div class="wrap">
+      <div class="nov-list">
+        {novidades.map((n) => (
+          <article class:list={['nov rv', { 'nov-dest': n.destaque }]} id={n.id}>
+            <div class="nov-meta">
+              <span class="nov-tipo" data-pt={n.tipo.pt.toUpperCase()} data-en={n.tipo.en.toUpperCase()}>{n.tipo.pt.toUpperCase()}</span>
+              <span class="nov-quando" data-pt={n.quando.pt} data-en={n.quando.en}>{n.quando.pt}</span>
+            </div>
+            <div class="nov-corpo">
+              <h2 data-pt={n.titulo.pt} data-en={n.titulo.en}>{n.titulo.pt}</h2>
+              <p data-pt={n.texto.pt} data-en={n.texto.en}>{n.texto.pt}</p>
+              {n.botoes && (
+                <div class="nov-btns">
+                  {n.botoes.map((b, j) => (
+                    <a href={b.url} class:list={['btn', j === 0 ? 'btn-creme' : 'btn-ghost']} {...(ext(b.url) ? { target: '_blank', rel: 'noopener' } : {})}>
+                      <span data-pt={b.pt} data-en={b.en}>{b.pt}</span>{ext(b.url) ? ' ↗' : ' →'}
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <div class="nov-segue rv">
+        <p data-i18n="nov_follow">As novidades chegam primeiro à nossa comunidade.</p>
+        <div class="nov-btns">
+          <a href={LINKS.grupo1} target="_blank" rel="noopener" class="btn btn-ghost">WhatsApp ↗</a>
+          <a href={LINKS.instagram} target="_blank" rel="noopener" class="btn btn-ghost">Instagram ↗</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <Fragment slot="scripts"><script is:inline src="/revista/pt-en.js"></script></Fragment>
+</Base>
+
+<style is:global>
+  .nov-sec{padding-top:20px;border-top:none}
+  .nov-list{display:flex;flex-direction:column;border-top:1px solid var(--line)}
+  .nov{display:grid;grid-template-columns:220px minmax(0,1fr);gap:40px;padding:44px 0;border-bottom:1px solid var(--line)}
+  @media(max-width:760px){.nov{grid-template-columns:1fr;gap:16px}}
+  .nov-meta{display:flex;flex-direction:column;gap:10px}
+  .nov-tipo{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--cobre)}
+  .nov-quando{font-family:var(--serif);font-style:italic;font-size:22px;color:var(--areia)}
+  .nov h2{margin:0;font-family:var(--disp);font-weight:300;text-transform:uppercase;font-size:clamp(30px,3.2vw,48px);line-height:1.05}
+  .nov p{margin:16px 0 0;max-width:760px;color:var(--areia);font-size:18px;line-height:1.7;font-weight:300}
+  .nov-btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:26px}
+  .nov-dest{position:relative;margin:28px 0;padding:56px 48px;border:1px solid rgba(191,137,87,.45);border-radius:28px;background:radial-gradient(ellipse 70% 90% at 85% 120%,rgba(191,137,87,.3),transparent 65%),#050504}
+  @media(max-width:760px){.nov-dest{padding:36px 26px}}
+  .nov-dest h2{font-size:clamp(44px,6vw,96px)}
+  .nov-dest .nov-quando{color:var(--creme)}
+  .nov-segue{margin-top:56px;display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
+  .nov-segue p{margin:0;font-family:var(--serif);font-style:italic;font-size:26px;color:var(--creme)}
+  .nov-segue .nov-btns{margin:0}
+</style>

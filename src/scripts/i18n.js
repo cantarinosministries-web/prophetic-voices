@@ -5,7 +5,7 @@
 
 export const T = {
   pt: {
-    nav_home: 'Home', nav_about: 'Quem Somos', nav_school: 'Escola de Profetas', nav_articles: 'Artigos', nav_courses: 'Cursos', nav_store: 'Loja',
+    nav_home: 'Home', nav_about: 'Quem Somos', nav_school: 'Escola de Profetas', nav_articles: 'Artigos', nav_courses: 'Cursos', nav_news: 'Novidades', nav_testimonies: 'Testemunhos', nav_store: 'Loja',
     scroll: 'ROLE',
     about_eyebrow: 'Quem somos',
     about_p1: 'O Prophetic Voices, fundado por <b>Gabriel e Priscila Cantarino</b>, é um ministério que existe para ser uma plataforma de formação profética a serviço da Igreja e da sociedade no tempo do fim.',
@@ -42,13 +42,20 @@ export const T = {
 
     art_eyebrow: 'Revista The Prophetic Voices', art_h1: 'Artigos', art_lede: 'Estudos em profetismo bíblico: artigos produzidos e traduzidos pela equipe, com rigor acadêmico e sensibilidade ao Espírito. A revista abrirá, no futuro, para submissões de pesquisadores.',
     cur_label: 'CURSO', cur_btn: 'Ver curso na Hotmart', cur_school_e: 'Formação completa', cur_school_h: 'Escola de Profetas · turma 2027', cur_school_p: 'Os cursos são portas de entrada. A formação completa, com prática supervisionada e vida em comunidade, acontece na Escola de Profetas.', cur_school_btn: 'Conhecer a Escola',
+    nov_eyebrow: 'Novidades do ministério', nov_h1: 'Novidades', nov_lede: 'Eventos, lançamentos e o que Deus tem feito por meio do The Prophetic Voices.', nov_follow: 'As novidades chegam primeiro à nossa comunidade.',
+    tes_eyebrow: 'Testemunhos', tes_h1: 'Testemunhos', tes_lede: 'Temos recebido muitos testemunhos de vidas abençoadas pelo ministério. Queremos ouvir o seu.',
+    tes_p1: 'Na Escola de Profetas, nos cursos, nos encontros e nas nossas comunidades, Deus tem tocado vidas, e muitas pessoas têm nos escrito para contar.',
+    tes_p2: 'Uma palavra profética que se cumpriu, uma cura, uma restauração, um chamado despertado, uma vida de oração renovada: cada testemunho glorifica a Deus e fortalece a fé de quem o lê. Se o nosso ministério abençoou você, conte para nós.',
+    tes_verse: '“Eles o venceram pelo sangue do Cordeiro e pela palavra do seu testemunho.”',
+    tes_s1: 'Preencha o formulário ao lado com o seu testemunho.', tes_s2: 'Nossa equipe lê cada relato com cuidado e oração.', tes_s3: 'Com a sua autorização, ele pode ser compartilhado no site e nas redes, para edificar outras pessoas.',
+    tes_note: 'Nenhum testemunho é publicado sem a sua autorização.', tes_open: 'Abrir o formulário em outra aba',
     course_eyebrow: 'Formação digital', course_h1: 'Cursos', course_lede: 'Cursos digitais para quem quer se formar no profético no próprio ritmo, com acesso pela Hotmart.',
     store_eyebrow: 'Loja The Prophetic Voices', store_h1: 'Loja', store_lede: 'Livros, materiais e vestuário. Frete calculado pelo CEP; pagamento por PIX ou cartão via Mercado Pago.',
     add: 'Adicionar', added: 'No carrinho ✓', price: '[PREÇO]',
     prods: [['LIVRO', 'Igreja do Fim · Gabriel Cantarino'], ['CAMISETA', 'Anti-False Prophet Club']],
   },
   en: {
-    nav_home: 'Home', nav_about: 'About Us', nav_school: 'School of Prophets', nav_articles: 'Articles', nav_courses: 'Courses', nav_store: 'Store',
+    nav_home: 'Home', nav_about: 'About Us', nav_school: 'School of Prophets', nav_articles: 'Articles', nav_courses: 'Courses', nav_news: 'News', nav_testimonies: 'Testimonies', nav_store: 'Store',
     scroll: 'SCROLL',
     about_eyebrow: 'About us',
     about_p1: 'Prophetic Voices, founded by <b>Gabriel and Priscila Cantarino</b>, is a ministry that exists to be a platform for prophetic formation in service of the Church and society in the end times.',
@@ -85,6 +92,13 @@ export const T = {
 
     art_eyebrow: 'The Prophetic Voices Journal', art_h1: 'Articles', art_lede: 'Studies in biblical prophetism: articles written and translated by our team, with academic rigor and sensitivity to the Spirit. The journal will later open to submissions from researchers.',
     cur_label: 'COURSE', cur_btn: 'View course on Hotmart', cur_school_e: 'Full formation', cur_school_h: 'School of Prophets · class of 2027', cur_school_p: 'The courses are doorways. The full formation, with supervised practice and life in community, happens in the School of Prophets.', cur_school_btn: 'Discover the School',
+    nov_eyebrow: 'Ministry news', nov_h1: 'News', nov_lede: 'Events, launches and what God has been doing through The Prophetic Voices.', nov_follow: 'News reaches our community first.',
+    tes_eyebrow: 'Testimonies', tes_h1: 'Testimonies', tes_lede: 'We have been receiving many testimonies of lives blessed through this ministry. We want to hear yours.',
+    tes_p1: 'In the School of Prophets, in our courses, gatherings and communities, God has been touching lives, and many people have written to tell us.',
+    tes_p2: 'A prophetic word fulfilled, a healing, a restoration, a calling awakened, a renewed life of prayer: every testimony glorifies God and strengthens the faith of those who read it. If our ministry has blessed you, tell us.',
+    tes_verse: '“They overcame him by the blood of the Lamb and by the word of their testimony.”',
+    tes_s1: 'Fill in the form with your testimony.', tes_s2: 'Our team reads every account with care and prayer.', tes_s3: 'With your permission, it may be shared on the website and social media to encourage others.',
+    tes_note: 'No testimony is published without your permission.', tes_open: 'Open the form in a new tab',
     course_eyebrow: 'Online formation', course_h1: 'Courses', course_lede: 'Online courses for those who want to be formed in the prophetic at their own pace, with access through Hotmart.',
     store_eyebrow: 'The Prophetic Voices Store', store_h1: 'Store', store_lede: 'Books, materials and apparel. Shipping calculated by ZIP code; payment by PIX or card via Mercado Pago.',
     add: 'Add', added: 'In cart ✓', price: '[PRICE]',

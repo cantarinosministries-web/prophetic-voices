@@ -1,0 +1,57 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+// Formulário do Google (respostas chegam na conta do ministério)
+const FORM = 'https://docs.google.com/forms/d/1bAbQIaF7zfDyQQakoTfmt7s6xaLIBsVFYIvrw3KBS5U/viewform';
+---
+<Base page="testemunhos" title="Testemunhos — The Prophetic Voices" description="Conte como Deus tem abençoado sua vida por meio do ministério The Prophetic Voices.">
+  <PageHero k="tes" eyebrow="Testemunhos" title="Testemunhos"
+    lede="Temos recebido muitos testemunhos de vidas abençoadas pelo ministério. Queremos ouvir o seu." />
+
+  <section class="pad tes-sec">
+    <div class="wrap tes-grid">
+      <div class="tes-txt rv">
+        <p class="tes-big" data-i18n="tes_p1">Na Escola de Profetas, nos cursos, nos encontros e nas nossas comunidades, Deus tem tocado vidas, e muitas pessoas têm nos escrito para contar.</p>
+        <p data-i18n="tes_p2">Uma palavra profética que se cumpriu, uma cura, uma restauração, um chamado despertado, uma vida de oração renovada: cada testemunho glorifica a Deus e fortalece a fé de quem o lê. Se o nosso ministério abençoou você, conte para nós.</p>
+
+        <figure class="tes-verso">
+          <span class="tes-gr" lang="grc">μαρτυρία</span>
+          <blockquote data-i18n="tes_verse">“Eles o venceram pelo sangue do Cordeiro e pela palavra do seu testemunho.”</blockquote>
+          <figcaption>AP 12.11</figcaption>
+        </figure>
+
+        <ol class="tes-passos">
+          <li><b>01</b><span data-i18n="tes_s1">Preencha o formulário ao lado com o seu testemunho.</span></li>
+          <li><b>02</b><span data-i18n="tes_s2">Nossa equipe lê cada relato com cuidado e oração.</span></li>
+          <li><b>03</b><span data-i18n="tes_s3">Com a sua autorização, ele pode ser compartilhado no site e nas redes, para edificar outras pessoas.</span></li>
+        </ol>
+        <p class="tes-nota" data-i18n="tes_note">Nenhum testemunho é publicado sem a sua autorização.</p>
+      </div>
+
+      <div class="tes-form rv">
+        <iframe src={`${FORM}?embedded=true`} title="Formulário de testemunho" loading="lazy">Carregando…</iframe>
+        <a href={FORM} target="_blank" rel="noopener" class="btn btn-creme tes-abrir"><span data-i18n="tes_open">Abrir o formulário em outra aba</span> ↗</a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style is:global>
+  .tes-sec{padding-top:20px;border-top:none}
+  .tes-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:56px;align-items:start}
+  @media(max-width:980px){.tes-grid{grid-template-columns:1fr}}
+  .tes-txt p{margin:0 0 20px;color:var(--areia);font-size:18px;line-height:1.75;font-weight:300}
+  .tes-txt .tes-big{font-family:var(--serif);font-size:clamp(26px,2.4vw,34px);line-height:1.3;color:var(--creme);font-weight:400}
+  .tes-verso{margin:36px 0;padding:30px 32px;border:1px solid var(--line);border-radius:24px;background:linear-gradient(150deg,rgba(191,137,87,.14),transparent 65%)}
+  .tes-gr{font-family:var(--serif);font-size:44px;color:var(--creme);line-height:1}
+  .tes-verso blockquote{margin:14px 0 10px;font-family:var(--serif);font-style:italic;font-size:24px;line-height:1.35;color:var(--cobre)}
+  .tes-verso figcaption{font-family:var(--mono);font-size:12px;letter-spacing:.16em;color:var(--areia)}
+  .tes-passos{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
+  .tes-passos li{display:flex;gap:16px;align-items:baseline;font-size:16px;color:var(--creme);line-height:1.5}
+  .tes-passos b{font-family:var(--mono);font-weight:400;font-size:12px;color:var(--cobre)}
+  .tes-txt .tes-nota{margin-top:26px;font-size:14px;color:#8C7D6E}
+  .tes-form{position:sticky;top:110px;display:flex;flex-direction:column;gap:14px}
+  @media(max-width:980px){.tes-form{position:static}}
+  .tes-form iframe{width:100%;height:min(80vh,1100px);min-height:620px;border:1px solid var(--line);border-radius:24px;background:#fff}
+  .tes-abrir{align-self:flex-start}
+</style>

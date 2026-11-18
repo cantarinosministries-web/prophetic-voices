@@ -61,7 +61,7 @@ const CSP = [
   "font-src 'self' https://fonts.gstatic.com",
   "img-src 'self' data: blob:",
   "media-src 'self'",
-  "frame-src 'self'",
+  "frame-src 'self' https://docs.google.com",
   "worker-src 'self' blob:",
   "frame-ancestors 'self'",
   "object-src 'none'",
