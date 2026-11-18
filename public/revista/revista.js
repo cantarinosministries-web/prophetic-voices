@@ -48,8 +48,10 @@
 
   function applyLang() {
     document.documentElement.lang = lang === 'en' ? 'en' : 'pt-BR';
-    document.querySelectorAll('[data-i18n]').forEach(function (el) { el.textContent = t(el.getAttribute('data-i18n')); });
-    document.querySelectorAll('[data-i18n-ph]').forEach(function (el) { el.placeholder = t(el.getAttribute('data-i18n-ph')); });
+    // só mexe nos textos da revista; o resto da página (menu, comunidade, rodapé) é do i18n do site
+    var tem = function (k) { return k in T.pt; };
+    document.querySelectorAll('[data-i18n]').forEach(function (el) { var k = el.getAttribute('data-i18n'); if (tem(k)) el.textContent = t(k); });
+    document.querySelectorAll('[data-i18n-ph]').forEach(function (el) { var k = el.getAttribute('data-i18n-ph'); if (tem(k)) el.placeholder = t(k); });
     document.querySelectorAll('[data-pt]').forEach(function (el) { el.textContent = lang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-pt'); });
     window.dispatchEvent(new Event('pv:artlang'));
   }
