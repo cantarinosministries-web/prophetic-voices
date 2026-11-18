@@ -41,6 +41,7 @@ export const T = {
     list_vol: 'VOL. 1 · TRADUÇÕES', list_read: 'Ler artigo', list_pdf: 'PDF',
 
     art_eyebrow: 'Revista The Prophetic Voices', art_h1: 'Artigos', art_lede: 'Estudos em profetismo bíblico: artigos produzidos e traduzidos pela equipe, com rigor acadêmico e sensibilidade ao Espírito. A revista abrirá, no futuro, para submissões de pesquisadores.',
+    cur_label: 'CURSO', cur_btn: 'Ver curso na Hotmart', cur_school_e: 'Formação completa', cur_school_h: 'Escola de Profetas · turma 2027', cur_school_p: 'Os cursos são portas de entrada. A formação completa, com prática supervisionada e vida em comunidade, acontece na Escola de Profetas.', cur_school_btn: 'Conhecer a Escola',
     course_eyebrow: 'Formação digital', course_h1: 'Cursos', course_lede: 'Cursos digitais para quem quer se formar no profético no próprio ritmo, com acesso pela Hotmart.',
     store_eyebrow: 'Loja The Prophetic Voices', store_h1: 'Loja', store_lede: 'Livros, materiais e vestuário. Frete calculado pelo CEP; pagamento por PIX ou cartão via Mercado Pago.',
     add: 'Adicionar', added: 'No carrinho ✓', price: '[PREÇO]',
@@ -83,6 +84,7 @@ export const T = {
     list_vol: 'VOL. 1 · TRANSLATIONS', list_read: 'Read article', list_pdf: 'PDF',
 
     art_eyebrow: 'The Prophetic Voices Journal', art_h1: 'Articles', art_lede: 'Studies in biblical prophetism: articles written and translated by our team, with academic rigor and sensitivity to the Spirit. The journal will later open to submissions from researchers.',
+    cur_label: 'COURSE', cur_btn: 'View course on Hotmart', cur_school_e: 'Full formation', cur_school_h: 'School of Prophets · class of 2027', cur_school_p: 'The courses are doorways. The full formation, with supervised practice and life in community, happens in the School of Prophets.', cur_school_btn: 'Discover the School',
     course_eyebrow: 'Online formation', course_h1: 'Courses', course_lede: 'Online courses for those who want to be formed in the prophetic at their own pace, with access through Hotmart.',
     store_eyebrow: 'The Prophetic Voices Store', store_h1: 'Store', store_lede: 'Books, materials and apparel. Shipping calculated by ZIP code; payment by PIX or card via Mercado Pago.',
     add: 'Add', added: 'In cart ✓', price: '[PRICE]',

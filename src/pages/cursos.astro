@@ -1,8 +1,95 @@
 ---
 import Base from '../layouts/Base.astro';
 import PageHero from '../components/PageHero.astro';
+import { cursos } from '../data/cursos.js';
+const SCHOOL = 'https://thepropheticvoices.hotmart.host/escola-de-profetas';
 ---
-<Base page="cursos" title="Cursos — The Prophetic Voices">
-  <PageHero k="course" soon eyebrow="Formação digital" title="Cursos"
+<Base page="cursos" title="Cursos — The Prophetic Voices" description="Cursos digitais de Gabriel Cantarino: Intercessão, Sacerdócio e Dons do Espírito, com acesso pela Hotmart.">
+  <PageHero k="course" eyebrow="Formação digital" title="Cursos"
     lede="Cursos digitais para quem quer se formar no profético no próprio ritmo, com acesso pela Hotmart." />
+
+  <section class="pad cursos-sec">
+    <div class="wrap">
+      <div class="cursos">
+        {cursos.map((c, i) => (
+          <article class="curso rv" style={`transition-delay:${i * 120}ms`}>
+            <a href={c.url} target="_blank" rel="noopener" class="curso-capa" aria-label={`${c.titulo.pt} — ver na Hotmart`}>
+              <span class="curso-n">{String(i + 1).padStart(2, '0')}</span>
+              <span class="curso-pal" lang={c.lang} dir={c.lang === 'he' ? 'rtl' : 'ltr'}>{c.palavra}</span>
+              <span class="curso-tr">{c.translit} · {c.ref}</span>
+              <span class="curso-gl" data-pt={c.glosa.pt} data-en={c.glosa.en}>{c.glosa.pt}</span>
+              <img src="/media/symbol-creme.png" alt="" class="curso-simb" />
+            </a>
+            <div class="curso-corpo">
+              <span class="curso-m">
+                <span data-i18n="cur_label">CURSO</span>
+                {c.resumoConteudo && <span data-pt={c.resumoConteudo.pt.toUpperCase()} data-en={c.resumoConteudo.en.toUpperCase()}> · {c.resumoConteudo.pt.toUpperCase()}</span>}
+              </span>
+              <h2 data-pt={c.titulo.pt} data-en={c.titulo.en}>{c.titulo.pt}</h2>
+              <p class="curso-res" data-pt={c.resumo.pt} data-en={c.resumo.en}>{c.resumo.pt}</p>
+              {c.modulos && (
+                <ol class="curso-mods">
+                  {c.modulos.pt.map((m, j) => <li data-pt={m} data-en={c.modulos.en[j]}>{m}</li>)}
+                </ol>
+              )}
+              <a href={c.url} target="_blank" rel="noopener" class="btn btn-creme curso-btn"><span data-i18n="cur_btn">Ver curso na Hotmart</span> ↗</a>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <div class="cursos-escola rv">
+        <div>
+          <div class="eyebrow" data-i18n="cur_school_e">Formação completa</div>
+          <h2 class="serif" data-i18n="cur_school_h">Escola de Profetas · turma 2027</h2>
+          <p data-i18n="cur_school_p">Os cursos são portas de entrada. A formação completa, com prática supervisionada e vida em comunidade, acontece na Escola de Profetas.</p>
+        </div>
+        <a href={SCHOOL} target="_blank" rel="noopener" class="btn btn-ghost"><span data-i18n="cur_school_btn">Conhecer a Escola</span> ↗</a>
+      </div>
+    </div>
+  </section>
+
+  <Fragment slot="scripts">
+    <script is:inline>
+      (function () {
+        function aplicar() {
+          var en = (window.__pvLang || (function () { try { return localStorage.getItem('pv-lang'); } catch (e) { return null; } })()) === 'en';
+          document.querySelectorAll('[data-pt][data-en]').forEach(function (el) {
+            var v = en ? el.getAttribute('data-en') : el.getAttribute('data-pt');
+            el.textContent = el.closest('.curso-m') && el.previousElementSibling ? ' · ' + v : v;
+          });
+        }
+        window.addEventListener('pv:lang', function (e) { window.__pvLang = (e && e.detail) || window.__pvLang; aplicar(); });
+        aplicar();
+      })();
+    </script>
+  </Fragment>
 </Base>
+
+<style is:global>
+  .cursos-sec{padding-top:20px;border-top:none}
+  .cursos{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+  @media(max-width:1060px){.cursos{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(max-width:700px){.cursos{grid-template-columns:1fr}}
+  .curso{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:28px;overflow:hidden;background:#050504;transition:border-color .4s,transform .4s}
+  .curso:hover{border-color:rgba(191,137,87,.55);transform:translateY(-4px)}
+  .curso-capa{position:relative;aspect-ratio:4/3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:28px;
+    background:radial-gradient(ellipse 80% 70% at 50% 110%,rgba(191,137,87,.38),transparent 70%),radial-gradient(ellipse 60% 50% at 50% 0%,rgba(248,233,183,.06),transparent 70%),#000;border-bottom:1px solid var(--line);overflow:hidden}
+  .curso-n{position:absolute;top:20px;left:24px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;color:var(--cobre)}
+  .curso-simb{position:absolute;top:16px;right:20px;width:30px;height:30px;opacity:.55}
+  .curso-pal{font-family:var(--serif);font-size:clamp(56px,6vw,84px);line-height:1;color:var(--creme);transition:transform .6s}
+  .curso:hover .curso-pal{transform:scale(1.04)}
+  .curso-tr{font-family:var(--mono);font-size:11.5px;letter-spacing:.18em;color:var(--areia)}
+  .curso-gl{font-family:var(--serif);font-style:italic;font-size:22px;color:var(--cobre)}
+  .curso-corpo{display:flex;flex-direction:column;gap:14px;padding:28px;flex:1}
+  .curso-m{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--cobre)}
+  .curso h2{margin:0;font-family:var(--disp);font-weight:300;text-transform:uppercase;font-size:clamp(30px,2.8vw,40px);line-height:1.05;letter-spacing:.01em}
+  .curso-res{margin:0;color:var(--areia);font-size:16px;line-height:1.65;font-weight:300}
+  .curso-mods{margin:2px 0 0;padding:0;list-style:none;counter-reset:m;display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:14px}
+  .curso-mods li{counter-increment:m;display:flex;gap:12px;font-size:14.5px;color:var(--creme)}
+  .curso-mods li::before{content:counter(m,decimal-leading-zero);font-family:var(--mono);font-size:11px;color:var(--cobre);padding-top:3px}
+  .curso-btn{margin-top:auto;align-self:flex-start}
+  .cursos-escola{margin-top:56px;display:flex;justify-content:space-between;align-items:center;gap:28px;flex-wrap:wrap;border:1px solid var(--line);border-radius:28px;padding:36px 40px;background:linear-gradient(120deg,rgba(191,137,87,.14),transparent 60%)}
+  .cursos-escola h2{margin:12px 0 8px;font-size:clamp(30px,3vw,44px);line-height:1.05;font-weight:400}
+  .cursos-escola p{margin:0;color:var(--areia);font-size:17px;line-height:1.6;font-weight:300;max-width:620px}
+</style>
