@@ -75,14 +75,14 @@ function limpar(dados, atual = {}) {
   if ('pdf_paginas' in o) o.pdf_paginas = o.pdf_paginas ? parseInt(o.pdf_paginas, 10) || null : null;
   if ('tipo' in o && !['traducao', 'original'].includes(o.tipo)) o.tipo = 'traducao';
   if ('area' in o && !AREAS.includes(o.area)) o.area = atual.area || AREAS[0];
-  for (const k of ['pdf_url', 'capa_url']) if (o[k] && !/^\/(artigos|arquivos)\/[\w./-]+$/.test(o[k])) delete o[k];
+  for (const k of ['pdf_url', 'capa_url']) if (o[k] && !/^\/artigos\/[\w-]+\.(?:pdf|jpe?g|png|webp)$/i.test(o[k])) delete o[k];
   if (o.url_original && !/^https?:\/\//.test(o.url_original)) o.url_original = null;
   return o;
 }
 
 async function slugLivre(env, base, id) {
   let s = base || 'artigo', i = 2;
-  while (await env.DB.prepare('SELECT 1 FROM artigos WHERE slug = ? AND id <> ?').bind(s, id || 0).first()) s = `${base}-${i++}`;
+  while (await env.DB.prepare('SELECT 1 FROM artigos WHERE slug = ?1 AND id <> ?2 UNION ALL SELECT 1 FROM artigos_enderecos WHERE slug = ?1 AND artigo_id <> ?2').bind(s, id || 0).first()) s = `${base}-${i++}`;
   return s;
 }
 
@@ -252,7 +252,7 @@ export async function api(req, env, url) {
       if (dados.slug && dados.slug !== a.slug) {
         const s = slugify(dados.slug);
         if (!s) return erro('Endereço inválido.');
-        if (await env.DB.prepare('SELECT 1 FROM artigos WHERE slug = ? AND id <> ?').bind(s, a.id).first()) return erro('Já existe um artigo com esse endereço.', 409);
+        if (await env.DB.prepare('SELECT 1 FROM artigos WHERE slug = ?1 AND id <> ?2 UNION ALL SELECT 1 FROM artigos_enderecos WHERE slug = ?1 AND artigo_id <> ?2').bind(s, a.id).first()) return erro('Já existe um artigo com esse endereço.', 409);
         d.slug = s;
       }
       const cols = Object.keys(d);
@@ -303,11 +303,15 @@ export async function api(req, env, url) {
       const chave = `artigos/${a.slug}-${aleatorio(4)}${tipo === 'capa' ? '-capa' : ''}.${ext}`;
       await env.ARQUIVOS.put(chave, buf, { httpMetadata: { contentType: ct } });
       const antigo = tipo === 'pdf' ? a.pdf_url : a.capa_url;
-      if (antigo && antigo.startsWith('/arquivos/')) await env.ARQUIVOS.delete(antigo.slice('/arquivos/'.length));
       const col = tipo === 'pdf' ? 'pdf_url' : 'capa_url';
       const pags = tipo === 'pdf' ? parseInt(url.searchParams.get('paginas') || '', 10) || null : null;
-      await env.DB.prepare(`UPDATE artigos SET ${col} = ?${tipo === 'pdf' ? ', pdf_paginas = ?' : ''}, atualizado_por = ?, atualizado_em = datetime('now') WHERE id = ?`)
-        .bind(...(tipo === 'pdf' ? ['/arquivos/' + chave, pags] : ['/arquivos/' + chave]), u.id, a.id).run();
+      const troca = await env.DB.prepare(`UPDATE artigos SET ${col} = ?${tipo === 'pdf' ? ', pdf_paginas = ?' : ''}, atualizado_por = ?, atualizado_em = datetime('now') WHERE id = ? AND ${col} IS ? AND status = ?`)
+        .bind(...(tipo === 'pdf' ? ['/arquivos/' + chave, pags] : ['/arquivos/' + chave]), u.id, a.id, antigo, a.status).run();
+      if (!troca.meta.changes) {
+        await env.ARQUIVOS.delete(chave);
+        return erro('O artigo mudou. Atualize antes de enviar novamente.', 409);
+      }
+      // O objeto anterior fica inacessível sem referência no banco e pode ser limpo depois.
       await registrar(env, u, tipo === 'pdf' ? 'enviou o PDF' : 'enviou a capa', a.titulo);
       return json({ artigo: comPermissoes(u, await lerArtigo(env, a.id)) });
     }

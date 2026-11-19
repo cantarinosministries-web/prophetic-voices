@@ -45,7 +45,9 @@ export function lerCookie(req, nome) {
   const c = req.headers.get('Cookie') || '';
   for (const p of c.split(/;\s*/)) {
     const i = p.indexOf('=');
-    if (i > 0 && p.slice(0, i) === nome) return decodeURIComponent(p.slice(i + 1));
+    if (i > 0 && p.slice(0, i) === nome) {
+      try { return decodeURIComponent(p.slice(i + 1)); } catch { return null; }
+    }
   }
   return null;
 }
@@ -73,6 +75,7 @@ export function cabecalhos(h = new Headers()) {
   h.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
   h.set('X-Content-Type-Options', 'nosniff');
   h.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  h.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=()');
   h.set('X-Frame-Options', 'SAMEORIGIN');
   h.set('Content-Security-Policy', CSP);
   return h;
