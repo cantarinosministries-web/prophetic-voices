@@ -447,6 +447,125 @@ function telaPapeis() {
   <div class="card" style="margin-top:20px"><h3>Fluxo de um artigo</h3><p class="muted" style="margin:0">Rascunho → Em revisão → Publicado (aparece no site na hora) → Arquivado (sai do site, continua no painel). Autores levam o artigo até “Em revisão”; editores e acima publicam.</p></div>`;
 }
 
+// ---------------------------------------------------------------- estatísticas
+// Acessos às páginas dos artigos e downloads dos PDFs, por período, artigo, mês e país.
+let EST = { periodo: '12m', de: '', ate: '' };
+const isoDia = (d) => new Date(d.getTime() - 3 * 3600e3).toISOString().slice(0, 10);
+const num = (n) => Number(n || 0).toLocaleString('pt-BR');
+const nomePais = (c) => {
+  if (!c || c === 'XX') return 'Não identificado';
+  try { return new Intl.DisplayNames(['pt-BR'], { type: 'region' }).of(c); } catch (e) { return c; }
+};
+const nomeMes = (m) => { const [a, b] = m.split('-'); return new Date(Date.UTC(+a, +b - 1, 15)).toLocaleDateString('pt-BR', { month: 'short', year: 'numeric', timeZone: 'UTC' }); };
+const dataBR = (s) => (s ? s.split('-').reverse().join('/') : '—');
+
+function intervalo() {
+  const hoje = new Date();
+  const ate = isoDia(hoje);
+  if (EST.periodo === '30d') return { de: isoDia(new Date(hoje - 29 * 864e5)), ate, nome: 'Últimos 30 dias' };
+  if (EST.periodo === '12m') { const d = new Date(hoje); d.setUTCFullYear(d.getUTCFullYear() - 1); d.setUTCDate(d.getUTCDate() + 1); return { de: isoDia(d), ate, nome: 'Últimos 12 meses' }; }
+  if (EST.periodo === 'ano') return { de: ate.slice(0, 4) + '-01-01', ate, nome: 'Ano de ' + ate.slice(0, 4) };
+  if (EST.periodo === 'livre' && EST.de && EST.ate) return { de: EST.de, ate: EST.ate, nome: `${dataBR(EST.de)} a ${dataBR(EST.ate)}` };
+  return { de: '', ate: '', nome: 'Desde o início da contagem' };
+}
+
+function baixarCsv(nome, linhas) {
+  const csv = '﻿' + linhas.map((l) => l.map((c) => { const t = String(c ?? ''); return /[";\n]/.test(t) ? '"' + t.replace(/"/g, '""') + '"' : t; }).join(';')).join('\r\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+  a.download = nome;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+function barrasMes(meses) {
+  if (!meses.length) return '<p class="muted small">Ainda não há registros neste período.</p>';
+  const max = Math.max(1, ...meses.map((m) => Math.max(m.acessos, m.downloads)));
+  return `<div class="est-leg small muted"><span><i class="est-a"></i>Acessos</span><span><i class="est-d"></i>Downloads</span></div>
+  <div class="est-meses">${meses.map((m) => `<div class="est-mes"><span class="small">${esc(nomeMes(m.mes))}</span>
+    <div class="est-bar"><i class="est-a" style="width:${(m.acessos / max) * 100}%"></i><b>${num(m.acessos)}</b></div>
+    <div class="est-bar"><i class="est-d" style="width:${(m.downloads / max) * 100}%"></i><b>${num(m.downloads)}</b></div></div>`).join('')}</div>`;
+}
+
+function tabelaPaises(paises) {
+  if (!paises.length) return '<p class="muted small">Ainda não há registros neste período.</p>';
+  return `<table class="tb"><thead><tr><th>País</th><th class="num">Acessos</th><th class="num">Downloads</th></tr></thead><tbody>
+  ${paises.map((p) => `<tr><td>${esc(nomePais(p.pais))}</td><td class="num">${num(p.acessos)}</td><td class="num">${num(p.downloads)}</td></tr>`).join('')}</tbody></table>`;
+}
+
+const NOTA_EST = 'Acessos = aberturas da página do artigo no site. Downloads = aberturas ou downloads do PDF (botões “Baixar PDF”, “PDF ↓”, “Abrir em tela cheia” e links diretos); a leitura no visualizador embutido da página não conta como download. Robôs de busca, pré-visualizações de links e pessoas logadas no painel ficam fora da contagem. O site não guarda IP nem nenhum dado pessoal dos leitores: só totais por dia e país.';
+
+function filtrosPeriodo() {
+  const op = [['30d', '30 dias'], ['12m', '12 meses'], ['ano', 'Este ano'], ['tudo', 'Tudo'], ['livre', 'Escolher datas']];
+  return `<div class="filtros est-filtros">${op.map(([k, n]) => `<button class="chip" aria-pressed="${EST.periodo === k}" data-per="${k}">${n}</button>`).join('')}
+    <span class="est-datas" ${EST.periodo === 'livre' ? '' : 'hidden'}><input type="date" id="estDe" value="${esc(EST.de)}"> a <input type="date" id="estAte" value="${esc(EST.ate)}"> <button class="btn sm" id="estAplicar">Aplicar</button></span></div>`;
+}
+
+function ligarFiltros(recarregar) {
+  $$('[data-per]').forEach((b) => b.addEventListener('click', () => { EST.periodo = b.dataset.per; if (b.dataset.per !== 'livre') recarregar(); else $('.est-datas').hidden = false; $$('[data-per]').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); }));
+  const ap = $('#estAplicar');
+  if (ap) ap.addEventListener('click', () => { EST.de = $('#estDe').value; EST.ate = $('#estAte').value; if (!EST.de || !EST.ate || EST.de > EST.ate) return toast('Escolha a data inicial e a final.', true); recarregar(); });
+}
+
+async function telaEstatisticas(slug) {
+  marcarMenu('estatisticas');
+  if (!S.permissoes.ver_estatisticas) return ir('artigos');
+  const iv = intervalo();
+  const q = new URLSearchParams();
+  if (iv.de) { q.set('de', iv.de); q.set('ate', iv.ate); }
+  if (slug) q.set('artigo', slug);
+  const r = await api('/estatisticas?' + q);
+  const recarregar = () => telaEstatisticas(slug);
+  const kpis = `<div class="lj-kpis">
+    <div class="card"><span class="small muted">Acessos às páginas</span><b>${num(r.totais.acessos)}</b></div>
+    <div class="card"><span class="small muted">Downloads do PDF</span><b>${num(r.totais.downloads)}</b></div>
+    <div class="card"><span class="small muted">Países</span><b>${num(r.totais.paises)}</b></div>
+    <div class="card"><span class="small muted">Contagem desde</span><b>${dataBR(r.contagem_desde)}</b></div></div>`;
+
+  if (slug) {
+    const a = r.artigo;
+    const fonte = [a.periodico, a.volume && 'v. ' + a.volume, a.numero && 'n. ' + a.numero, a.paginas_original && 'p. ' + a.paginas_original, a.ano].filter(Boolean).join(', ');
+    const link = location.origin + '/artigos/' + a.slug + '.html';
+    app.innerHTML = `<div class="est-rel">
+    <div class="head no-print"><div><a href="#estatisticas" class="small muted">← Todas as estatísticas</a></div>
+      <div class="est-acoes"><button class="btn sm" id="estCsv">Exportar planilha (CSV)</button><button class="btn sm pri" id="estImprimir">Imprimir ou salvar em PDF</button></div></div>
+    <div class="no-print">${filtrosPeriodo()}</div>
+    <div class="est-cab"><img src="/media/pv07-cobre.png" alt="Símbolo The Prophetic Voices" class="est-logo"><div><p class="small muted" style="margin:0">Relatório de acessos · ${esc(iv.nome)}</p></div></div>
+    <h1 style="margin:6px 0 4px">${esc(a.titulo)}</h1>
+    ${a.titulo_original ? `<p class="muted" style="margin:0 0 4px"><i>${esc(a.titulo_original)}</i></p>` : ''}
+    <p style="margin:0 0 4px">${esc(a.autor)}${fonte ? ` · Original: ${esc(fonte)}` : ''}</p>
+    <p class="small muted" style="margin:0 0 18px">Publicado na revista The Prophetic Voices em ${a.publicado_em ? dataBR(a.publicado_em.slice(0, 10)) : '—'} · ${esc(link)}</p>
+    ${kpis}
+    <div class="grid2"><div class="card"><h3>Por mês</h3>${barrasMes(r.meses)}</div><div class="card"><h3>Por país</h3>${tabelaPaises(r.paises)}</div></div>
+    <p class="small muted" style="margin-top:18px">${esc(NOTA_EST)}</p>
+    <p class="small muted">Relatório gerado em ${new Date().toLocaleString('pt-BR')} · thepropheticvoices.com.br</p></div>`;
+    ligarFiltros(recarregar);
+    $('#estImprimir').addEventListener('click', () => window.print());
+    $('#estCsv').addEventListener('click', () => baixarCsv(`relatorio-${a.slug}.csv`, [
+      ['Relatório de acessos', a.titulo], ['Autor', a.autor], ['Período', iv.nome], ['Página', link], [],
+      ['Mês', 'Acessos', 'Downloads'], ...r.meses.map((m) => [m.mes, m.acessos, m.downloads]), ['Total', r.totais.acessos, r.totais.downloads], [],
+      ['País', 'Acessos', 'Downloads'], ...r.paises.map((p) => [nomePais(p.pais), p.acessos, p.downloads])]));
+    return;
+  }
+
+  app.innerHTML = `<div class="head"><div><h1>Estatísticas</h1><p class="muted">Acessos e downloads dos artigos da revista · ${esc(iv.nome)}. Abra um artigo para gerar o relatório que pode ser enviado à editora ou ao autor.</p></div>
+    <div class="est-acoes"><button class="btn sm" id="estCsv">Exportar planilha (CSV)</button></div></div>
+  ${filtrosPeriodo()}${kpis}
+  <div class="card" style="padding:6px 12px;margin-bottom:18px"><table class="tb"><thead><tr><th>Artigo</th><th class="num">Acessos</th><th class="num">Downloads</th><th class="num">Países</th><th></th></tr></thead><tbody>
+  ${r.artigos.map((a) => `<tr><td><a href="#estatisticas/${esc(a.slug)}" style="text-decoration:none"><b style="font-weight:500">${esc(a.titulo)}</b></a><br><span class="small muted">${esc(a.autor)}${a.periodico ? ' · ' + esc(a.periodico) + (a.ano ? ' (' + esc(a.ano) + ')' : '') : ''}${a.status === 'arquivado' ? ' · arquivado' : ''}</span></td>
+    <td class="num">${num(a.acessos)}</td><td class="num">${num(a.downloads)}</td><td class="num">${num(a.paises)}</td><td><a class="btn sm" href="#estatisticas/${esc(a.slug)}">Relatório</a></td></tr>`).join('') || '<tr><td colspan="5" class="muted">Nenhum artigo publicado.</td></tr>'}
+  </tbody></table></div>
+  <div class="grid2"><div class="card"><h3>Por mês</h3>${barrasMes(r.meses)}</div><div class="card"><h3>Por país</h3>${tabelaPaises(r.paises)}</div></div>
+  <p class="small muted" style="margin-top:18px">${esc(NOTA_EST)}</p>`;
+  ligarFiltros(recarregar);
+  $('#estCsv').addEventListener('click', () => baixarCsv('estatisticas-revista.csv', [
+    ['Período', iv.nome], [],
+    ['Artigo', 'Autor', 'Original', 'Ano', 'Acessos', 'Downloads', 'Países', 'Página'],
+    ...r.artigos.map((a) => [a.titulo, a.autor, a.periodico, a.ano, a.acessos, a.downloads, a.paises, location.origin + '/artigos/' + a.slug + '.html']),
+    [], ['Mês', 'Acessos', 'Downloads'], ...r.meses.map((m) => [m.mes, m.acessos, m.downloads]),
+    [], ['País', 'Acessos', 'Downloads'], ...r.paises.map((p) => [nomePais(p.pais), p.acessos, p.downloads])]));
+}
+
 // ---------------------------------------------------------------- navegação
 async function carregarSessao() {
   const s = await api('/sessao', { publico: true });
@@ -466,6 +585,8 @@ async function rotear() {
     if (!S.permissoes.ver_revista && ['', 'artigos'].includes(h) || h.startsWith('artigo/') && !S.permissoes.ver_revista) return S.permissoes.loja_ver ? ir('loja') : telaConta();
     if (h.startsWith('artigo/')) return await telaArtigo(h.slice(7));
     if (h === 'usuarios') return await telaUsuarios();
+    if (h === 'estatisticas') return await telaEstatisticas('');
+    if (h.startsWith('estatisticas/')) return await telaEstatisticas(h.slice(13));
     if (h === 'historico') return await telaHistorico();
     if (h === 'conta') return telaConta();
     if (h === 'papeis') return telaPapeis();

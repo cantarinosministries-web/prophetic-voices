@@ -105,3 +105,31 @@ a.card:hover{border-color:#BF8957}
 .lj-linha{display:flex;gap:10px;flex-wrap:wrap}
 .form .f.check{flex-direction:row;align-items:center;justify-content:flex-start;grid-column:1/-1;text-align:left}
 .tb label.small{white-space:nowrap}
+/* estatísticas da revista */
+.est-acoes{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start}
+.tb .num,.tb th.num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.est-datas{display:inline-flex;gap:8px;align-items:center;font-size:14px}
+.est-datas input{width:auto;margin:0;padding:6px 10px}
+.est-leg{display:flex;gap:16px;margin-bottom:10px}
+.est-leg i,.est-bar i{display:inline-block}
+.est-leg i{width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.est-a{background:var(--cobre)}.est-d{background:var(--areia)}
+.est-meses{display:grid;gap:10px}
+.est-mes{display:grid;grid-template-columns:86px 1fr;gap:3px 12px;align-items:center}
+.est-mes>span{grid-row:span 2;color:var(--areia)}
+.est-bar{display:flex;align-items:center;gap:8px;height:12px}
+.est-bar i{height:10px;border-radius:2px;min-width:2px}
+.est-bar b{font-weight:400;font-size:12px;font-variant-numeric:tabular-nums}
+.est-cab{display:none}
+@media print{
+  .bar,.no-print,#toast{display:none!important}
+  body{background:#fff;color:#000}
+  .card{background:#fff!important;border-color:#ccc!important;break-inside:avoid}
+  .muted,.est-mes>span{color:#444!important}
+  .lj-kpis b,h1,h3{color:#000!important}
+  .est-cab{display:flex;align-items:center;gap:14px;margin-bottom:10px}
+  .est-logo{height:52px}
+  .est-a{background:#BF8957!important;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+  .est-d{background:#CAB5A0!important;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+  main{padding:0!important;max-width:none!important}
+}

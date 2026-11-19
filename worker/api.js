@@ -2,6 +2,7 @@
 import { aleatorio, sha256, hashSenha, iguais, senhaValida, lerCookie, cookieSessao, COOKIE, json, erro } from './seguranca.js';
 import { PAPEIS, PAPEIS_LOJA, pode, podeAtribuir, permissoesDe } from './permissoes.js';
 import { apiLoja } from './loja.js';
+import { relatorio } from './estatisticas.js';
 
 const DIAS_SESSAO = 14;
 const AREAS = ['Antigo Testamento', 'Novo Testamento', 'Teologia bíblica', 'História'];
@@ -405,6 +406,11 @@ export async function api(req, env, url) {
       }
     }
     return erro('Rota não encontrada.', 404);
+  }
+
+  if (p === '/estatisticas' && m === 'GET') {
+    if (!pode(u, 'ver_estatisticas')) return erro('Apenas editores e acima veem as estatísticas.', 403);
+    return relatorio(env, url);
   }
 
   if (p === '/historico' && m === 'GET') {

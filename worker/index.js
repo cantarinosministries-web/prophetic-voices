@@ -10,6 +10,7 @@ import { paginaLista, paginaArtigo } from './paginas.js';
 import { origemOk, erro, cabecalhos } from './seguranca.js';
 import { pode } from './permissoes.js';
 import { apiLojaPublica, webhookMercadoPago } from './loja.js';
+import { contar } from './estatisticas.js';
 
 function html(texto, status = 200) {
   const h = cabecalhos(new Headers({ 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' }));
@@ -26,7 +27,7 @@ async function publicados(env) {
 }
 
 export default {
-  async fetch(req, env) {
+  async fetch(req, env, ctx) {
     const url = new URL(req.url);
     const path = url.pathname;
     try {
@@ -43,7 +44,15 @@ export default {
 
       if (path.startsWith('/artigos/')) {
         const nome = decodeURIComponent(path.slice('/artigos/'.length));
-        if (/\.(pdf|jpe?g|png|webp)$/i.test(nome)) return env.ASSETS.fetch(req);
+        if (/\.pdf$/i.test(nome)) {
+          const r = await env.ASSETS.fetch(req);
+          if (r.ok) {
+            const a = await env.DB.prepare("SELECT id FROM artigos WHERE pdf_url = ? AND status = 'publicado'").bind('/artigos/' + nome).first();
+            if (a) contar(env, ctx, req, a.id, 'downloads');
+          }
+          return r;
+        }
+        if (/\.(jpe?g|png|webp)$/i.test(nome)) return env.ASSETS.fetch(req);
         const slug = nome.replace(/\.html$/, '');
         if (!slug || slug === 'modelo' || slug.includes('/')) return naoEncontrado(env, req);
         const a = await env.DB.prepare('SELECT * FROM artigos WHERE slug = ?').bind(slug).first();
@@ -56,7 +65,9 @@ export default {
         }
         const rel = (await publicados(env)).filter((b) => b.id !== a.id);
         rel.sort((x, y) => (y.area === a.area) - (x.area === a.area));
-        return html(await paginaArtigo(env, req, a, rel, previa));
+        const pagina = html(await paginaArtigo(env, req, a, rel, previa));
+        if (!previa) contar(env, ctx, req, a.id, 'acessos');
+        return pagina;
       }
 
       if (path.startsWith('/arquivos/')) {
@@ -72,7 +83,7 @@ export default {
         }
         if (!/^artigos\/[\w.-]+$/.test(chave)) return naoEncontrado(env, req);
         const ref = '/arquivos/' + chave;
-        const a = await env.DB.prepare('SELECT status FROM artigos WHERE pdf_url = ? OR capa_url = ?').bind(ref, ref).first();
+        const a = await env.DB.prepare('SELECT id, status, pdf_url FROM artigos WHERE pdf_url = ? OR capa_url = ?').bind(ref, ref).first();
         if (!a) return naoEncontrado(env, req);
         if (a.status !== 'publicado') {
           const u = await usuarioDaSessao(env, req);
@@ -84,6 +95,7 @@ export default {
         obj.writeHttpMetadata(h);
         h.set('ETag', obj.httpEtag);
         h.set('Cache-Control', a.status === 'publicado' ? 'public, max-age=86400' : 'private, no-store');
+        if (a.status === 'publicado' && a.pdf_url === ref) contar(env, ctx, req, a.id, 'downloads');
         return new Response(obj.body, { headers: h });
       }
 
