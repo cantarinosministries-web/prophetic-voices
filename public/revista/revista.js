@@ -16,7 +16,7 @@
       abs_note: 'Resumo editorial da The Prophetic Voices; o artigo original não tem resumo.', kw_h: 'Palavras-chave',
       reader_h: 'Leitura', open: 'Abrir em tela cheia ↗', fb1: 'Se o documento não aparecer no seu aparelho,', fb2: 'abra o PDF aqui',
       m_author: 'Autor', m_orig: 'Título original', m_journal: 'Periódico', m_year: 'Ano', m_pages: 'Páginas (original)', m_pub: 'Editora original',
-      m_trans: 'Tradução', m_lang: 'Idioma', m_lang_v: 'Português', m_date: 'Publicado na revista', m_stable: 'Original', cite_h: 'Como citar', rel_h: 'Leia também',
+      m_trans: 'Tradução', m_lang: 'Idioma', m_lang_v: 'Português', m_date: 'Publicado na revista', m_views: 'Acessos', m_dls: 'Downloads do PDF', m_stable: 'Original', cite_h: 'Como citar', rel_h: 'Leia também',
       rights: 'Original em domínio público. Tradução para o português © 2026 Gabriel Cantarino / The Prophetic Voices.',
       more_by: 'Outros artigos do autor', foot: 'Preparando uma geração para serem Vozes Proféticas no tempo do fim.'
     },
@@ -34,7 +34,7 @@
       abs_note: 'Editorial abstract by The Prophetic Voices; the original article has no abstract.', kw_h: 'Keywords',
       reader_h: 'Reader', open: 'Open full screen ↗', fb1: 'If the document does not appear on your device,', fb2: 'open the PDF here',
       m_author: 'Author', m_orig: 'Original title', m_journal: 'Journal', m_year: 'Year', m_pages: 'Pages (original)', m_pub: 'Original publisher',
-      m_trans: 'Translation', m_lang: 'Language', m_lang_v: 'Portuguese', m_date: 'Published in the journal', m_stable: 'Original', cite_h: 'How to cite', rel_h: 'Read also',
+      m_trans: 'Translation', m_lang: 'Language', m_lang_v: 'Portuguese', m_date: 'Published in the journal', m_views: 'Page views', m_dls: 'PDF downloads', m_stable: 'Original', cite_h: 'How to cite', rel_h: 'Read also',
       rights: 'Original in the public domain. Portuguese translation © 2026 Gabriel Cantarino / The Prophetic Voices.',
       more_by: 'More by this author', foot: 'Preparing a generation to be Prophetic Voices in the end times.'
     }

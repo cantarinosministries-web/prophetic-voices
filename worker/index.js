@@ -10,7 +10,7 @@ import { paginaLista, paginaArtigo } from './paginas.js';
 import { origemOk, erro, cabecalhos } from './seguranca.js';
 import { pode } from './permissoes.js';
 import { apiLojaPublica, webhookMercadoPago } from './loja.js';
-import { contar } from './estatisticas.js';
+import { contar, contavel, totaisArtigo } from './estatisticas.js';
 
 function html(texto, status = 200) {
   const h = cabecalhos(new Headers({ 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' }));
@@ -65,7 +65,12 @@ export default {
         }
         const rel = (await publicados(env)).filter((b) => b.id !== a.id);
         rel.sort((x, y) => (y.area === a.area) - (x.area === a.area));
-        const pagina = html(await paginaArtigo(env, req, a, rel, previa));
+        let numeros = null;
+        if (!previa) {
+          numeros = await totaisArtigo(env, a.id);
+          if (contavel(req)) numeros.acessos += 1; // a visita atual já entra na conta mostrada
+        }
+        const pagina = html(await paginaArtigo(env, req, a, rel, previa, numeros));
         if (!previa) contar(env, ctx, req, a.id, 'acessos');
         return pagina;
       }

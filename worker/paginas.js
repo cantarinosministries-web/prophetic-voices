@@ -106,7 +106,7 @@ export async function paginaLista(env, req, artigos) {
 }
 
 // ---------------------------------------------------------------- artigo
-export async function paginaArtigo(env, req, a, relacionados, previa) {
+export async function paginaArtigo(env, req, a, relacionados, previa, numeros) {
   const t = await modelo(env, req, '/artigos/modelo.html');
   const p = paraPublico(a);
   const trad = a.tipo === 'traducao' && a.tradutor;
@@ -149,6 +149,8 @@ export async function paginaArtigo(env, req, a, relacionados, previa) {
     trad && ['m_trans', 'Tradução', esc(a.tradutor)],
     ['m_lang', 'Idioma', '<span data-i18n="m_lang_v">Português</span>'],
     ['m_date', 'Publicado na revista', `<span data-pt="${esc(dataPt)}" data-en="${esc(dataEn)}">${esc(dataPt)}</span>`],
+    numeros && numeros.acessos + numeros.downloads > 0 && ['m_views', 'Acessos', `<span data-pt="${numeros.acessos.toLocaleString('pt-BR')}" data-en="${numeros.acessos.toLocaleString('en-US')}">${numeros.acessos.toLocaleString('pt-BR')}</span>`],
+    numeros && numeros.acessos + numeros.downloads > 0 && ['m_dls', 'Downloads do PDF', `<span data-pt="${numeros.downloads.toLocaleString('pt-BR')}" data-en="${numeros.downloads.toLocaleString('en-US')}">${numeros.downloads.toLocaleString('pt-BR')}</span>`],
     a.url_original && ['m_stable', 'Original', `<a href="${esc(a.url_original)}" target="_blank" rel="noopener">${esc(a.url_original.replace(/^https?:\/\/(www\.)?/, '').replace('jstor.org/stable/', 'JSTOR '))} ↗</a>`],
   ].filter(Boolean).map((l) => `<dt data-i18n="${l[0]}">${l[1]}</dt><dd>${l[2]}</dd>`).join('');
   const main = `${faixa}

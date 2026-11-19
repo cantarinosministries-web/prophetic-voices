@@ -7,7 +7,7 @@ const ROBO = /bot|crawl|spider|slurp|archiver|facebookexternalhit|whatsapp|teleg
 
 const hoje = () => new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10); // horário de Brasília
 
-function contavel(req) {
+export function contavel(req) {
   if (req.method !== 'GET') return false;
   const ua = req.headers.get('User-Agent') || '';
   if (!ua || ROBO.test(ua)) return false;
@@ -34,6 +34,12 @@ export function contar(env, ctx, req, artigoId, tipo) {
      ON CONFLICT(artigo_id, dia, pais) DO UPDATE SET acessos = acessos + excluded.acessos, downloads = downloads + excluded.downloads`,
   ).bind(artigoId, hoje(), pais, a, 1 - a).run().catch((e) => console.error('estatísticas', e));
   if (ctx && ctx.waitUntil) ctx.waitUntil(p);
+}
+
+// totais de sempre de um artigo, para mostrar na própria página
+export async function totaisArtigo(env, artigoId) {
+  const r = await env.DB.prepare('SELECT COALESCE(SUM(acessos), 0) acessos, COALESCE(SUM(downloads), 0) downloads FROM estatisticas WHERE artigo_id = ?').bind(artigoId).first();
+  return { acessos: r ? r.acessos : 0, downloads: r ? r.downloads : 0 };
 }
 
 // GET /api/estatisticas?de=AAAA-MM-DD&ate=AAAA-MM-DD&artigo=<slug>
