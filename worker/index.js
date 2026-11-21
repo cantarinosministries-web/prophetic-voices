@@ -12,8 +12,8 @@ import { pode } from './permissoes.js';
 import { apiLojaPublica, webhookMercadoPago } from './loja.js';
 import { contar, contavel, totaisArtigo } from './estatisticas.js';
 
-function html(texto, status = 200) {
-  const h = cabecalhos(new Headers({ 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' }));
+function html(texto, status = 200, privado = false) {
+  const h = cabecalhos(new Headers({ 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': privado ? 'private, no-store' : 'no-cache' }));
   return new Response(texto, { status, headers: h });
 }
 
@@ -38,25 +38,46 @@ export default {
         return await api(req, env, url);
       }
 
+      if (path === '/sitemap.xml') {
+        const canonico = 'https://thepropheticvoices.com.br';
+        const fixas = ['/', '/artigos.html', '/cursos', '/novidades', '/testemunhos', '/loja'];
+        const linhas = (await env.DB.prepare("SELECT slug FROM artigos WHERE status = 'publicado' ORDER BY slug").all()).results;
+        const urls = [...fixas, ...linhas.map(({ slug }) => '/artigos/' + encodeURIComponent(slug) + '.html')];
+        const xml = '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
+          + urls.map((u) => '<url><loc>' + canonico + u + '</loc></url>').join('') + '</urlset>';
+        return new Response(xml, { headers: cabecalhos(new Headers({ 'Content-Type': 'application/xml; charset=utf-8', 'Cache-Control': 'no-cache' })) });
+      }
+
       if (path === '/artigos.html' || path === '/artigos' || path === '/artigos/') {
         return html(await paginaLista(env, req, await publicados(env)));
       }
 
       if (path.startsWith('/artigos/')) {
         const nome = decodeURIComponent(path.slice('/artigos/'.length));
-        if (/\.pdf$/i.test(nome)) {
-          const r = await env.ASSETS.fetch(req);
-          if (r.ok) {
-            const a = await env.DB.prepare("SELECT id FROM artigos WHERE pdf_url = ? AND status = 'publicado'").bind('/artigos/' + nome).first();
-            if (a) contar(env, ctx, req, a.id, 'downloads');
+        if (/\.(pdf|jpe?g|png|webp)$/i.test(nome)) {
+          const ref = '/artigos/' + nome;
+          const a = await env.DB.prepare("SELECT id, pdf_url FROM artigos WHERE status = 'publicado' AND (pdf_url = ? OR capa_url = ?)").bind(ref, ref).first();
+          if (!a) {
+            const u = await usuarioDaSessao(env, req);
+            if (!pode(u, 'ver_rascunhos')) return naoEncontrado(env, req);
+            const privada = await env.DB.prepare('SELECT 1 FROM artigos WHERE pdf_url = ? OR capa_url = ?').bind(ref, ref).first();
+            if (!privada) return naoEncontrado(env, req);
           }
-          return r;
+          const r = await env.ASSETS.fetch(req);
+          const headers = new Headers(r.headers);
+          headers.set('Cache-Control', a ? 'public, no-cache' : 'private, no-store');
+          if (a && r.ok && a.pdf_url === ref) contar(env, ctx, req, a.id, 'downloads');
+          return new Response(r.body, { status: r.status, headers });
         }
-        if (/\.(jpe?g|png|webp)$/i.test(nome)) return env.ASSETS.fetch(req);
         const slug = nome.replace(/\.html$/, '');
         if (!slug || slug === 'modelo' || slug.includes('/')) return naoEncontrado(env, req);
         const a = await env.DB.prepare('SELECT * FROM artigos WHERE slug = ?').bind(slug).first();
-        if (!a) return naoEncontrado(env, req);
+        if (!a) {
+          const alias = await env.DB.prepare(`SELECT a.slug FROM artigos_enderecos e JOIN artigos a ON a.id = e.artigo_id
+            WHERE e.slug = ? AND a.status = 'publicado'`).bind(slug).first();
+          if (alias) return Response.redirect(new URL('/artigos/' + encodeURIComponent(alias.slug) + '.html', req.url), 301);
+          return naoEncontrado(env, req);
+        }
         let previa = false;
         if (a.status !== 'publicado') {
           const u = await usuarioDaSessao(env, req);
@@ -70,7 +91,7 @@ export default {
           numeros = await totaisArtigo(env, a.id);
           if (contavel(req)) numeros.acessos += 1; // a visita atual já entra na conta mostrada
         }
-        const pagina = html(await paginaArtigo(env, req, a, rel, previa, numeros));
+        const pagina = html(await paginaArtigo(env, req, a, rel, previa, numeros), 200, previa);
         if (!previa) contar(env, ctx, req, a.id, 'acessos');
         return pagina;
       }
@@ -99,7 +120,7 @@ export default {
         const h = cabecalhos(new Headers());
         obj.writeHttpMetadata(h);
         h.set('ETag', obj.httpEtag);
-        h.set('Cache-Control', a.status === 'publicado' ? 'public, max-age=86400' : 'private, no-store');
+        h.set('Cache-Control', a.status === 'publicado' ? 'public, no-cache' : 'private, no-store');
         if (a.status === 'publicado' && a.pdf_url === ref) contar(env, ctx, req, a.id, 'downloads');
         return new Response(obj.body, { headers: h });
       }

@@ -32,11 +32,11 @@ async function modelo(env, req, caminho) {
 
 function preencher(t, { titulo, descricao, head = '', main = '', scripts = '' }) {
   return t
-    .replace(/__PV_TITLE__/g, esc(titulo))
-    .replace(/__PV_DESC__/g, esc(descricao))
-    .replace(/<pv-slot data-k="?head"?><\/pv-slot>/, head)
-    .replace(/<pv-slot data-k="?main"?><\/pv-slot>/, main)
-    .replace(/<pv-slot data-k="?scripts"?><\/pv-slot>/, scripts);
+    .replace(/__PV_TITLE__/g, () => esc(titulo))
+    .replace(/__PV_DESC__/g, () => esc(descricao))
+    .replace(/<pv-slot data-k="?head"?><\/pv-slot>/, () => head)
+    .replace(/<pv-slot data-k="?main"?><\/pv-slot>/, () => main)
+    .replace(/<pv-slot data-k="?scripts"?><\/pv-slot>/, () => scripts);
 }
 
 const ogTags = (t, d, u) =>

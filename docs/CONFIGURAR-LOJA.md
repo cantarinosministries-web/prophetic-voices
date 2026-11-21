@@ -28,11 +28,11 @@ A loja já está no ar em **modo de teste**: só quem está logado no painel con
 - CEP de origem, CPF ou CNPJ e endereço do remetente (saem na etiqueta).
 - Opcional: frete grátis acima de um valor, retirada pessoal, dias extras de preparo, aviso no topo da loja.
 
-Pronto: com `MP_ACCESS_TOKEN` e `MELHOR_ENVIO_TOKEN` definidos, a faixa "Modo de teste" some e qualquer visitante pode comprar.
+O checkout público exige `MP_ACCESS_TOKEN`, `MP_WEBHOOK_SECRET` e `MELHOR_ENVIO_TOKEN`, com o Melhor Envio fora do sandbox e a loja aberta no painel.
 
 ## Como funciona por dentro
 - Preço, estoque e frete são sempre recalculados no servidor (o carrinho do navegador não decide nada).
-- O estoque sai automaticamente quando o Mercado Pago confirma o pagamento e volta em cancelamento/reembolso de pedido pago.
+- A baixa de estoque e a atualização do pedido são atômicas. Sem saldo, o pagamento fica registrado para conciliação no painel. Reponha e sincronize o pedido ou reembolse pelo fluxo do provedor.
 - Cada pedido tem um link secreto de acompanhamento para o cliente (`/pedido.html?codigo=…&chave=…`).
 - Papéis da loja: Gerente (tudo), Expedição (etiquetas, rastreio, status de envio), Visualizador (só leitura).
   Proprietário e administrador têm acesso total. O acesso à loja é independente do acesso à revista.

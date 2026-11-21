@@ -17,6 +17,7 @@ import { usuarioDaSessao } from './api.js';
 async function equipeTestando(env, req) { const u = await usuarioDaSessao(env, req); return !!(u && podeLoja(u, 'ver')); }
 
 const STATUS = ['aguardando', 'pago', 'separacao', 'enviado', 'entregue', 'cancelado', 'reembolsado'];
+const deStatusVendido = (status) => ['pago', 'separacao', 'enviado', 'entregue'].includes(status);
 const STATUS_NOME = {
   aguardando: 'Aguardando pagamento', pago: 'Pago', separacao: 'Em separação', enviado: 'Enviado',
   entregue: 'Entregue', cancelado: 'Cancelado', reembolsado: 'Reembolsado',
@@ -29,6 +30,7 @@ const so = (s) => String(s || '').replace(/\D/g, '');
 const txt = (s, n = 200) => String(s ?? '').trim().slice(0, n);
 const reais = (c) => Math.round(c) / 100;
 const brl = (c) => 'R$ ' + (c / 100).toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+const lojaPronta = (env) => !!(env.MP_ACCESS_TOKEN && env.MP_WEBHOOK_SECRET && env.MELHOR_ENVIO_TOKEN && env.ME_AMBIENTE !== 'sandbox');
 const modoTeste = (env) => ({ pagamento: !env.MP_ACCESS_TOKEN, frete: !env.MELHOR_ENVIO_TOKEN });
 
 async function corpoJson(req) {
@@ -184,44 +186,44 @@ async function hmacHex(segredo, texto) {
 
 const METODO = { pix: 'Pix', bank_transfer: 'Pix', ticket: 'Boleto', credit_card: 'Cartão de crédito', debit_card: 'Cartão de débito', account_money: 'Saldo Mercado Pago', prepaid_card: 'Cartão pré-pago' };
 
-// estoque sai uma única vez, quando o pagamento é aprovado; volta se o pedido for estornado/cancelado depois de pago
-async function moverEstoque(env, pedido, sinal, motivo, usuarioId) {
-  const itens = (await env.DB.prepare('SELECT * FROM pedido_itens WHERE pedido_id = ?').bind(pedido.id).all()).results;
-  const ops = [];
-  for (const i of itens) {
-    const q = sinal * i.quantidade;
-    if (i.variacao_id) ops.push(env.DB.prepare('UPDATE produto_variacoes SET estoque = estoque + ? WHERE id = ?').bind(q, i.variacao_id));
-    else if (i.produto_id) ops.push(env.DB.prepare('UPDATE produtos SET estoque = estoque + ? WHERE id = ?').bind(q, i.produto_id));
-    if (i.produto_id) {
-      ops.push(env.DB.prepare(`INSERT INTO estoque_movimentos (produto_id, variacao_id, quantidade, saldo, motivo, pedido_id, usuario_id) VALUES (?,?,?,
-        ${i.variacao_id ? '(SELECT estoque FROM produto_variacoes WHERE id = ?)' : '(SELECT estoque FROM produtos WHERE id = ?)'},?,?,?)`)
-        .bind(i.produto_id, i.variacao_id, q, i.variacao_id || i.produto_id, `${motivo} ${pedido.codigo}`, pedido.id, usuarioId || null));
-    }
-  }
-  ops.push(env.DB.prepare('UPDATE pedidos SET estoque_baixado = ? WHERE id = ?').bind(sinal < 0 ? 1 : 0, pedido.id));
-  await env.DB.batch(ops);
-}
-
-// aplica o status de um pagamento ao pedido (vindo do webhook, do retorno do checkout ou da simulação)
+// O D1 aplica o movimento e o status na mesma operação.
 async function aplicarPagamento(env, pedido, pg) {
-  const st = pg.status;
+  const status = pg.status;
+  const pagamento = String(pg.id);
+  const simulacao = modoTeste(env).pagamento && pagamento.startsWith('TESTE-');
+  if (!simulacao && pg.external_reference !== pedido.codigo) return;
   const metodo = METODO[pg.payment_type_id] || METODO[pg.payment_method_id] || pg.payment_type_id || null;
-  await env.DB.prepare("UPDATE pedidos SET mp_pagamento = ?, mp_status = ?, pagamento_metodo = COALESCE(?, pagamento_metodo), atualizado_em = datetime('now') WHERE id = ?")
-    .bind(String(pg.id), st, metodo, pedido.id).run();
-  if (st === 'approved') {
-    if (Math.round((pg.transaction_amount || 0) * 100) + 1 < pedido.total) {
-      await env.DB.prepare("UPDATE pedidos SET nota_interna = TRIM(COALESCE(nota_interna,'') || ' Valor pago menor que o total: confira.') WHERE id = ?").bind(pedido.id).run();
+  if (status === 'approved') {
+    if (pedido.mp_status === 'approved' && pedido.mp_pagamento && pedido.mp_pagamento !== pagamento) {
+      await env.DB.prepare("UPDATE pedidos SET nota_interna = 'Mais de um pagamento aprovado. Confira no Mercado Pago.' WHERE id = ?")
+        .bind(pedido.id).run();
       return;
     }
-    if (['aguardando', 'cancelado'].includes(pedido.status)) {
-      await env.DB.prepare("UPDATE pedidos SET status = 'pago', pago_em = datetime('now') WHERE id = ?").bind(pedido.id).run();
+    if ((!simulacao && pg.currency_id !== 'BRL') || Math.round(Number(pg.transaction_amount) * 100) !== pedido.total) {
+      await env.DB.prepare("UPDATE pedidos SET nota_interna = 'Pagamento com valor ou moeda divergente. Confira no Mercado Pago.' WHERE id = ? AND estoque_baixado = 0")
+        .bind(pedido.id).run();
+      return;
     }
-    if (!pedido.estoque_baixado) await moverEstoque(env, pedido, -1, 'Venda', null);
-  } else if (['refunded', 'charged_back'].includes(st)) {
-    await env.DB.prepare("UPDATE pedidos SET status = 'reembolsado' WHERE id = ?").bind(pedido.id).run();
-    if (pedido.estoque_baixado) await moverEstoque(env, pedido, +1, 'Estorno', null);
-  } else if (['rejected', 'cancelled'].includes(st) && pedido.status === 'aguardando') {
-    // pagamento recusado: o pedido continua aguardando, o cliente pode tentar de novo pelo link do pedido
+    try {
+      await env.DB.prepare(`UPDATE pedidos SET status = CASE WHEN status IN ('aguardando','cancelado') THEN 'pago' ELSE status END,
+        mp_pagamento = ?, mp_status = 'approved', pagamento_metodo = COALESCE(?, pagamento_metodo), estoque_baixado = 1,
+        motivo_estoque = 'Venda', usuario_estoque = NULL, pago_em = COALESCE(pago_em, datetime('now')), atualizado_em = datetime('now')
+        WHERE id = ? AND status <> 'reembolsado' AND (estoque_baixado = 0 OR mp_pagamento IS NULL OR mp_pagamento = ?)
+          AND (mp_status IS NOT 'approved' OR mp_pagamento = ?)`)
+        .bind(pagamento, metodo, pedido.id, pagamento, pagamento).run();
+    } catch (error) {
+      if (!String(error).includes('PV_ESTOQUE_INSUFICIENTE')) throw error;
+      await env.DB.prepare(`UPDATE pedidos SET mp_pagamento = ?, mp_status = 'approved',
+        nota_interna = 'Pagamento aprovado sem estoque. Reponha e sincronize ou reembolse.'
+        WHERE id = ? AND estoque_baixado = 0 AND status <> 'reembolsado'
+          AND (mp_status IS NOT 'approved' OR mp_pagamento = ?)`).bind(pagamento, pedido.id, pagamento).run();
+    }
+    return;
+  }
+  if (['refunded', 'charged_back'].includes(status)) {
+    await env.DB.prepare(`UPDATE pedidos SET status = 'reembolsado', mp_status = ?, estoque_baixado = 0,
+      motivo_estoque = 'Estorno', usuario_estoque = NULL, atualizado_em = datetime('now')
+      WHERE id = ? AND mp_pagamento = ?`).bind(status, pedido.id, pagamento).run();
   }
 }
 
@@ -234,7 +236,7 @@ async function sincronizarPagamento(env, pedido, pagamentoId) {
   } else {
     const r = await mp(env, 'GET', `/v1/payments/search?external_reference=${encodeURIComponent(pedido.codigo)}&sort=date_created&criteria=desc`);
     const res = r.results || [];
-    pg = res.find((x) => x.status === 'approved') || res.find((x) => ['refunded', 'charged_back'].includes(x.status)) || res[0];
+    pg = res.find((x) => String(x.id) === pedido.mp_pagamento) || res.find((x) => x.status === 'approved') || res.find((x) => ['refunded', 'charged_back'].includes(x.status)) || res[0];
   }
   if (pg) await aplicarPagamento(env, pedido, pg);
   return env.DB.prepare('SELECT * FROM pedidos WHERE id = ?').bind(pedido.id).first();
@@ -243,6 +245,7 @@ async function sincronizarPagamento(env, pedido, pagamentoId) {
 async function linkPagamento(env, origem, pedido, itens) {
   const voltar = `${origem}/pedido.html?codigo=${pedido.codigo}&chave=${pedido.chave}`;
   if (modoTeste(env).pagamento) return voltar + '&simulacao=1';
+  if (pedido.mp_checkout_url) return pedido.mp_checkout_url;
   const cfg = await config(env);
   const nomes = pedido.nome.split(/\s+/);
   const pref = await mp(env, 'POST', '/checkout/preferences', {
@@ -263,17 +266,29 @@ async function linkPagamento(env, origem, pedido, itens) {
     auto_return: 'approved',
     statement_descriptor: 'PROPHETICVOICES',
     payment_methods: { installments: Math.min(12, Math.max(1, parseInt(cfg.parcelas_max, 10) || 12)) },
-  }, 'pref-' + pedido.codigo + '-' + Date.now());
-  await env.DB.prepare('UPDATE pedidos SET mp_preferencia = ? WHERE id = ?').bind(pref.id, pedido.id).run();
+  }, 'pref-' + pedido.codigo);
+  await env.DB.prepare('UPDATE pedidos SET mp_preferencia = ?, mp_checkout_url = ? WHERE id = ?').bind(pref.id, pref.init_point, pedido.id).run();
   return pref.init_point;
+}
+
+async function iniciarCheckout(env, origem, pedido, itens) {
+  const acompanhar = `/pedido.html?codigo=${pedido.codigo}&chave=${pedido.chave}`;
+  let ir = acompanhar;
+  if (pedido.status === 'aguardando' && pedido.mp_status !== 'approved') {
+    try {
+      ir = await linkPagamento(env, origem, pedido, itens);
+    } catch {
+      console.warn('Falha ao abrir o checkout', pedido.codigo);
+    }
+  }
+  return json({ codigo: pedido.codigo, chave: pedido.chave, ir }, 201);
 }
 
 function pedidoPublico(p, itens) {
   return {
     codigo: p.codigo, status: p.status, status_nome: STATUS_NOME[p.status], criado_em: p.criado_em, pago_em: p.pago_em, enviado_em: p.enviado_em,
-    nome: p.nome, subtotal: p.subtotal, frete: p.frete, desconto: p.desconto, total: p.total, frete_nome: p.frete_nome, frete_prazo: p.frete_prazo,
+    subtotal: p.subtotal, frete: p.frete, desconto: p.desconto, total: p.total, frete_nome: p.frete_nome, frete_prazo: p.frete_prazo,
     pagamento_metodo: p.pagamento_metodo, mp_status: p.mp_status, rastreio: p.rastreio,
-    entrega: p.frete_servico === 'retirada' ? null : `${p.rua}, ${p.numero}${p.complemento ? ' — ' + p.complemento : ''} · ${p.bairro} · ${p.cidade}/${p.uf} · CEP ${p.cep}`,
     itens: itens.map((i) => ({ nome: i.nome, variacao: i.variacao, preco: i.preco, quantidade: i.quantidade })),
   };
 }
@@ -296,7 +311,7 @@ export async function apiLojaPublica(req, env, url) {
   if (p === '/produtos' && m === 'GET') {
     const prods = (await produtosCompletos(env)).filter((x) => x.preco > 0).map(paraVitrine);
     const teste = modoTeste(env);
-    return json({ produtos: prods, loja_aberta: cfg.loja_aberta !== '0' && (!teste.pagamento || (await equipeTestando(env, req))), aviso: cfg.aviso || '', teste }, 200, { 'Cache-Control': 'no-cache' });
+    return json({ produtos: prods, loja_aberta: cfg.loja_aberta !== '0' && (teste.pagamento ? await equipeTestando(env, req) : lojaPronta(env)), aviso: cfg.aviso || '', teste }, 200, { 'Cache-Control': 'no-cache' });
   }
 
   const mcep = p.match(/^\/cep\/(\d{8})$/);
@@ -319,7 +334,7 @@ export async function apiLojaPublica(req, env, url) {
   }
 
   if (p === '/pedido' && m === 'POST') {
-    if (cfg.loja_aberta === '0') return erro('A loja está temporariamente fechada para pedidos.', 503);
+    if (cfg.loja_aberta === '0' || (!modoTeste(env).pagamento && !lojaPronta(env))) return erro('A loja está temporariamente fechada para pedidos.', 503);
     if (modoTeste(env).pagamento && !(await equipeTestando(env, req))) return erro('As vendas on-line abrem em breve. Por enquanto, fale conosco pelo WhatsApp.', 503);
     const d = await corpoJson(req);
     const c = d.cliente || {}, e = d.endereco || {};
@@ -328,6 +343,15 @@ export async function apiLojaPublica(req, env, url) {
     if (!/^\S+@\S+\.\S+$/.test(cli.email)) return erro('E-mail inválido.');
     if (cli.telefone.length < 10) return erro('Telefone inválido (com DDD).');
     if (!cpfValido(cli.cpf)) return erro('CPF inválido.');
+    const tentativa = typeof d.tentativa === 'string' && /^[0-9a-f-]{36}$/i.test(d.tentativa) ? d.tentativa : null;
+    if (tentativa) {
+      const existente = await env.DB.prepare('SELECT * FROM pedidos WHERE tentativa_checkout = ?').bind(tentativa).first();
+      if (existente) {
+        if (existente.email !== cli.email || existente.cpf !== cli.cpf) return erro('Tentativa de checkout inválida.', 409);
+        const gravados = (await env.DB.prepare('SELECT * FROM pedido_itens WHERE pedido_id = ?').bind(existente.id).all()).results;
+        return iniciarCheckout(env, url.origin, existente, gravados);
+      }
+    }
     let itens, frete;
     try {
       itens = await conferirItens(env, d.itens);
@@ -340,20 +364,21 @@ export async function apiLojaPublica(req, env, url) {
     if (!ret && (!end.rua || !end.numero || !end.bairro || !end.cidade || end.uf.length !== 2)) return erro('Complete o endereço de entrega.');
     const subtotal = itens.reduce((s, i) => s + i.preco * i.quantidade, 0);
     const codigo = await novoCodigo(env), chave = aleatorio(16);
-    const ped = await env.DB.prepare(`INSERT INTO pedidos (codigo, chave, status, nome, email, telefone, cpf, cep, rua, numero, complemento, bairro, cidade, uf,
-        subtotal, frete, desconto, total, frete_servico, frete_nome, frete_prazo, observacao)
-      VALUES (?,?,'aguardando',?,?,?,?,?,?,?,?,?,?,?,?,?,0,?,?,?,?,?) RETURNING *`)
-      .bind(codigo, chave, cli.nome, cli.email, cli.telefone, cli.cpf, end.cep, end.rua, end.numero, end.complemento || null, end.bairro, end.cidade, end.uf,
-        subtotal, frete.preco, subtotal + frete.preco, frete.id, `${frete.empresa && !ret ? frete.empresa + ' ' : ''}${frete.nome}`, frete.prazo, txt(d.observacao, 500) || null).first();
     const linhas = itens.map((i) => ({ produto_id: i.produto.id, variacao_id: i.variacao ? i.variacao.id : null, nome: i.produto.nome, variacao: i.variacao ? i.variacao.nome : null, preco: i.preco, quantidade: i.quantidade }));
-    await env.DB.batch(linhas.map((l) => env.DB.prepare('INSERT INTO pedido_itens (pedido_id, produto_id, variacao_id, nome, variacao, preco, quantidade) VALUES (?,?,?,?,?,?,?)')
-      .bind(ped.id, l.produto_id, l.variacao_id, l.nome, l.variacao, l.preco, l.quantidade)));
-    let ir;
-    try { ir = await linkPagamento(env, url.origin, ped, linhas); } catch (x) {
-      console.error(x);
-      return erro('Não conseguimos abrir o pagamento agora. Seu pedido ' + codigo + ' foi registrado; tente pagar pelo link do pedido em instantes.', 502);
-    }
-    return json({ codigo, chave, ir }, 201);
+    await env.DB.batch([
+      env.DB.prepare(`INSERT INTO pedidos (codigo, chave, tentativa_checkout, status, nome, email, telefone, cpf, cep, rua, numero, complemento, bairro, cidade, uf,
+          subtotal, frete, desconto, total, frete_servico, frete_nome, frete_prazo, observacao)
+        VALUES (?,?,?,'aguardando',?,?,?,?,?,?,?,?,?,?,?,?,?,0,?,?,?,?,?) ON CONFLICT(tentativa_checkout) DO NOTHING`)
+        .bind(codigo, chave, tentativa, cli.nome, cli.email, cli.telefone, cli.cpf, end.cep, end.rua, end.numero, end.complemento || null, end.bairro, end.cidade, end.uf,
+          subtotal, frete.preco, subtotal + frete.preco, frete.id, `${frete.empresa && !ret ? frete.empresa + ' ' : ''}${frete.nome}`, frete.prazo, txt(d.observacao, 500) || null),
+      ...linhas.map((l) => env.DB.prepare(`INSERT INTO pedido_itens (pedido_id, produto_id, variacao_id, nome, variacao, preco, quantidade)
+        SELECT id, ?, ?, ?, ?, ?, ? FROM pedidos WHERE codigo = ?`)
+        .bind(l.produto_id, l.variacao_id, l.nome, l.variacao, l.preco, l.quantidade, codigo)),
+    ]);
+    const ped = await env.DB.prepare('SELECT * FROM pedidos WHERE codigo = ? OR tentativa_checkout = ?').bind(codigo, tentativa).first();
+    if (ped.email !== cli.email || ped.cpf !== cli.cpf) return erro('Tentativa de checkout inválida.', 409);
+    const gravados = (await env.DB.prepare('SELECT * FROM pedido_itens WHERE pedido_id = ?').bind(ped.id).all()).results;
+    return iniciarCheckout(env, url.origin, ped, gravados);
   }
 
   if (p === '/pedido' && m === 'GET') {
@@ -369,10 +394,13 @@ export async function apiLojaPublica(req, env, url) {
 
   // pagar de novo (pedido aguardando) — gera um novo link do Mercado Pago
   if (p === '/pedido/pagar' && m === 'POST') {
+    if (cfg.loja_aberta === '0' || (modoTeste(env).pagamento ? !(await equipeTestando(env, req)) : !lojaPronta(env))) {
+      return erro('A loja está temporariamente fechada para pagamentos.', 503);
+    }
     const d = await corpoJson(req);
     const ped = await env.DB.prepare('SELECT * FROM pedidos WHERE codigo = ?').bind(txt(d.codigo, 20)).first();
     if (!ped || !iguais(await sha256(ped.chave), await sha256(String(d.chave || '')))) return erro('Pedido não encontrado.', 404);
-    if (ped.status !== 'aguardando') return erro('Este pedido não está aguardando pagamento.');
+    if (ped.status !== 'aguardando' || ped.mp_status === 'approved') return erro('Este pedido não está aguardando pagamento.');
     const itens = (await env.DB.prepare('SELECT * FROM pedido_itens WHERE pedido_id = ?').bind(ped.id).all()).results;
     try { return json({ ir: await linkPagamento(env, url.origin, ped, itens) }); } catch (e) { return erro('Não conseguimos abrir o pagamento agora. Tente em instantes.', 502); }
   }
@@ -399,7 +427,8 @@ export async function webhookMercadoPago(req, env, url) {
   const tipo = b.type || b.topic || url.searchParams.get('type') || url.searchParams.get('topic');
   const id = String(url.searchParams.get('data.id') || (b.data && b.data.id) || url.searchParams.get('id') || '');
   if (tipo !== 'payment' || !id) return json({ ok: true });
-  if (env.MP_WEBHOOK_SECRET) {
+  if (!env.MP_WEBHOOK_SECRET) return erro('Webhook indisponível.', 503);
+  {
     const partes = Object.fromEntries((req.headers.get('x-signature') || '').split(',').map((x) => x.trim().split('=')));
     const manifesto = `id:${/^[a-z0-9]+$/i.test(id) ? id.toLowerCase() : id};request-id:${req.headers.get('x-request-id') || ''};ts:${partes.ts || ''};`;
     if (!partes.v1 || !iguais(await hmacHex(env.MP_WEBHOOK_SECRET, manifesto), partes.v1)) return erro('Assinatura inválida.', 401);
@@ -668,16 +697,23 @@ export async function apiLoja(req, env, url, seg, u, { corpo, registrar }) {
         sets.push('status = ?'); b.push(d.status);
         if (d.status === 'enviado') sets.push("enviado_em = COALESCE(enviado_em, datetime('now'))");
         if (d.status === 'pago') sets.push("pago_em = COALESCE(pago_em, datetime('now'))");
-        await registrar(env, u, 'mudou o pedido', ped.codigo, `${STATUS_NOME[ped.status]} → ${STATUS_NOME[d.status]}`);
       }
       if ('rastreio' in d) { if (!expedir) return negar(); sets.push('rastreio = ?'); b.push(txt(d.rastreio, 60) || null); }
       if ('nota_interna' in d) { if (!expedir) return negar(); sets.push('nota_interna = ?'); b.push(txt(d.nota_interna, 1000) || null); }
-      if (sets.length) await env.DB.prepare(`UPDATE pedidos SET ${sets.join(', ')}, atualizado_em = datetime('now') WHERE id = ?`).bind(...b, ped.id).run();
-      // estoque acompanha a mudança manual de status
       if (d.status && d.status !== ped.status) {
-        const vendido = ['pago', 'separacao', 'enviado', 'entregue'].includes(d.status);
-        if (vendido && !ped.estoque_baixado) await moverEstoque(env, ped, -1, 'Venda (manual)', u.id);
-        if (!vendido && ped.estoque_baixado) await moverEstoque(env, ped, +1, d.status === 'reembolsado' ? 'Estorno' : 'Cancelamento', u.id);
+        sets.push('estoque_baixado = ?', 'motivo_estoque = ?', 'usuario_estoque = ?');
+        b.push(deStatusVendido(d.status) ? 1 : 0, deStatusVendido(d.status) ? 'Venda (manual)' : 'Cancelamento/estorno', u.id);
+      }
+      if (sets.length) {
+        try {
+          const atualizado = await env.DB.prepare(`UPDATE pedidos SET ${sets.join(', ')}, atualizado_em = datetime('now') WHERE id = ? AND status = ? AND estoque_baixado = ?`)
+            .bind(...b, ped.id, ped.status, ped.estoque_baixado).run();
+          if (!atualizado.meta.changes) return erro('O pedido mudou. Atualize e tente novamente.', 409);
+        } catch (error) {
+          if (String(error).includes('PV_ESTOQUE_INSUFICIENTE')) return erro('Estoque insuficiente para concluir a operação.', 409);
+          throw error;
+        }
+        if (d.status && d.status !== ped.status) await registrar(env, u, 'mudou o pedido', ped.codigo, `${STATUS_NOME[ped.status]} → ${STATUS_NOME[d.status]}`);
       }
       return json({ ok: true });
     }
@@ -691,8 +727,7 @@ export async function apiLoja(req, env, url, seg, u, { corpo, registrar }) {
       if (!modoTeste(env).pagamento && !String(ped.mp_pagamento).startsWith('TESTE')) {
         try { await mp(env, 'POST', `/v1/payments/${ped.mp_pagamento}/refunds`, {}, 'ref-' + ped.codigo); } catch (e) { return erro(e.message, 502); }
       }
-      await env.DB.prepare("UPDATE pedidos SET status = 'reembolsado', mp_status = 'refunded', atualizado_em = datetime('now') WHERE id = ?").bind(ped.id).run();
-      if (ped.estoque_baixado) await moverEstoque(env, ped, +1, 'Estorno', u.id);
+      await env.DB.prepare("UPDATE pedidos SET status = 'reembolsado', mp_status = 'refunded', estoque_baixado = 0, motivo_estoque = 'Estorno', usuario_estoque = ?, atualizado_em = datetime('now') WHERE id = ?").bind(u.id, ped.id).run();
       await registrar(env, u, 'reembolsou o pedido', ped.codigo, brl(ped.total));
       return json({ ok: true });
     }

@@ -30,6 +30,12 @@ npm run servidor:local   # site + painel em http://localhost:8787
 
 `npm run dev` continua servindo só as páginas do Astro (sem revista dinâmica nem painel).
 
+## Revisão e homologação
+
+Abra um pull request para `main`. O workflow **Verificar site** roda o build, os testes e as migrações em D1 local. Configure a proteção de `main` no GitHub para exigir esse status antes do merge.
+
+Em homologação, use outro Worker, outro D1, outro R2 e credenciais de teste. Valide compra, frete, assinatura do webhook, pagamento repetido, última unidade e estorno antes de habilitar vendas reais. Preserve compatibilidade com o Worker anterior ao criar migrações, pois elas são aplicadas antes do deploy.
+
 ## Publicação
 
 O Cloudflare publica sozinho a cada push na branch `main` (Workers Builds):
@@ -51,4 +57,4 @@ Configuração inicial (uma vez): veja `docs/CONFIGURAR-CLOUDFLARE.md`.
 - Código: `worker/loja.js` (API pública, webhook do Mercado Pago e API do painel), `public/loja/` (vitrine e checkout),
   `src/scripts/admin-loja.js` (telas do painel). Banco: `migrations/0003_loja.sql`.
 - Integrações por segredos no Cloudflare: `MP_ACCESS_TOKEN`, `MP_WEBHOOK_SECRET`, `MELHOR_ENVIO_TOKEN` (e `ME_AMBIENTE=sandbox` para testes).
-  Sem eles, a loja fica em modo de teste e só a equipe logada consegue simular compras. Passo a passo: `docs/CONFIGURAR-LOJA.md`.
+  Sem o token do Mercado Pago, só a equipe autorizada consegue simular pagamentos. O checkout real exige também assinatura de webhook e Melhor Envio fora do sandbox. Passo a passo: `docs/CONFIGURAR-LOJA.md`.
