@@ -24,7 +24,11 @@
       logins_h: 'Logins vinculados', logins_p: 'Você pode entrar por qualquer um destes.', remover: 'Remover', vincular_h: 'Vincular outro login',
       vinculado: 'Login vinculado à sua conta.', sair: 'Sair', excluir: 'Excluir minha conta', excluir_conf: 'Confirmar exclusão',
       excluir_p: 'Excluir apaga o seu cadastro, os logins vinculados e todos os seus comentários. Não é possível desfazer.',
-      excluida: 'Sua conta foi excluída.', voltar_rev: 'Ir para a revista', email: 'E-mail'
+      excluida: 'Sua conta foi excluída.', voltar_rev: 'Ir para a revista', email: 'E-mail',
+      bv_h: 'Bem-vindo ao The Prophetic Voices', bv_p: 'Quer receber no seu e-mail ({e}) os novos artigos da revista e os novos testemunhos assim que forem publicados? Você pode cancelar quando quiser, com um clique em qualquer e-mail.',
+      bv_sim: 'Sim, quero receber', bv_nao: 'Agora não', bv_seguir: 'Continuar para onde eu estava →',
+      em_h: 'E-mails', em_on: 'Você recebe no e-mail os novos artigos e testemunhos.', em_off: 'Você não recebe e-mails de novos artigos e testemunhos.',
+      em_ligar: 'Quero receber', em_desligar: 'Parar de receber', em_sim_ok: 'Pronto! Você vai receber os novos artigos e testemunhos.', em_nao_ok: 'Tudo bem. Você não vai receber e-mails; pode mudar isso aqui quando quiser.'
     },
     en: {
       e_eyebrow: 'Sign up', e_h: 'Sign in', e_em: 'or create your account',
@@ -41,7 +45,11 @@
       logins_h: 'Linked logins', logins_p: 'You can sign in with any of these.', remover: 'Remove', vincular_h: 'Link another login',
       vinculado: 'Login linked to your account.', sair: 'Sign out', excluir: 'Delete my account', excluir_conf: 'Confirm deletion',
       excluir_p: 'Deleting removes your profile, linked logins and all your comments. This cannot be undone.',
-      excluida: 'Your account was deleted.', voltar_rev: 'Go to the journal', email: 'E-mail'
+      excluida: 'Your account was deleted.', voltar_rev: 'Go to the journal', email: 'E-mail',
+      bv_h: 'Welcome to The Prophetic Voices', bv_p: 'Would you like to receive new journal articles and new testimonies at your e-mail ({e}) as soon as they are published? You can unsubscribe at any time with one click in any e-mail.',
+      bv_sim: 'Yes, send them to me', bv_nao: 'Not now', bv_seguir: 'Continue where I was →',
+      em_h: 'E-mails', em_on: 'You receive new articles and testimonies by e-mail.', em_off: 'You do not receive e-mails about new articles and testimonies.',
+      em_ligar: 'Subscribe', em_desligar: 'Unsubscribe', em_sim_ok: 'Done! You will receive new articles and testimonies.', em_nao_ok: 'All right. You will not receive e-mails; you can change this here anytime.'
     }
   };
   var t = function (k) { var l = L.lingua(); return (T[l] && T[l][k]) || T.pt[k] || k; };
@@ -66,19 +74,39 @@
     raiz.innerHTML = '<div class="conta-card" style="max-width:560px"><h2>' + esc(t('excluida')) + '</h2><p></p><a class="btn btn-creme sm" href="/artigos.html">' + esc(t('voltar_rev')) + '</a></div>';
   }
 
+  var voltaBv = params.get('bemvindo') && params.get('volta') && /^\/(?!\/)/.test(params.get('volta')) && !/^\/(entrar|conta)\.html/.test(params.get('volta')) ? params.get('volta') : '';
+  function boasVindas(l) {
+    if (!params.get('bemvindo')) return '';
+    if (l.perguntar_email) {
+      return '<div class="conta-card conta-bv"><h2>' + esc(t('bv_h')) + '</h2><p>' + esc(t('bv_p').replace('{e}', l.email)) + '</p><div class="conta-perigo"><button type="button" class="btn btn-creme sm" data-email="1">' + esc(t('bv_sim')) + '</button><button type="button" class="btn btn-ghost sm" data-email="0">' + esc(t('bv_nao')) + '</button></div></div>';
+    }
+    return voltaBv ? '<p class="conta-ok"><a href="' + esc(voltaBv) + '">' + esc(t('bv_seguir')) + '</a></p>' : '';
+  }
+  function cartaoEmail(l) {
+    if (!l.email || (params.get('bemvindo') && l.perguntar_email)) return '';
+    return '<div class="conta-card"><h3>' + esc(t('em_h')) + '</h3><p>' + esc(l.recebe_email ? t('em_on') : t('em_off')) + (l.recebe_email ? '<br><small>' + esc(l.email) + '</small>' : '') + '</p>' +
+      (l.recebe_email ? '<button type="button" class="btn btn-ghost sm" data-email="0">' + esc(t('em_desligar')) + '</button>' : '<button type="button" class="btn btn-creme sm" data-email="1">' + esc(t('em_ligar')) + '</button>') + '</div>';
+  }
+
   function telaConta() {
     var l = S.leitor;
     var ligados = l.contas.map(function (c) { return c.provedor; });
     var outros = (S.provedores || []).filter(function (p) { return ligados.indexOf(p.id) < 0; });
     raiz.innerHTML = '<div class="conta-grade"><div><div class="eyebrow">' + esc(t('c_eyebrow')) + '</div><h1>' + esc(t('c_h')) + '<em>' + esc(l.nome) + '</em></h1><p class="lede">' + esc(t('c_desde').replace('{d}', data(l.criado_em))) + (l.email ? '<br>' + esc(t('email')) + ': ' + esc(l.email) : '') + '</p>' +
       '<div class="conta-perigo" style="margin-top:28px"><button type="button" class="btn btn-ghost sm" id="sair">' + esc(t('sair')) + '</button></div></div>' +
-      '<div>' + avisos() +
+      '<div>' + avisos() + boasVindas(l) + cartaoEmail(l) +
       '<div class="conta-card"><h3>' + esc(t('nome_h')) + '</h3><p>' + esc(t('nome_p')) + '</p><form class="conta-campo" id="fNome"><input name="nome" maxlength="80" minlength="2" required value="' + esc(l.nome) + '" aria-label="' + esc(t('nome_h')) + '"><button class="btn btn-creme sm" type="submit">' + esc(t('salvar')) + '</button></form></div>' +
       '<div class="conta-card"><h3>' + esc(t('logins_h')) + '</h3><p>' + esc(t('logins_p')) + '</p><ul class="conta-lista">' + l.contas.map(function (c) {
         return '<li>' + (L.ICONES[c.provedor] || '') + '<span>' + esc(L.NOMES[c.provedor] || c.provedor) + (c.email ? '<small>' + esc(c.email) + '</small>' : '') + '</span>' + (l.contas.length > 1 ? '<button type="button" class="lnk-x" data-desv="' + esc(c.provedor) + '">' + esc(t('remover')) + '</button>' : '') + '</li>';
       }).join('') + '</ul>' + (outros.length ? '<h3 style="margin-top:22px">' + esc(t('vincular_h')) + '</h3>' + L.botoes(outros, { volta: '/conta.html?ok=vinculado', vincular: true }) : '') + '</div>' +
       '<div class="conta-card"><p>' + esc(t('excluir_p')) + '</p><div class="conta-perigo"><button type="button" class="btn btn-ghost sm" id="excluir">' + esc(t('excluir')) + '</button></div></div></div></div>';
 
+    raiz.querySelectorAll('[data-email]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var sim = b.getAttribute('data-email') === '1';
+        L.api('/conta/email', 'POST', { receber: sim }).then(function () { aviso = sim ? 'em_sim_ok' : 'em_nao_ok'; erroAviso = ''; return iniciar(); }).catch(function (er) { alert(er.message); });
+      });
+    });
     document.getElementById('sair').addEventListener('click', function () { L.api('/conta/sair', 'POST').then(function () { location.href = '/artigos.html'; }); });
     document.getElementById('fNome').addEventListener('submit', function (e) {
       e.preventDefault();

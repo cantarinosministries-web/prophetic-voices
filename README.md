@@ -59,3 +59,8 @@ Configuração inicial (uma vez): veja `docs/CONFIGURAR-CLOUDFLARE.md`.
 - Cada login só aparece quando seus segredos estão no Cloudflare; sem nenhum, o cadastro e os comentários ficam escondidos.
   Passo a passo: `docs/CONFIGURAR-LOGINS.md`.
 - Comentários: só aparecem depois de aprovados (editor e acima), sem respostas em sequência.
+
+## E-mails automáticos e testemunhos (painel → Testemunhos e E-mails)
+- Testemunhos autorizados são publicados pelo painel e aparecem em `/testemunhos.html`.
+- Novo artigo ou testemunho publicado pela primeira vez → e-mail para os inscritos (conta do site ou rodapé com confirmação),
+  via Cloudflare Email Service. Código: `worker/emails.js`. Configuração: `docs/CONFIGURAR-EMAILS.md`.

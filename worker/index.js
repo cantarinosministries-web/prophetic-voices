@@ -7,6 +7,7 @@
 //   /api/loja/*     loja virtual (ver worker/loja.js)
 //   /auth/*         login dos leitores (Google, Apple, Facebook, Microsoft) — ver worker/leitores.js
 //   /api/conta/*, /api/comentarios/*   cadastro do leitor e comentários públicos
+//   /email/*, /api/newsletter, /api/publico/testemunhos   e-mails automáticos e testemunhos (ver worker/emails.js)
 import { api, usuarioDaSessao } from './api.js';
 import { paginaLista, paginaArtigo } from './paginas.js';
 import { origemOk, erro, cabecalhos } from './seguranca.js';
@@ -14,6 +15,7 @@ import { pode } from './permissoes.js';
 import { apiLojaPublica, webhookMercadoPago } from './loja.js';
 import { contar, contavel, totaisArtigo } from './estatisticas.js';
 import { rotaAuth, apiLeitores, provedoresAtivos } from './leitores.js';
+import { rotaEmail, apiNewsletter, testemunhosPublicos, processarFila } from './emails.js';
 
 function html(texto, status = 200) {
   const h = cabecalhos(new Headers({ 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' }));
@@ -30,17 +32,25 @@ async function publicados(env) {
 }
 
 export default {
+  // a cada 10 minutos: envia o que ficou na fila de e-mails (novos artigos e testemunhos)
+  async scheduled(evento, env, ctx) {
+    ctx.waitUntil(processarFila(env).catch((e) => console.error('fila de e-mails', e)));
+  },
+
   async fetch(req, env, ctx) {
     const url = new URL(req.url);
     const path = url.pathname;
     try {
       if (path === '/api/loja/mp/webhook') return await webhookMercadoPago(req, env, url);
       if (path.startsWith('/auth/')) return await rotaAuth(req, env, url);
+      if (path.startsWith('/email/')) return await rotaEmail(req, env, url);
       if (path.startsWith('/api/')) {
         if (!origemOk(req)) return erro('Pedido recusado.', 403);
         if (path.startsWith('/api/loja/publico/')) return await apiLojaPublica(req, env, url);
         if (path.startsWith('/api/conta/') || path === '/api/conta' || path.startsWith('/api/comentarios/')) return await apiLeitores(req, env, url);
-        return await api(req, env, url);
+        if (path === '/api/newsletter') return await apiNewsletter(req, env);
+        if (path === '/api/publico/testemunhos' && req.method === 'GET') return await testemunhosPublicos(env);
+        return await api(req, env, url, ctx);
       }
 
       if (path === '/artigos.html' || path === '/artigos' || path === '/artigos/') {

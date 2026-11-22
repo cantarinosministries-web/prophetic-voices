@@ -1,0 +1,37 @@
+---
+// Confirmação e cancelamento da inscrição nos e-mails de novos artigos e testemunhos.
+import Base from '../layouts/Base.astro';
+---
+<Base page="newsletter" title="E-mails — The Prophetic Voices">
+  <Fragment slot="head"><meta name="robots" content="noindex" /></Fragment>
+  <section class="pad conta-sec"><div class="wrap"><div class="conta-card" style="max-width:620px" id="nl"><p>…</p></div></div></section>
+  <Fragment slot="scripts">
+    <script is:inline>
+      (function () {
+        var box = document.getElementById('nl');
+        var q = new URLSearchParams(location.search), t = q.get('t'), estado = q.get('estado');
+        var en = function () { try { return localStorage.getItem('pv-lang') === 'en'; } catch (e) { return false; } };
+        var T = {
+          confirmado: ['Inscrição confirmada', 'Pronto! Você vai receber no seu e-mail os novos artigos e testemunhos do The Prophetic Voices. Em cada e-mail há um link para cancelar quando quiser.', 'Subscription confirmed', 'Done! You will receive new articles and testimonies from The Prophetic Voices. Every e-mail has a link to unsubscribe anytime.'],
+          invalido: ['Link inválido ou expirado', 'Não encontramos esta inscrição. Se quiser, inscreva-se de novo no rodapé do site.', 'Invalid or expired link', 'We could not find this subscription. You can subscribe again in the site footer.'],
+          cancelar: ['Cancelar inscrição', 'Você deixará de receber os e-mails de novos artigos e testemunhos. Pode se inscrever de novo quando quiser.', 'Unsubscribe', 'You will stop receiving e-mails about new articles and testimonies. You can subscribe again anytime.'],
+          cancelado: ['Inscrição cancelada', 'Você não vai mais receber nossos e-mails. Obrigado por ter caminhado conosco até aqui.', 'Unsubscribed', 'You will no longer receive our e-mails. Thank you for walking with us.'],
+          vazio: ['E-mails do The Prophetic Voices', 'Inscreva-se no rodapé do site para receber os novos artigos e testemunhos.', 'The Prophetic Voices e-mails', 'Subscribe in the site footer to receive new articles and testimonies.']
+        };
+        function tela(k, botao) {
+          var x = T[k], i = en() ? 2 : 0;
+          box.innerHTML = '<div class="eyebrow">E-mails</div><h2 style="margin-top:12px">' + x[i] + '</h2><p>' + x[i + 1] + '</p>' +
+            (botao ? '<button type="button" class="btn btn-creme sm" id="sairBtn">' + (en() ? 'Confirm unsubscribe' : 'Confirmar cancelamento') + '</button>' : '<a class="btn btn-ghost sm" href="/artigos.html">' + (en() ? 'Go to the journal' : 'Ir para a revista') + '</a>');
+          var b = document.getElementById('sairBtn');
+          if (b) b.onclick = function () {
+            b.disabled = true;
+            fetch('/email/sair?t=' + encodeURIComponent(t), { method: 'POST' }).then(function (r) { tela(r.ok ? 'cancelado' : 'invalido'); history.replaceState(null, '', '/newsletter.html?estado=' + (r.ok ? 'cancelado' : 'invalido')); });
+          };
+        }
+        function desenhar() { if (estado && T[estado]) tela(estado); else if (t) tela('cancelar', true); else tela('vazio'); }
+        desenhar();
+        window.addEventListener('pv:lang', function () { setTimeout(desenhar, 0); });
+      })();
+    </script>
+  </Fragment>
+</Base>

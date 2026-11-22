@@ -8,7 +8,7 @@
     "directory": "./dist",
     "binding": "ASSETS",
     // estas rotas passam primeiro pelo Worker; o resto sai direto dos arquivos
-    "run_worker_first": ["/api/*", "/arquivos/*", "/artigos.html", "/artigos", "/artigos/*", "/auth/*"]
+    "run_worker_first": ["/api/*", "/arquivos/*", "/artigos.html", "/artigos", "/artigos/*", "/auth/*", "/email/*"]
   },
   // banco de dados: usuários, artigos, comentários e histórico
   "d1_databases": [
@@ -21,5 +21,7 @@
   ],
   // armazenamento dos PDFs e capas enviados pelo painel
   "r2_buckets": [{ "binding": "ARQUIVOS", "bucket_name": "pv-arquivos" }],
+  // envia a fila de e-mails (novos artigos e testemunhos) a cada 10 minutos
+  "triggers": { "crons": ["*/10 * * * *"] },
   "observability": { "enabled": true }
 }

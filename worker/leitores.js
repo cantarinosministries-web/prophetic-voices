@@ -9,6 +9,7 @@
 //
 // Cada provedor só aparece no site quando os segredos dele estão no Cloudflare (ver docs/CONFIGURAR-LOGINS.md).
 import { aleatorio, sha256, lerCookie, json, erro, cabecalhos } from './seguranca.js';
+import { inscricaoDoLeitor, definirInscricaoLeitor, emailConfigurado } from './emails.js';
 
 const DOM = 'https://thepropheticvoices.com.br';
 const COOKIE_LEITOR = 'pv_leitor';
@@ -246,11 +247,14 @@ export async function rotaAuth(req, env, url) {
     // Apple: o cookie de sessão é gravado num passo seguinte, já dentro do site
     const c = aleatorio(32);
     await env.DB.prepare('INSERT INTO login_estados (estado_hash, provedor, verificador, nonce, volta, concluido_leitor, expira_em) VALUES (?,?,?,?,?,?,?)')
-      .bind(await sha256('c:' + c), nome, '-', '-', e.volta, r.leitor, daqui(2)).run();
+      .bind(await sha256('c:' + c), nome, '-', '-', destinoFinal(e.volta, r), r.leitor, daqui(2)).run();
     return redirecionar(`/auth/concluir?c=${c}`, [limpa]);
   }
-  return redirecionar(voltaSegura(e.volta), [limpa, await criarSessao(env, r.leitor)]);
+  return redirecionar(destinoFinal(e.volta, r), [limpa, await criarSessao(env, r.leitor)]);
 }
+
+// conta recém-criada passa pela boas-vindas (pergunta sobre os e-mails) antes de voltar
+const destinoFinal = (volta, r) => (r.novo ? `/conta.html?bemvindo=1&volta=${encodeURIComponent(voltaSegura(volta))}` : voltaSegura(volta));
 
 async function vincularOuCriar(env, provedor, id, vincularA) {
   const ja = await env.DB.prepare('SELECT lc.leitor_id, l.bloqueado FROM leitor_contas lc JOIN leitores l ON l.id = lc.leitor_id WHERE lc.provedor = ? AND lc.sub = ?').bind(provedor, id.sub).first();
@@ -275,7 +279,7 @@ async function vincularOuCriar(env, provedor, id, vincularA) {
   const nome = (id.nome || (id.email ? id.email.split('@')[0] : '') || 'Leitor').trim().slice(0, 80);
   const novo = await env.DB.prepare('INSERT INTO leitores (nome, email) VALUES (?,?) RETURNING id').bind(nome, id.email).first();
   await env.DB.prepare('INSERT INTO leitor_contas (provedor, sub, leitor_id, email) VALUES (?,?,?,?)').bind(provedor, id.sub, novo.id, id.email).run();
-  return { leitor: novo.id, bloqueado: 0 };
+  return { leitor: novo.id, bloqueado: 0, novo: true };
 }
 
 // ---------------------------------------------------------------- /api/conta e /api/comentarios (públicas)
@@ -284,7 +288,9 @@ async function corpo(req) { try { return await req.json(); } catch (e) { return 
 const publicoLeitor = async (env, l) => {
   if (!l) return null;
   const contas = (await env.DB.prepare('SELECT provedor, email, criado_em FROM leitor_contas WHERE leitor_id = ? ORDER BY criado_em').bind(l.id).all()).results;
-  return { nome: l.nome, email: l.email, criado_em: l.criado_em, bloqueado: !!l.bloqueado, contas };
+  const insc = await inscricaoDoLeitor(env, l.id);
+  return { nome: l.nome, email: l.email, criado_em: l.criado_em, bloqueado: !!l.bloqueado, contas,
+    recebe_email: !!(insc && insc.status === 'ativo'), perguntar_email: !l.respondeu_email && !!l.email };
 };
 
 export async function apiLeitores(req, env, url) {
@@ -295,7 +301,7 @@ export async function apiLeitores(req, env, url) {
 
   if (seg[0] === 'conta') {
     if (p === '/conta/sessao' && m === 'GET') {
-      return json({ leitor: await publicoLeitor(env, l), provedores: provedoresAtivos(env).map((k) => ({ id: k, nome: PROVEDORES[k].nome })) });
+      return json({ leitor: await publicoLeitor(env, l), provedores: provedoresAtivos(env).map((k) => ({ id: k, nome: PROVEDORES[k].nome })), email_servico: emailConfigurado(env) });
     }
     if (p === '/conta/sair' && m === 'POST') {
       const tok = lerCookie(req, COOKIE_LEITOR);
@@ -307,6 +313,10 @@ export async function apiLeitores(req, env, url) {
       const nome = String((await corpo(req)).nome || '').replace(/\s+/g, ' ').trim();
       if (nome.length < 2 || nome.length > 80) return erro('O nome precisa ter entre 2 e 80 caracteres.');
       await env.DB.prepare('UPDATE leitores SET nome = ? WHERE id = ?').bind(nome, l.id).run();
+      return json({ ok: true });
+    }
+    if (p === '/conta/email' && m === 'POST') {
+      try { await definirInscricaoLeitor(env, l, !!(await corpo(req)).receber); } catch (er) { return erro(er.message); }
       return json({ ok: true });
     }
     if (seg[1] === 'desvincular' && seg[2] && m === 'POST') {

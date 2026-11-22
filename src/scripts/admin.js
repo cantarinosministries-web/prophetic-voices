@@ -614,6 +614,85 @@ async function telaComentarios() {
   }));
 }
 
+// ---------------------------------------------------------------- testemunhos publicados no site
+const ST_T = { rascunho: 'Rascunho', publicado: 'Publicado', arquivado: 'Fora do site' };
+const AUT_T = { anonimo: 'Sem identificação', nome: 'Com o nome' };
+
+async function telaTestemunhos(idEditar) {
+  marcarMenu('testemunhos');
+  if (!S.permissoes.publicar) return ir(inicio());
+  const r = await api('/testemunhos');
+  const t = idEditar === 'novo' ? { id: 0, titulo: '', texto: '', assinatura: '', autorizacao: 'anonimo', status: 'rascunho' } : r.testemunhos.find((x) => String(x.id) === String(idEditar));
+  if (t) return formTestemunho(t, r.email);
+  app.innerHTML = `<div class="head"><div><h1>Testemunhos</h1><p class="muted">Os relatos chegam pelo formulário da página Testemunhos. Aqui a equipe publica os que foram autorizados. ${r.email ? 'Ao publicar pela primeira vez, os inscritos recebem o testemunho por e-mail.' : 'Os e-mails automáticos ainda não estão ligados (veja a aba E-mails).'}</p></div><a class="btn pri" href="#testemunhos/novo">Novo testemunho</a></div>
+  <div class="stack">${r.testemunhos.map((x) => `<div class="card"><div class="small muted">${ST_T[x.status]} · ${AUT_T[x.autorizacao]}${x.publicado_em ? ' · publicado em ' + data(x.publicado_em, false) : ''}${x.envio_status === 'concluido' || x.envio_status === 'fila' ? ` · e-mail para ${x.envio_total} inscrito(s)` : ''}</div>
+    <h3 style="margin:8px 0 6px">${esc(x.titulo)}</h3><p class="small muted" style="margin:0 0 12px">${esc(x.texto.slice(0, 220))}${x.texto.length > 220 ? '…' : ''}</p>
+    <a class="btn sm" href="#testemunhos/${x.id}">Abrir</a>${x.status === 'publicado' ? ` <a class="btn sm" target="_blank" rel="noopener" href="/testemunhos.html#t-${x.id}">Ver no site ↗</a>` : ''}</div>`).join('') || '<div class="card"><p class="muted" style="margin:0">Nenhum testemunho cadastrado ainda.</p></div>'}</div>`;
+}
+
+function formTestemunho(t, emailOn) {
+  const novo = !t.id;
+  app.innerHTML = `<div class="head"><div><a href="#testemunhos" class="small muted">← Todos os testemunhos</a><h1>${novo ? 'Novo testemunho' : esc(t.titulo)}</h1><p class="muted">${novo ? 'Copie o relato do formulário, ajuste só o necessário (sem mudar o sentido) e retire nomes de outras pessoas.' : ST_T[t.status] + (t.publicado_em ? ' · publicado em ' + data(t.publicado_em) : '')}</p></div></div>
+  <form id="ft" class="card stack">
+    <label class="f"><span>Título</span><input name="titulo" maxlength="160" required value="${esc(t.titulo)}" placeholder="Ex.: Uma palavra que se cumpriu"></label>
+    <label class="f"><span>Testemunho</span><textarea name="texto" rows="14" required>${esc(t.texto)}</textarea><small>Deixe uma linha em branco entre os parágrafos.</small></label>
+    <label class="f"><span>Autorização dada por quem enviou</span><select name="autorizacao"><option value="anonimo"${t.autorizacao === 'anonimo' ? ' selected' : ''}>Publicar sem identificar a pessoa</option><option value="nome"${t.autorizacao === 'nome' ? ' selected' : ''}>Publicar com o nome da pessoa</option></select><small>Testemunhos marcados como “só para a equipe” não entram aqui.</small></label>
+    <label class="f"><span>Assinatura exibida</span><input name="assinatura" maxlength="160" value="${esc(t.assinatura || '')}" placeholder="Com nome: “Ana Souza, Imperatriz (MA)” · Sem identificar: “Uma aluna da Escola de Profetas”"></label>
+    <p class="err" id="errT"></p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn pri" type="submit">${novo ? 'Salvar rascunho' : 'Salvar alterações'}</button></div>
+  </form>
+  ${novo ? '' : `<div class="card" style="margin-top:16px">
+    ${t.status !== 'publicado' ? `<label class="check" style="display:flex;gap:10px;align-items:flex-start;margin-bottom:12px"><input type="checkbox" id="autOk"> <span>Conferi no formulário que a pessoa autorizou a publicação <b>${t.autorizacao === 'nome' ? 'com o nome dela' : 'sem identificação'}</b>, e que o texto não expõe crianças, vítimas ou outras pessoas.</span></label>
+      <button class="btn cob" id="pubT">Publicar no site${!t.publicado_em && emailOn ? ' e avisar os inscritos por e-mail' : ''}</button>` : '<button class="btn" id="arqT">Tirar do site</button>'}
+    ${t.status !== 'publicado' && !t.publicado_em ? '' : ''}
+    <button class="btn dng" id="excT" style="margin-left:8px">Excluir</button>
+    ${t.publicado_em && t.status !== 'publicado' ? '<p class="small muted" style="margin:10px 0 0">Este testemunho já foi enviado por e-mail antes; publicar de novo não reenvia.</p>' : ''}
+  </div>`}`;
+  $('#ft').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const d = Object.fromEntries(new FormData(e.target));
+    try {
+      if (novo) { const r = await api('/testemunhos', { method: 'POST', body: d }); toast('Rascunho salvo.'); ir('testemunhos/' + r.testemunho.id); }
+      else { await api('/testemunhos/' + t.id, { method: 'PUT', body: d }); toast('Alterações salvas.'); telaTestemunhos(t.id); }
+    } catch (er) { $('#errT').textContent = er.message; }
+  });
+  $('#pubT')?.addEventListener('click', async () => {
+    if (!$('#autOk').checked) return toast('Marque a confirmação da autorização antes de publicar.', true);
+    try { await api('/testemunhos/' + t.id + '/status', { method: 'POST', body: { status: 'publicado', autorizacao_conferida: true } }); toast(!t.publicado_em && emailOn ? 'Publicado. Os e-mails estão sendo enviados.' : 'Publicado no site.'); telaTestemunhos(t.id); }
+    catch (er) { toast(er.message, true); }
+  });
+  $('#arqT')?.addEventListener('click', async () => {
+    try { await api('/testemunhos/' + t.id + '/status', { method: 'POST', body: { status: 'arquivado' } }); toast('Retirado do site.'); telaTestemunhos(t.id); } catch (er) { toast(er.message, true); }
+  });
+  $('#excT')?.addEventListener('click', async (e) => {
+    const b = e.currentTarget;
+    if (!b.dataset.conf) { b.dataset.conf = '1'; b.textContent = 'Confirmar: excluir'; return; }
+    try { await api('/testemunhos/' + t.id, { method: 'DELETE' }); toast('Testemunho excluído.'); ir('testemunhos'); } catch (er) { toast(er.message, true); }
+  });
+}
+
+// ---------------------------------------------------------------- e-mails automáticos
+async function telaEmails() {
+  marcarMenu('emails');
+  if (!S.permissoes.publicar) return ir(inicio());
+  const r = await api('/emails');
+  const soma = (st, or) => r.inscritos.filter((x) => x.status === st && (!or || x.origem === or)).reduce((a, x) => a + x.n, 0);
+  const ST = { fila: 'Enviando', concluido: 'Enviado', sem_servico: 'Não enviado (serviço desligado)' };
+  app.innerHTML = `<div class="head"><div><h1>E-mails</h1><p class="muted">Quando um artigo ou testemunho é publicado pela primeira vez, cada inscrito recebe um e-mail com ele. Ninguém recebe o mesmo aviso duas vezes, e cada e-mail traz o link para cancelar.</p></div></div>
+  <div class="card" style="border-color:${r.configurado ? 'var(--line)' : 'var(--cobre)'}"><h3>Serviço de envio</h3>
+    <p class="small ${r.configurado ? '' : 'muted'}" style="margin:0">${r.configurado ? `✓ Ligado · remetente <code>${esc(r.remetente)}</code>` : 'Desligado: faltam os segredos <code>EMAIL_API_TOKEN</code> e <code>CF_ACCOUNT_ID</code> no Cloudflare. Enquanto isso, as inscrições pela conta são registradas, mas nada é enviado e o rodapé responde “abrem em breve”. Passo a passo em <code>docs/CONFIGURAR-EMAILS.md</code>.'}</p></div>
+  <div class="card" style="margin-top:16px"><h3>Inscritos</h3>
+    <table class="tb"><tbody>
+      <tr><td>Recebendo</td><td class="num"><b>${soma('ativo')}</b></td><td class="small muted">${soma('ativo', 'conta')} pela conta do site · ${soma('ativo', 'rodape')} pelo rodapé</td></tr>
+      <tr><td>Aguardando confirmação</td><td class="num">${soma('pendente')}</td><td class="small muted">inscreveram-se no rodapé e ainda não clicaram no e-mail</td></tr>
+      <tr><td>Cancelados</td><td class="num">${soma('cancelado')}</td><td class="small muted">não recebem mais nada</td></tr>
+    </tbody></table></div>
+  <div class="card" style="margin-top:16px"><h3>Últimos envios</h3>
+    <table class="tb"><thead><tr><th>Quando</th><th>O quê</th><th>Situação</th><th class="num">Enviados</th><th class="num">Falhas</th></tr></thead><tbody>
+    ${r.envios.map((e) => `<tr><td class="small muted" style="white-space:nowrap">${data(e.criado_em)}</td><td>${e.tipo === 'artigo' ? 'Artigo' : 'Testemunho'}: ${esc(e.titulo)}</td><td class="small">${ST[e.status]}${e.na_fila ? ` · ${e.na_fila} na fila` : ''}</td><td class="num">${e.enviados}/${e.total}</td><td class="num">${e.falhas || '—'}</td></tr>`).join('') || '<tr><td colspan="5" class="muted">Nenhum envio ainda.</td></tr>'}
+    </tbody></table></div>`;
+}
+
 async function carregarSessao() {
   const s = await api('/sessao', { publico: true });
   S = { usuario: s.usuario, permissoes: s.permissoes, papeis: s.papeis, papeis_loja: s.papeis_loja || {}, configurar: s.configurar, chave: s.chave_configurada };
@@ -634,6 +713,9 @@ async function rotear() {
     if (h.startsWith('artigo/')) return await telaArtigo(h.slice(7));
     if (h === 'usuarios') return await telaUsuarios();
     if (h === 'comentarios') return await telaComentarios();
+    if (h === 'testemunhos') return await telaTestemunhos();
+    if (h.startsWith('testemunhos/')) return await telaTestemunhos(h.slice(12));
+    if (h === 'emails') return await telaEmails();
     if (h === 'estatisticas') return await telaEstatisticas('');
     if (h.startsWith('estatisticas/')) return await telaEstatisticas(h.slice(13));
     if (h === 'historico') return await telaHistorico();

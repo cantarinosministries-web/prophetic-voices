@@ -88,12 +88,14 @@ const isHome = page === 'home';
     <div class="wrap">
       <div class="foot-top">
         <div style="flex:1 1 420px">
-          <h2 class="serif" style="margin:0;font-size:44px;line-height:1.05"><span data-i18n="news_h1">Receba os novos artigos</span> <span class="it" style="color:var(--cobre)" data-i18n="news_h2">da nossa plataforma.</span></h2>
-          <form class="news" onsubmit="return false">
+          <h2 class="serif" style="margin:0;font-size:44px;line-height:1.05"><span data-i18n="news_h1">Receba os novos artigos</span> <span class="it" style="color:var(--cobre)" data-i18n="news_h2">e testemunhos no seu e-mail.</span></h2>
+          <form class="news" id="newsForm" novalidate>
             <label for="em" class="sr">E-mail</label>
             <input id="em" type="email" data-i18n-ph="news_ph" placeholder="seu@email.com" />
             <button type="submit" class="btn btn-creme" style="height:54px" data-i18n="news_btn">Inscrever</button>
           </form>
+          <p class="news-msg" id="newsMsg" role="status" aria-live="polite"></p>
+          <p class="news-nota" data-i18n-html="news_note">Você recebe um e-mail para confirmar. Pode cancelar quando quiser. <a href="/privacidade.html">Política de Privacidade</a>.</p>
         </div>
         <div class="cols">
           <div><span data-i18n="f_nav">NAVEGAR</span><a href="/index.html#quem-somos" data-i18n="nav_about">Quem Somos</a><a href={SCHOOL} target="_blank" rel="noopener" data-i18n="nav_school">Escola de Profetas</a><a href="/artigos.html" data-i18n="nav_articles">Artigos</a><a href="/cursos.html" data-i18n="nav_courses">Cursos</a><a href="/loja.html" data-i18n="nav_store">Loja</a></div>
@@ -165,6 +167,26 @@ const isHome = page === 'home';
         cb.classList.add('on');
       }
     }).catch(() => {});
+
+    // inscrição nos e-mails de novos artigos e testemunhos (rodapé)
+    const nf = document.getElementById('newsForm') as HTMLFormElement | null;
+    nf?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const msg = document.getElementById('newsMsg')!;
+      const en = document.documentElement.lang === 'en';
+      const email = (document.getElementById('em') as HTMLInputElement).value.trim();
+      const btn = nf.querySelector('button') as HTMLButtonElement;
+      btn.disabled = true;
+      try {
+        const r = await fetch('/api/newsletter', { method: 'POST', credentials: 'same-origin', headers: { 'X-PV': '1', 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) });
+        const d = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(d.erro || '');
+        msg.textContent = d.ja ? (en ? 'This e-mail is already subscribed.' : 'Este e-mail já está inscrito.') : (en ? 'Almost there: check your inbox and confirm your subscription.' : 'Quase lá: confira sua caixa de entrada e confirme a inscrição.');
+        nf.reset();
+      } catch (er) {
+        msg.textContent = (er as Error).message || (en ? 'Could not subscribe now. Please try again later.' : 'Não foi possível inscrever agora. Tente mais tarde.');
+      } finally { btn.disabled = false; }
+    });
 
     // menu no celular
     const mb = document.getElementById('menuBtn');

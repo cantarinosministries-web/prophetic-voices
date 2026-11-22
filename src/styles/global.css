@@ -367,3 +367,8 @@ html[lang="en"] .so-en{display:block}
 .legal-links a{color:inherit}.legal-links a:hover{color:var(--creme)}
 .conta-priv a,.com-entrar p a{color:var(--areia);border-bottom:1px solid rgba(191,137,87,.6)}
 .legal-doc{min-width:0}.legal-doc h2{overflow-wrap:break-word}@media(max-width:520px){.legal-doc h2{font-size:27px}.legal-lede{font-size:19px!important}}
+.conta-bv{border-color:var(--cobre)}.conta-ok a{color:var(--creme);border-bottom:1px solid rgba(191,137,87,.6)}.conta-card small{color:#8C7D6E}
+.news-msg{margin:12px 0 0;min-height:1em;color:var(--creme);font-size:15px}
+.news-nota{margin:8px 0 0;color:#8C7D6E;font-size:13px}
+.news-nota a{color:var(--areia);border-bottom:1px solid rgba(191,137,87,.6)}
+.news button[disabled]{opacity:.5;cursor:wait}
