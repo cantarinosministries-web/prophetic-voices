@@ -52,3 +52,10 @@ Configuração inicial (uma vez): veja `docs/CONFIGURAR-CLOUDFLARE.md`.
   `src/scripts/admin-loja.js` (telas do painel). Banco: `migrations/0003_loja.sql`.
 - Integrações por segredos no Cloudflare: `MP_ACCESS_TOKEN`, `MP_WEBHOOK_SECRET`, `MELHOR_ENVIO_TOKEN` (e `ME_AMBIENTE=sandbox` para testes).
   Sem eles, a loja fica em modo de teste e só a equipe logada consegue simular compras. Passo a passo: `docs/CONFIGURAR-LOJA.md`.
+
+## Cadastro de leitores e comentários (/entrar, /conta, painel → Comentários)
+- Login com Google, Apple, Facebook e Microsoft (OAuth/OpenID Connect), sem senha. Código: `worker/leitores.js`, `public/conta/`,
+  `public/revista/comentarios.js`, `src/pages/entrar.astro`, `src/pages/conta.astro`. Banco: `migrations/0012_leitores_comentarios.sql`.
+- Cada login só aparece quando seus segredos estão no Cloudflare; sem nenhum, o cadastro e os comentários ficam escondidos.
+  Passo a passo: `docs/CONFIGURAR-LOGINS.md`.
+- Comentários: só aparecem depois de aprovados (editor e acima), sem respostas em sequência.

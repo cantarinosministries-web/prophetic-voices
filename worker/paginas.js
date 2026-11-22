@@ -106,7 +106,7 @@ export async function paginaLista(env, req, artigos) {
 }
 
 // ---------------------------------------------------------------- artigo
-export async function paginaArtigo(env, req, a, relacionados, previa, numeros) {
+export async function paginaArtigo(env, req, a, relacionados, previa, numeros, comentarios = false) {
   const t = await modelo(env, req, '/artigos/modelo.html');
   const p = paraPublico(a);
   const trad = a.tipo === 'traducao' && a.tradutor;
@@ -181,6 +181,12 @@ export async function paginaArtigo(env, req, a, relacionados, previa, numeros) {
         <div class="reader"><iframe src="${esc(pdf)}#view=FitH" title="${esc(a.titulo)} — PDF" loading="lazy"></iframe></div>
         <p class="art-note"><span data-i18n="fb1">Se o documento não aparecer no seu aparelho,</span> <a href="${esc(pdf)}" target="_blank" rel="noopener" data-i18n="fb2">abra o PDF aqui</a>.</p>
       </section>` : ''}
+      ${comentarios ? `<section class="art-block coments" id="comentarios" data-slug="${esc(a.slug)}" aria-labelledby="com-h">
+        <h2 id="com-h" data-i18n="com_h">Comentários</h2>
+        <p class="art-note" data-i18n="com_note">Os comentários passam pela equipe editorial antes de aparecer.</p>
+        <div class="com-lista" id="comLista" aria-live="polite"></div>
+        <div class="com-form" id="comForm"></div>
+      </section>` : ''}
     </div>
     <aside class="art-side" aria-label="Informações do artigo">
       <div class="meta-card">
@@ -199,6 +205,6 @@ export async function paginaArtigo(env, req, a, relacionados, previa, numeros) {
     head: (previa ? '<meta name="robots" content="noindex">' : '') + ogTags(a.titulo, (a.resumo || '').slice(0, 280), urlPag) + meta +
       `<script type="application/ld+json">${JSON.stringify(ld).replace(/</g, '\\u003c')}</script>`,
     main,
-    scripts: '<script src="/revista/revista.js"></script>',
+    scripts: '<script src="/revista/revista.js"></script>' + (comentarios ? '<script src="/conta/botoes.js"></script><script src="/revista/comentarios.js"></script>' : ''),
   });
 }

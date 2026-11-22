@@ -567,10 +567,58 @@ async function telaEstatisticas(slug) {
 }
 
 // ---------------------------------------------------------------- navegação
+// ---------------------------------------------------------------- comentários dos leitores (moderação)
+let filtroCom = 'pendente';
+const NOMES_STATUS_COM = { pendente: 'Pendentes', aprovado: 'Aprovados', rejeitado: 'Rejeitados' };
+
+async function atualizarPendentes() {
+  const b = $('#nPend');
+  if (!b || !S.permissoes || !S.permissoes.moderar_comentarios) return;
+  try { const { n } = await api('/moderacao/pendentes'); b.textContent = n; b.hidden = !n; } catch (e) {}
+}
+
+async function telaComentarios() {
+  marcarMenu('comentarios');
+  if (!S.permissoes.moderar_comentarios) return ir(inicio());
+  const r = await api('/moderacao?status=' + filtroCom);
+  const ativos = r.provedores.filter((p) => p.configurado);
+  app.innerHTML = `<div class="head"><div><h1>Comentários</h1><p class="muted">Comentários dos leitores nos artigos. Nada aparece no site antes de ser aprovado. Não há respostas em sequência: cada comentário é independente.</p></div></div>
+  <div class="filtros" style="margin-bottom:16px">${Object.keys(NOMES_STATUS_COM).map((s) => `<button class="chip" data-st="${s}" aria-pressed="${filtroCom === s}">${NOMES_STATUS_COM[s]} <b>${r.contagem[s] || 0}</b></button>`).join('')}</div>
+  <div class="stack">${r.comentarios.map((c) => `<div class="card">
+      <div class="small muted"><a href="/artigos/${esc(c.slug)}.html#comentarios" target="_blank" rel="noopener">${esc(c.titulo)} ↗</a> · ${data(c.criado_em)}</div>
+      <p style="margin:10px 0;white-space:pre-wrap;line-height:1.6">${esc(c.texto)}</p>
+      <div class="small"><b style="font-weight:500">${esc(c.nome)}</b> <span class="muted">${esc(c.email || 'sem e-mail')}${c.bloqueado ? ' · bloqueado' : ''}</span></div>
+      ${c.moderado_em ? `<div class="small muted" style="margin-top:4px">${c.status === 'aprovado' ? 'Aprovado' : c.status === 'rejeitado' ? 'Rejeitado' : 'Moderado'} por ${esc(c.moderado_por_nome || '—')} em ${data(c.moderado_em)}</div>` : ''}
+      <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+        ${c.status !== 'aprovado' ? `<button class="btn sm pri" data-com="${c.id}" data-acao="aprovar">Aprovar</button>` : ''}
+        ${c.status !== 'rejeitado' ? `<button class="btn sm" data-com="${c.id}" data-acao="rejeitar">${c.status === 'aprovado' ? 'Tirar do site' : 'Rejeitar'}</button>` : ''}
+        <button class="btn sm dng" data-com="${c.id}" data-acao="apagar">Apagar</button>
+        <button class="btn sm" data-leitor="${c.leitor_id}" data-bloq="${c.bloqueado ? 0 : 1}">${c.bloqueado ? 'Desbloquear leitor' : 'Bloquear leitor'}</button>
+      </div></div>`).join('') || `<div class="card"><p class="muted" style="margin:0">Nenhum comentário ${filtroCom === 'pendente' ? 'aguardando aprovação' : NOMES_STATUS_COM[filtroCom].toLowerCase()}.</p></div>`}</div>
+  <div class="card" style="margin-top:28px"><h3>Logins do site</h3>
+    <p class="small muted">${r.leitores} ${r.leitores === 1 ? 'leitor cadastrado' : 'leitores cadastrados'}. ${ativos.length ? 'A seção de comentários e o cadastro aparecem no site.' : 'Nenhum login configurado ainda: o cadastro e a seção de comentários ficam escondidos no site até o primeiro ser ligado.'} O passo a passo está em <code>docs/CONFIGURAR-LOGINS.md</code> no repositório.</p>
+    <table class="tb"><thead><tr><th>Login</th><th>Situação</th><th>Endereço de retorno (para o painel do provedor)</th></tr></thead><tbody>
+    ${r.provedores.map((p) => `<tr><td>${esc(p.nome)}</td><td>${p.configurado ? '✓ Ligado' : '<span class="muted">Falta configurar</span>'}</td><td><code class="small">${esc(p.retorno)}</code> <button class="lnk small" data-copiar="${esc(p.retorno)}">copiar</button></td></tr>`).join('')}
+    </tbody></table></div>`;
+  $$('[data-st]').forEach((b) => b.addEventListener('click', () => { filtroCom = b.dataset.st; telaComentarios(); }));
+  $$('[data-com]').forEach((b) => b.addEventListener('click', async () => {
+    if (b.dataset.acao === 'apagar' && !b.dataset.conf) { b.dataset.conf = '1'; b.textContent = 'Confirmar: apagar'; return; }
+    try { await api('/moderacao/' + b.dataset.com, { method: 'POST', body: { acao: b.dataset.acao } }); toast({ aprovar: 'Comentário aprovado e publicado.', rejeitar: 'Comentário rejeitado.', apagar: 'Comentário apagado.' }[b.dataset.acao]); atualizarPendentes(); telaComentarios(); }
+    catch (er) { toast(er.message, true); }
+  }));
+  $$('[data-leitor]').forEach((b) => b.addEventListener('click', async () => {
+    const bloquear = b.dataset.bloq === '1';
+    if (bloquear && !b.dataset.conf) { b.dataset.conf = '1'; b.textContent = 'Confirmar bloqueio'; return; }
+    try { await api('/moderacao/leitor/' + b.dataset.leitor, { method: 'POST', body: { bloquear } }); toast(bloquear ? 'Leitor bloqueado; os pendentes dele foram rejeitados.' : 'Leitor desbloqueado.'); atualizarPendentes(); telaComentarios(); }
+    catch (er) { toast(er.message, true); }
+  }));
+}
+
 async function carregarSessao() {
   const s = await api('/sessao', { publico: true });
   S = { usuario: s.usuario, permissoes: s.permissoes, papeis: s.papeis, papeis_loja: s.papeis_loja || {}, configurar: s.configurar, chave: s.chave_configurada };
   mostrarMenu();
+  atualizarPendentes();
   return s;
 }
 
@@ -585,6 +633,7 @@ async function rotear() {
     if (!S.permissoes.ver_revista && ['', 'artigos'].includes(h) || h.startsWith('artigo/') && !S.permissoes.ver_revista) return S.permissoes.loja_ver ? ir('loja') : telaConta();
     if (h.startsWith('artigo/')) return await telaArtigo(h.slice(7));
     if (h === 'usuarios') return await telaUsuarios();
+    if (h === 'comentarios') return await telaComentarios();
     if (h === 'estatisticas') return await telaEstatisticas('');
     if (h.startsWith('estatisticas/')) return await telaEstatisticas(h.slice(13));
     if (h === 'historico') return await telaHistorico();

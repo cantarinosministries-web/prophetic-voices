@@ -37,6 +37,7 @@ export function pode(u, acao, artigo) {
     case 'excluir_artigo':
       return n >= 5 || (n === 3 && dono(u, artigo) && artigo.status === 'rascunho');
     case 'ver_estatisticas':
+    case 'moderar_comentarios':
       return n >= 4;
     case 'gerir_usuarios':
     case 'ver_historico':
@@ -89,6 +90,7 @@ export function permissoesDe(u) {
     gerir_usuarios: pode(u, 'gerir_usuarios'),
     ver_historico: pode(u, 'ver_historico'),
     ver_estatisticas: pode(u, 'ver_estatisticas'),
+    moderar_comentarios: pode(u, 'moderar_comentarios'),
     papeis_atribuiveis: Object.keys(PAPEIS).filter((p) => podeAtribuir(u, p, null)),
     loja_ver: podeLoja(u, 'ver'),
     loja_expedir: podeLoja(u, 'expedir'),

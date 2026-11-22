@@ -3,6 +3,7 @@ import { aleatorio, sha256, hashSenha, iguais, senhaValida, lerCookie, cookieSes
 import { PAPEIS, PAPEIS_LOJA, pode, podeAtribuir, permissoesDe } from './permissoes.js';
 import { apiLoja } from './loja.js';
 import { relatorio } from './estatisticas.js';
+import { apiModeracao } from './leitores.js';
 
 const DIAS_SESSAO = 14;
 const AREAS = ['Antigo Testamento', 'Novo Testamento', 'Teologia bíblica', 'História'];
@@ -406,6 +407,11 @@ export async function api(req, env, url) {
       }
     }
     return erro('Rota não encontrada.', 404);
+  }
+
+  if (seg[0] === 'moderacao') {
+    if (!pode(u, 'moderar_comentarios')) return erro('Apenas editores e acima moderam os comentários.', 403);
+    return apiModeracao(req, env, url, seg.slice(1), u, { registrar });
   }
 
   if (p === '/estatisticas' && m === 'GET') {

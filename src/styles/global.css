@@ -289,3 +289,42 @@ body.ready .eagle-wrap{opacity:1}
   nav .links.open a{padding:14px 0;border-bottom:1px solid var(--line)}
   #top-nav.menu-aberto{background:#000}
 }
+
+/* login dos leitores (Google, Apple, Facebook, Microsoft) */
+.pv-logins{display:flex;flex-direction:column;gap:10px;max-width:400px}
+.pv-login{display:flex;align-items:center;justify-content:center;gap:12px;height:52px;padding:0 22px;border-radius:999px;background:var(--branco);color:#000;font-size:15px;font-weight:500;border:1px solid var(--branco);transition:transform .3s,box-shadow .3s}
+.pv-login:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(0,0,0,.5)}
+.pv-login svg{flex:none}
+.pv-login-apple{background:#000;color:var(--branco);border-color:rgba(248,233,183,.45)}
+.conta-btn{display:none}
+.conta-btn.on{display:inline-flex}
+.conta-btn .ini{font-family:var(--mono);font-size:11px;letter-spacing:.04em}
+.conta-btn.logado{background:var(--cobre);border-color:var(--cobre);color:#000}
+
+/* páginas de cadastro e conta */
+.conta-sec{padding:150px 0 110px;min-height:80svh}
+.conta-grade{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:64px;align-items:start}
+@media(max-width:900px){.conta-grade{grid-template-columns:1fr;gap:36px}.conta-sec{padding-top:120px}}
+.conta-sec h1{margin:16px 0 0;font-family:var(--disp);font-weight:200;text-transform:uppercase;font-size:clamp(48px,7vw,96px);line-height:.92}
+.conta-sec h1 em{display:block;font-family:var(--serif);font-style:italic;text-transform:none;font-weight:400;color:var(--cobre);font-size:.5em;margin-top:10px;line-height:1.05}
+.conta-sec .lede{margin:24px 0 0;max-width:560px;font-size:18px;line-height:1.7;color:var(--areia);font-weight:300}
+.conta-card{border:1px solid var(--line);border-radius:24px;padding:28px;background:#070605}
+.conta-card+.conta-card{margin-top:18px}
+.conta-card h2{margin:0 0 6px;font-family:var(--serif);font-weight:400;font-size:28px}
+.conta-card h3{margin:0 0 12px;font-family:var(--mono);font-weight:400;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--cobre)}
+.conta-card p{margin:0 0 18px;color:var(--areia);font-size:14.5px;line-height:1.65}
+.conta-priv{margin:20px 0 0!important;font-size:12.5px!important;color:#8C7D6E!important}
+.conta-erro{padding:14px 18px;border-radius:14px;border:1px solid var(--cobre);color:var(--creme);font-size:14.5px;margin:0 0 18px}
+.conta-ok{padding:14px 18px;border-radius:14px;border:1px solid var(--line);color:var(--areia);font-size:14.5px;margin:0 0 18px}
+.conta-campo{display:flex;gap:10px;flex-wrap:wrap}
+.conta-campo input{flex:1 1 220px;height:50px;border-radius:999px;border:1px solid rgba(202,181,160,.32);background:#0b0a08;color:var(--creme);font:300 16px var(--sans);padding:0 20px;outline:none}
+.conta-campo input:focus{border-color:var(--cobre)}
+.conta-lista{list-style:none;margin:0 0 18px;padding:0;display:flex;flex-direction:column;gap:8px}
+.conta-lista li{display:flex;align-items:center;gap:12px;padding:12px 16px;border:1px solid var(--line);border-radius:16px;font-size:14.5px}
+.conta-lista li small{display:block;color:#8C7D6E;font-size:12.5px}
+.conta-lista li .lnk-x{margin-left:auto}
+.lnk-x{all:unset;cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--areia);border-bottom:1px solid rgba(202,181,160,.32)}
+.lnk-x:hover{color:var(--creme);border-color:var(--cobre)}
+.conta-perigo{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn.sm{height:42px;padding:0 18px;font-size:14px}
+@media(max-width:520px){nav .acts{gap:6px}nav .acts .icon-btn{width:40px;height:40px}.lang{padding:3px}.lang button{height:32px;padding:0 7px}nav .logo img{height:34px}.wrap{padding:0 20px}}

@@ -5,12 +5,15 @@
 //   /artigos/<x>    página de cada artigo (PDFs e capas estáticos seguem para os arquivos)
 //   /arquivos/*     PDFs e capas enviados pelo painel e fotos da loja (R2)
 //   /api/loja/*     loja virtual (ver worker/loja.js)
+//   /auth/*         login dos leitores (Google, Apple, Facebook, Microsoft) — ver worker/leitores.js
+//   /api/conta/*, /api/comentarios/*   cadastro do leitor e comentários públicos
 import { api, usuarioDaSessao } from './api.js';
 import { paginaLista, paginaArtigo } from './paginas.js';
 import { origemOk, erro, cabecalhos } from './seguranca.js';
 import { pode } from './permissoes.js';
 import { apiLojaPublica, webhookMercadoPago } from './loja.js';
 import { contar, contavel, totaisArtigo } from './estatisticas.js';
+import { rotaAuth, apiLeitores, provedoresAtivos } from './leitores.js';
 
 function html(texto, status = 200) {
   const h = cabecalhos(new Headers({ 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' }));
@@ -32,9 +35,11 @@ export default {
     const path = url.pathname;
     try {
       if (path === '/api/loja/mp/webhook') return await webhookMercadoPago(req, env, url);
+      if (path.startsWith('/auth/')) return await rotaAuth(req, env, url);
       if (path.startsWith('/api/')) {
         if (!origemOk(req)) return erro('Pedido recusado.', 403);
         if (path.startsWith('/api/loja/publico/')) return await apiLojaPublica(req, env, url);
+        if (path.startsWith('/api/conta/') || path === '/api/conta' || path.startsWith('/api/comentarios/')) return await apiLeitores(req, env, url);
         return await api(req, env, url);
       }
 
@@ -70,7 +75,8 @@ export default {
           numeros = await totaisArtigo(env, a.id);
           if (contavel(req)) numeros.acessos += 1; // a visita atual já entra na conta mostrada
         }
-        const pagina = html(await paginaArtigo(env, req, a, rel, previa, numeros));
+        const comentarios = !previa && provedoresAtivos(env).length > 0;
+        const pagina = html(await paginaArtigo(env, req, a, rel, previa, numeros, comentarios));
         if (!previa) contar(env, ctx, req, a.id, 'acessos');
         return pagina;
       }
