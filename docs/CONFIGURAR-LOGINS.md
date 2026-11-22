@@ -16,8 +16,10 @@ Endereços que cada provedor pede:
 | Facebook | `https://thepropheticvoices.com.br/auth/facebook/retorno` |
 | Microsoft | `https://thepropheticvoices.com.br/auth/microsoft/retorno` |
 
-Domínio: `thepropheticvoices.com.br` · Política de privacidade: `https://thepropheticvoices.com.br/privacidade.html`
-(**ainda não existe**: Google, Facebook e Apple pedem esse endereço; criar a página antes de publicar o app deles).
+Domínio: `thepropheticvoices.com.br`
+- Política de Privacidade: `https://thepropheticvoices.com.br/privacidade.html`
+- Termos de Uso: `https://thepropheticvoices.com.br/termos.html`
+- Exclusão de dados (Facebook pede): `https://thepropheticvoices.com.br/privacidade.html#excluir`
 
 ---
 
@@ -37,8 +39,8 @@ Segredos: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`.
 
 1. https://developers.facebook.com → Meus apps → **Criar app** → caso de uso "Autenticar e solicitar dados de usuários com o Login do Facebook".
 2. Login do Facebook → Configurações → **URIs de redirecionamento do OAuth válidos**: o endereço da tabela. Deixe "Login no OAuth da Web" ligado.
-3. Configurações do app → Básico: domínio, link da política de privacidade, link de **exclusão de dados** (pode ser
-   `https://thepropheticvoices.com.br/conta.html`, onde o leitor exclui a própria conta), ícone e categoria.
+3. Configurações do app → Básico: domínio, link da política de privacidade, link de **exclusão de dados**
+   (`https://thepropheticvoices.com.br/privacidade.html#excluir`), ícone e categoria.
 4. Permissões usadas: `public_profile` e `email` (padrão, sem revisão avançada). Colocar o app no **modo Ao vivo**.
    A Meta pode pedir a **verificação da empresa** para o modo ao vivo.
 5. Copiar o **ID do app** e a **Chave secreta do app**.

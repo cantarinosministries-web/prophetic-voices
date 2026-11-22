@@ -14,6 +14,7 @@
       e_lede: 'Com a sua conta você comenta nos artigos da revista The Prophetic Voices. Não há senha para criar: use uma conta que você já tem.',
       e_card: 'Escolha como entrar', e_card_p: 'Se é a primeira vez, a conta é criada na hora.',
       priv: 'Guardamos apenas o seu nome e o seu e-mail, recebidos da conta escolhida. O e-mail não aparece no site, e você pode excluir a sua conta a qualquer momento.',
+      priv_links: 'Ao continuar, você concorda com os <a href="/termos.html">Termos de Uso</a> e a <a href="/privacidade.html">Política de Privacidade</a>.',
       breve: 'O cadastro abre em breve.', breve_p: 'Estamos ligando os logins do site. Volte em alguns dias.',
       err_cancelado: 'O login foi cancelado. Escolha uma conta para continuar.', err_expirou: 'O login demorou demais e expirou. Tente de novo.',
       err_falhou: 'Não conseguimos confirmar o login com esse provedor. Tente de novo ou use outra conta.', err_indisponivel: 'Esse login ainda não está disponível.',
@@ -30,6 +31,7 @@
       e_lede: 'With your account you can comment on The Prophetic Voices journal articles. There is no password to create: use an account you already have.',
       e_card: 'Choose how to sign in', e_card_p: 'If it is your first time, your account is created right away.',
       priv: 'We only keep your name and e-mail, received from the account you choose. Your e-mail never appears on the site, and you can delete your account at any time.',
+      priv_links: 'By continuing you agree to the <a href="/termos.html">Terms of Use</a> and the <a href="/privacidade.html">Privacy Policy</a>.',
       breve: 'Sign-up opens soon.', breve_p: 'We are setting up the site logins. Please come back in a few days.',
       err_cancelado: 'Sign-in was cancelled. Choose an account to continue.', err_expirou: 'Sign-in took too long and expired. Please try again.',
       err_falhou: 'We could not confirm the sign-in with this provider. Try again or use another account.', err_indisponivel: 'This sign-in is not available yet.',
@@ -56,7 +58,7 @@
     var tem = S.provedores && S.provedores.length;
     raiz.innerHTML = '<div class="conta-grade"><div><div class="eyebrow">' + esc(t('e_eyebrow')) + '</div><h1>' + esc(t('e_h')) + '<em>' + esc(t('e_em')) + '</em></h1><p class="lede">' + esc(t('e_lede')) + '</p></div>' +
       '<div class="conta-card">' + avisos() + (tem
-        ? '<h2>' + esc(t('e_card')) + '</h2><p>' + esc(t('e_card_p')) + '</p>' + L.botoes(S.provedores, { volta: volta }) + '<p class="conta-priv">' + esc(t('priv')) + '</p>'
+        ? '<h2>' + esc(t('e_card')) + '</h2><p>' + esc(t('e_card_p')) + '</p>' + L.botoes(S.provedores, { volta: volta }) + '<p class="conta-priv">' + esc(t('priv')) + ' ' + t('priv_links') + '</p>'
         : '<h2>' + esc(t('breve')) + '</h2><p>' + esc(t('breve_p')) + '</p>') + '</div></div>';
   }
 

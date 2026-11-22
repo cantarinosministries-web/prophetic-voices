@@ -11,7 +11,7 @@
     pt: {
       com_h: 'Comentários', com_note: 'Os comentários passam pela equipe editorial antes de aparecer.',
       vazio: 'Ainda não há comentários publicados neste artigo.',
-      entrar: 'Entre para comentar', entrar_p: 'Use uma das suas contas. Guardamos só o seu nome e e-mail; o e-mail nunca aparece no site.',
+      entrar: 'Entre para comentar', entrar_p: 'Use uma das suas contas. Guardamos só o seu nome e e-mail; o e-mail nunca aparece no site.', pol: 'Política de Privacidade',
       como: 'Comentando como', sair: 'sair', conta: 'minha conta', ph: 'Escreva seu comentário sobre o artigo…', enviar: 'Enviar para aprovação',
       enviado: 'Recebemos o seu comentário. Ele aparece aqui depois de aprovado pela equipe.', pend_1: 'Você tem 1 comentário aguardando aprovação neste artigo.',
       pend_n: 'Você tem {n} comentários aguardando aprovação neste artigo.', bloq: 'Sua conta não pode enviar comentários.', carac: '{n} de {m}', erro: 'Não foi possível carregar os comentários.'
@@ -19,7 +19,7 @@
     en: {
       com_h: 'Comments', com_note: 'Comments are reviewed by the editorial team before they appear.',
       vazio: 'There are no published comments on this article yet.',
-      entrar: 'Sign in to comment', entrar_p: 'Use one of your accounts. We only keep your name and e-mail; your e-mail never appears on the site.',
+      entrar: 'Sign in to comment', entrar_p: 'Use one of your accounts. We only keep your name and e-mail; your e-mail never appears on the site.', pol: 'Privacy Policy',
       como: 'Commenting as', sair: 'sign out', conta: 'my account', ph: 'Write your comment on the article…', enviar: 'Send for approval',
       enviado: 'We received your comment. It will appear here once approved by the team.', pend_1: 'You have 1 comment awaiting approval on this article.',
       pend_n: 'You have {n} comments awaiting approval on this article.', bloq: 'Your account cannot send comments.', carac: '{n} of {m}', erro: 'Could not load the comments.'
