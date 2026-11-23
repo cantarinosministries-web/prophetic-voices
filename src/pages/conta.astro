@@ -1,0 +1,9 @@
+---
+// Conta do leitor: nome, logins vinculados, sair e excluir. Lógica em public/conta/conta.js.
+import Base from '../layouts/Base.astro';
+---
+<Base page="conta" title="Minha conta — The Prophetic Voices">
+  <Fragment slot="head"><meta name="robots" content="noindex" /></Fragment>
+  <section class="pad conta-sec"><div class="wrap" id="conta" data-pagina="conta"><p class="conta-carregando">…</p></div></section>
+  <Fragment slot="scripts"><script is:inline src="/conta/botoes.js"></script><script is:inline src="/conta/conta.js"></script></Fragment>
+</Base>

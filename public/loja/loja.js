@@ -81,7 +81,7 @@
       var cats = []; prods.forEach(function (p) { if (p.categoria && cats.indexOf(p.categoria) < 0) cats.push(p.categoria); });
       var lista = prods.filter(function (p) { return !filtro || p.categoria === filtro; });
       var h = faixaTeste(j);
-      if (!j.loja_aberta) h += '<div class="lj-aviso">' + esc(t('fechada')) + '</div>';
+      if (!j.loja_aberta && prods.length) h += '<div class="lj-aviso">' + esc(t('fechada')) + '</div>';
       if (j.aviso) h += '<div class="lj-aviso">' + esc(j.aviso) + '</div>';
       if (cats.length > 1) {
         h += '<div class="lj-cats">' + [''].concat(cats).map(function (c) {

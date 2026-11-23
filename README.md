@@ -30,12 +30,6 @@ npm run servidor:local   # site + painel em http://localhost:8787
 
 `npm run dev` continua servindo só as páginas do Astro (sem revista dinâmica nem painel).
 
-## Revisão e homologação
-
-Abra um pull request para `main`. O workflow **Verificar site** roda o build, os testes e as migrações em D1 local. Configure a proteção de `main` no GitHub para exigir esse status antes do merge.
-
-Em homologação, use outro Worker, outro D1, outro R2 e credenciais de teste. Valide compra, frete, assinatura do webhook, pagamento repetido, última unidade e estorno antes de habilitar vendas reais. Preserve compatibilidade com o Worker anterior ao criar migrações, pois elas são aplicadas antes do deploy.
-
 ## Publicação
 
 O Cloudflare publica sozinho a cada push na branch `main` (Workers Builds):
@@ -57,4 +51,31 @@ Configuração inicial (uma vez): veja `docs/CONFIGURAR-CLOUDFLARE.md`.
 - Código: `worker/loja.js` (API pública, webhook do Mercado Pago e API do painel), `public/loja/` (vitrine e checkout),
   `src/scripts/admin-loja.js` (telas do painel). Banco: `migrations/0003_loja.sql`.
 - Integrações por segredos no Cloudflare: `MP_ACCESS_TOKEN`, `MP_WEBHOOK_SECRET`, `MELHOR_ENVIO_TOKEN` (e `ME_AMBIENTE=sandbox` para testes).
-  Sem o token do Mercado Pago, só a equipe autorizada consegue simular pagamentos. O checkout real exige também assinatura de webhook e Melhor Envio fora do sandbox. Passo a passo: `docs/CONFIGURAR-LOJA.md`.
+  Sem eles, a loja fica em modo de teste e só a equipe logada consegue simular compras. Passo a passo: `docs/CONFIGURAR-LOJA.md`.
+
+## Cadastro de leitores e comentários (/entrar, /conta, painel → Comentários)
+- Login com Google, Apple, Facebook e Microsoft (OAuth/OpenID Connect), sem senha. Código: `worker/leitores.js`, `public/conta/`,
+  `public/revista/comentarios.js`, `src/pages/entrar.astro`, `src/pages/conta.astro`. Banco: `migrations/0012_leitores_comentarios.sql`.
+- Cada login só aparece quando seus segredos estão no Cloudflare; sem nenhum, o cadastro e os comentários ficam escondidos.
+  Passo a passo: `docs/CONFIGURAR-LOGINS.md`.
+- Comentários: só aparecem depois de aprovados (editor e acima), sem respostas em sequência.
+
+## E-mails automáticos e testemunhos (painel → Testemunhos e E-mails)
+- Testemunhos autorizados são publicados pelo painel e aparecem em `/testemunhos.html`.
+- Novo artigo ou testemunho publicado pela primeira vez → e-mail para os inscritos (conta do site ou rodapé com confirmação),
+  via Cloudflare Email Service. Código: `worker/emails.js`. Configuração: `docs/CONFIGURAR-EMAILS.md`.
+
+## Leitura e download: acesso por artigo (desde 23/11/2026)
+- Cada artigo tem `acesso` (painel → artigo → "Acesso ao PDF"): **livre** (domínio público ou licença aberta: qualquer um lê e baixa) ou **cadastro** (publicado com autorização: gratuito, mas exige conta de leitor). Migração 0014.
+- Navegar pela revista, resumos e fichas é sempre aberto.
+- O Worker bloqueia `/artigos/*.pdf` e `/arquivos/artigos/*.pdf` sem login: navegação vai para `/entrar.html?motivo=leitura&volta=<artigo>#leitor`; pedidos embutidos recebem 401.
+- Passam direto: leitor logado, equipe logada no painel e robôs de busca acadêmica (Googlebot, Google Scholar etc., pelo User-Agent).
+- Se nenhum login estiver configurado, tudo volta a ser aberto (para ninguém ficar trancado).
+- Página do artigo sem login mostra o aviso "Leitura e download gratuitos" com os botões de login (`public/revista/cadastro.js`).
+
+## Biblioteca do leitor e leitor de PDF próprio (desde 23/11/2026)
+- `/conta.html` tem duas abas: **Biblioteca** (padrão) e **Dados da conta**. API em `worker/biblioteca.js` (`/api/conta/biblioteca`, `salvos`, `colecoes`, `citacoes`, `progresso`, `historico`, `interesse`, `artigo/<slug>`).
+- Biblioteca: continuar lendo, artigos salvos, coleções, citações guardadas (com chamada ABNT), comentários enviados, publicados recentemente e "Escreva para a revista" (interesse por trilho; a lista aparece no painel → E-mails). Página `/proponha.html`.
+- Leitor de PDF próprio (`src/scripts/leitor-pdf.js`, pdf.js carregado só na página do artigo): páginas, zoom, tela cheia, texto selecionável, "Guardar citação" e "Copiar com referência". Se falhar, volta ao visualizador do navegador. Os pedidos dele levam `X-PV-Leitor` e não contam como download.
+- **Histórico de leitura é opcional** (`leitores.historico`: NULL = não respondeu, 1 = ligado, 0 = desligado). Só grava a página com ele ligado; desligar apaga tudo. Política de Privacidade 1.3, seção 5.1.
+- "Como citar" na página do artigo: ABNT, SBL e APA (`worker/citacao.js`).

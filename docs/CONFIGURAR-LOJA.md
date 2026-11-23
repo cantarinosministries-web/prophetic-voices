@@ -36,3 +36,4 @@ O checkout público exige `MP_ACCESS_TOKEN`, `MP_WEBHOOK_SECRET` e `MELHOR_ENVIO
 - Cada pedido tem um link secreto de acompanhamento para o cliente (`/pedido.html?codigo=…&chave=…`).
 - Papéis da loja: Gerente (tudo), Expedição (etiquetas, rastreio, status de envio), Visualizador (só leitura).
   Proprietário e administrador têm acesso total. O acesso à loja é independente do acesso à revista.
+O checkout público permanece em preparação até a equipe validar o fluxo em homologação com produto de teste, frete, pagamento e confirmação do pedido. Depois da validação, configure `LOJA_CHECKOUT_LIBERADO=1` em produção e confirme no painel que a loja está aberta.

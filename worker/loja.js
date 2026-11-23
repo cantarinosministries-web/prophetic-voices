@@ -30,7 +30,7 @@ const so = (s) => String(s || '').replace(/\D/g, '');
 const txt = (s, n = 200) => String(s ?? '').trim().slice(0, n);
 const reais = (c) => Math.round(c) / 100;
 const brl = (c) => 'R$ ' + (c / 100).toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-const lojaPronta = (env) => !!(env.MP_ACCESS_TOKEN && env.MP_WEBHOOK_SECRET && env.MELHOR_ENVIO_TOKEN && env.ME_AMBIENTE !== 'sandbox');
+const lojaPronta = (env) => env.LOJA_CHECKOUT_LIBERADO === '1' && !!(env.MP_ACCESS_TOKEN && env.MP_WEBHOOK_SECRET && env.MELHOR_ENVIO_TOKEN && env.ME_AMBIENTE !== 'sandbox');
 const modoTeste = (env) => ({ pagamento: !env.MP_ACCESS_TOKEN, frete: !env.MELHOR_ENVIO_TOKEN });
 
 async function corpoJson(req) {
@@ -311,7 +311,7 @@ export async function apiLojaPublica(req, env, url) {
   if (p === '/produtos' && m === 'GET') {
     const prods = (await produtosCompletos(env)).filter((x) => x.preco > 0).map(paraVitrine);
     const teste = modoTeste(env);
-    return json({ produtos: prods, loja_aberta: cfg.loja_aberta !== '0' && (teste.pagamento ? await equipeTestando(env, req) : lojaPronta(env)), aviso: cfg.aviso || '', teste }, 200, { 'Cache-Control': 'no-cache' });
+    return json({ produtos: prods, loja_aberta: prods.length > 0 && cfg.loja_aberta !== '0' && (teste.pagamento ? await equipeTestando(env, req) : lojaPronta(env)), aviso: cfg.aviso || '', teste });
   }
 
   const mcep = p.match(/^\/cep\/(\d{8})$/);

@@ -18,7 +18,9 @@
       m_author: 'Autor', m_orig: 'Título original', m_journal: 'Periódico', m_year: 'Ano', m_pages: 'Páginas (original)', m_pub: 'Editora original',
       m_trans: 'Tradução', m_lang: 'Idioma', m_lang_v: 'Português', m_date: 'Publicado na revista', m_views: 'Acessos', m_dls: 'Downloads do PDF', m_stable: 'Original', cite_h: 'Como citar', rel_h: 'Leia também',
       rights: 'Original em domínio público. Tradução para o português © 2026 Gabriel Cantarino / The Prophetic Voices.',
-      more_by: 'Outros artigos do autor', foot: 'Preparando uma geração para serem Vozes Proféticas no tempo do fim.'
+      more_by: 'Outros artigos do autor', foot: 'Preparando uma geração para serem Vozes Proféticas no tempo do fim.',
+      m_access: 'Acesso', acc_livre: 'Livre', acc_cad: 'Gratuito, com cadastro', tag_livre: 'Acesso livre', tag_cad: 'Leitura com cadastro gratuito',
+      save: 'Salvar na biblioteca', saved: 'Salvo na biblioteca ✓'
     },
     en: {
       nav_home: 'Home', nav_about: 'About', nav_school: 'School of Prophets', nav_articles: 'Articles', nav_courses: 'Courses', nav_store: 'Store',
@@ -36,7 +38,9 @@
       m_author: 'Author', m_orig: 'Original title', m_journal: 'Journal', m_year: 'Year', m_pages: 'Pages (original)', m_pub: 'Original publisher',
       m_trans: 'Translation', m_lang: 'Language', m_lang_v: 'Portuguese', m_date: 'Published in the journal', m_views: 'Page views', m_dls: 'PDF downloads', m_stable: 'Original', cite_h: 'How to cite', rel_h: 'Read also',
       rights: 'Original in the public domain. Portuguese translation © 2026 Gabriel Cantarino / The Prophetic Voices.',
-      more_by: 'More by this author', foot: 'Preparing a generation to be Prophetic Voices in the end times.'
+      more_by: 'More by this author', foot: 'Preparing a generation to be Prophetic Voices in the end times.',
+      m_access: 'Access', acc_livre: 'Open', acc_cad: 'Free, with an account', tag_livre: 'Open access', tag_cad: 'Free reading with an account',
+      save: 'Save to library', saved: 'Saved to library ✓'
     }
   };
   var lang = 'pt';
@@ -58,7 +62,16 @@
   // o idioma é trocado pelo cabeçalho do site (i18n.js), que avisa com o evento pv:lang
   window.addEventListener('pv:lang', function (e) { var l = (e && e.detail) || (function () { try { return localStorage.getItem('pv-lang'); } catch (x) { return null; } })(); if (T[l]) { lang = l; applyLang(); } });
 
-  // citação (página do artigo)
+  // citação (página do artigo): ABNT, SBL ou APA
+  var citeP = document.getElementById('citeText');
+  document.querySelectorAll('.cite-tabs [data-fmt]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      document.querySelectorAll('.cite-tabs [data-fmt]').forEach(function (x) { x.setAttribute('aria-selected', x === b ? 'true' : 'false'); });
+      citeP.textContent = citeP.getAttribute('data-' + b.getAttribute('data-fmt'));
+      try { localStorage.setItem('pv-cite', b.getAttribute('data-fmt')); } catch (e) {}
+    });
+  });
+  try { var fmt0 = localStorage.getItem('pv-cite'); var b0 = fmt0 && document.querySelector('.cite-tabs [data-fmt="' + fmt0 + '"]'); if (b0) b0.click(); } catch (e) {}
   var citeBtn = document.getElementById('citeBtn');
   if (citeBtn) citeBtn.addEventListener('click', function () {
     var txt = document.getElementById('citeText').innerText;
@@ -124,7 +137,8 @@
         '<p class="by"><a href="?autor=' + encodeURIComponent(a.autor) + '" data-autor="' + esc(a.autor) + '">' + hl(a.autor, terms) + '</a>' + (a.tradutor ? ' <span>· ' + t('trad') + ': ' + esc(a.tradutor) + '</span>' : '') + '</p>' +
         '<p class="abs">' + esc(lang === 'en' ? a.resumoEn : a.resumo) + '</p>' +
         '<div class="kw">' + a.palavrasChave.slice(0, 5).map(function (k) { return '<button data-k="' + esc(k) + '">' + hl(k, terms) + '</button>'; }).join('') + '</div>' +
-        '<div class="links"><a href="' + a.url + '" class="btn btn-creme sm">' + t('read') + '</a><a href="' + a.pdf + '" download class="btn btn-ghost sm">PDF ↓</a></div></div></article>';
+        '<div class="links"><a href="' + a.url + '" class="btn btn-creme sm">' + t('read') + '</a>' + (window.PV_CADASTRO && a.acesso !== 'livre' ? '<a href="' + a.url + '#leitor" class="btn btn-ghost sm">PDF ↓</a>' : '<a href="' + a.pdf + '" download class="btn btn-ghost sm">PDF ↓</a>') +
+        (window.PV_LOGINS ? '<span class="acc-tag' + (a.acesso === 'livre' ? ' livre' : '') + '">' + t(a.acesso === 'livre' ? 'tag_livre' : 'tag_cad') + '</span>' : '') + '</div></div></article>';
     }).join('');
     list.querySelectorAll('[data-autor]').forEach(function (el) { el.onclick = function (e) { e.preventDefault(); state.autor = el.dataset.autor; render(); }; });
     list.querySelectorAll('[data-k]').forEach(function (el) { el.onclick = function () { state.q = el.dataset.k; input.value = state.q; render(); }; });

@@ -1,4 +1,5 @@
 // Monta as páginas públicas da revista a partir do banco, dentro dos modelos gerados pelo Astro.
+import { referencias } from './citacao.js';
 
 const DOM = 'https://thepropheticvoices.com.br';
 const AREA_EN = { 'Antigo Testamento': 'Old Testament', 'Novo Testamento': 'New Testament', 'Teologia bíblica': 'Biblical theology', 'História': 'History' };
@@ -15,7 +16,7 @@ export function paraPublico(a) {
     ano: a.ano || '', paginasOriginal: a.paginas_original || '', editoraOriginal: a.editora_original || '',
     area: a.area, areaEn: AREA_EN[a.area] || a.area, tema: a.tema || '', temaEn: a.tema_en || a.tema || '',
     resumo: a.resumo || '', resumoEn: a.resumo_en || a.resumo || '', palavrasChave: kw,
-    url: `/artigos/${a.slug}.html`, pdf: a.pdf_url || '', capa: a.capa_url || '/media/symbol-creme.png',
+    url: `/artigos/${a.slug}.html`, pdf: a.pdf_url || '', capa: a.capa_url || '/media/symbol-creme.png', acesso: a.acesso === 'livre' ? 'livre' : 'cadastro',
   };
 }
 
@@ -43,7 +44,7 @@ const ogTags = (t, d, u) =>
   `<link rel="canonical" href="${u}"><meta property="og:type" content="article"><meta property="og:title" content="${esc(t)}"><meta property="og:description" content="${esc(d)}"><meta property="og:url" content="${u}">`;
 
 // ---------------------------------------------------------------- lista
-export async function paginaLista(env, req, artigos) {
+export async function paginaLista(env, req, artigos, bloqueado = false, logins = false) {
   const t = await modelo(env, req, '/artigos.html');
   const pub = artigos.map(paraPublico);
   const autores = new Set(pub.map((a) => a.autor)).size;
@@ -101,21 +102,19 @@ export async function paginaLista(env, req, artigos) {
     head: ogTags('Artigos — The Prophetic Voices', 'Revista The Prophetic Voices: artigos e traduções em profetismo bíblico.', DOM + '/artigos.html') +
       `<script type="application/ld+json">${JSON.stringify(ld).replace(/</g, '\\u003c')}</script>`,
     main,
-    scripts: `<script>window.PV_ARTIGOS=${dados};</script><script src="/revista/revista.js"></script>`,
+    scripts: `<script>window.PV_ARTIGOS=${dados};${bloqueado ? 'window.PV_CADASTRO=true;' : ''}${logins ? 'window.PV_LOGINS=true;' : ''}</script><script src="/revista/revista.js"></script>`,
   });
 }
 
 // ---------------------------------------------------------------- artigo
-export async function paginaArtigo(env, req, a, relacionados, previa, numeros) {
+export async function paginaArtigo(env, req, a, relacionados, previa, numeros, comentarios = false, bloqueado = false) {
   const t = await modelo(env, req, '/artigos/modelo.html');
   const p = paraPublico(a);
   const trad = a.tipo === 'traducao' && a.tradutor;
   const mes = a.mes ? `${a.mes} ` : '';
   const fonte = a.periodico ? `${esc(a.periodico)}${a.volume ? `, vol. ${esc(a.volume)}` : ''}${a.numero ? `, nº ${esc(a.numero)}` : ''}${a.ano ? ` (${esc(mes)}${esc(a.ano)})` : ''}${a.paginas_original ? `, pp. ${esc(a.paginas_original)}` : ''}` : '';
-  const citAutor = a.autor_citacao || a.autor;
-  const citacao = trad
-    ? `${citAutor} ${a.titulo}. Tradução de ${a.tradutor}. The Prophetic Voices, ${(a.publicado_em || '').slice(0, 4) || '2026'}.${a.periodico ? ` Original: ${a.periodico}${a.volume ? `, v. ${a.volume}` : ''}${a.numero ? `, n. ${a.numero}` : ''}${a.paginas_original ? `, p. ${a.paginas_original}` : ''}, ${mes}${a.ano}.` : ''}`
-    : `${citAutor} ${a.titulo}. Revista The Prophetic Voices, ${(a.publicado_em || '').slice(0, 4) || a.ano || '2026'}.`;
+  const refs = referencias(a);
+  const livre = a.acesso === 'livre';
   const autorLink = `/artigos.html?autor=${encodeURIComponent(a.autor)}#acervo`;
   const kw = p.palavrasChave.map((k) => `<a href="/artigos.html?q=${encodeURIComponent(k)}#acervo">${esc(k)}</a>`).join('');
   const rel = relacionados.slice(0, 4).map((b) => `<a href="/artigos/${b.slug}.html">${esc(b.titulo)}<small>${esc(b.autor)} · ${esc(b.ano || '')}</small></a>`).join('');
@@ -123,21 +122,26 @@ export async function paginaArtigo(env, req, a, relacionados, previa, numeros) {
   const dataPt = pub ? pub.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'America/Fortaleza' }) : '—';
   const dataEn = pub ? pub.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'America/Fortaleza' }) : '—';
   const pdf = a.pdf_url;
+  const pdfCanonico = pdf?.startsWith('/arquivos/artigos/')
+    ? pdf.replace('/arquivos/artigos/', '/artigos/arquivo-') : pdf;
   const urlPag = `${DOM}/artigos/${a.slug}.html`;
-  const pg = (a.paginas_original || '').split(/[–-]/);
+  const dataPublicacao = (a.publicado_em || '').slice(0, 10).replace(/-/g, '/');
   const meta = [
-    ['citation_title', a.titulo], ['citation_author', a.autor], ['citation_publication_date', a.ano],
-    ['citation_online_date', (a.publicado_em || '').slice(0, 10).replace(/-/g, '/')], ['citation_journal_title', 'Revista The Prophetic Voices'],
-    ['citation_publisher', 'The Prophetic Voices'], ['citation_language', 'pt'], ['citation_pdf_url', pdf ? DOM + pdf : ''],
+    ['citation_title', a.titulo], ['citation_author', a.autor], ['citation_publication_date', dataPublicacao],
+    ['citation_online_date', dataPublicacao], ['citation_journal_title', 'Revista The Prophetic Voices'],
+    ['citation_publisher', 'The Prophetic Voices'], ['citation_language', 'pt'], ['citation_pdf_url', livre && pdfCanonico ? DOM + pdfCanonico : ''],
     ['citation_abstract_html_url', urlPag], ['citation_keywords', p.palavrasChave.join('; ')],
-    ['citation_firstpage', pg[0] || ''], ['citation_lastpage', pg[1] || ''], ['DC.contributor', trad ? a.tradutor : ''],
+    ['DC.source', a.periodico ? [a.periodico, a.ano, a.paginas_original].filter(Boolean).join(', ') : ''],
+    ['DC.contributor', trad ? a.tradutor : ''],
   ].filter((m) => m[1]).map((m) => `<meta name="${m[0]}" content="${esc(m[1])}">`).join('');
   const ld = { '@context': 'https://schema.org', '@type': 'ScholarlyArticle', headline: a.titulo, alternativeHeadline: a.titulo_original || undefined,
     author: { '@type': 'Person', name: a.autor, affiliation: a.afiliacao || undefined }, translator: trad ? { '@type': 'Person', name: a.tradutor } : undefined,
     inLanguage: 'pt-BR', abstract: a.resumo, keywords: p.palavrasChave, datePublished: (a.publicado_em || '').slice(0, 10), url: urlPag,
     publisher: { '@type': 'Organization', name: 'The Prophetic Voices' },
     isBasedOn: a.periodico ? { '@type': 'ScholarlyArticle', name: a.titulo_original || a.titulo, datePublished: a.ano, isPartOf: { '@type': 'Periodical', name: a.periodico }, sameAs: a.url_original || undefined } : undefined,
-    encoding: pdf ? { '@type': 'MediaObject', contentUrl: DOM + pdf, encodingFormat: 'application/pdf' } : undefined };
+    isAccessibleForFree: livre,
+    hasPart: livre ? undefined : { '@type': 'WebPageElement', isAccessibleForFree: false, cssSelector: '.gate' },
+    encoding: livre && pdfCanonico ? { '@type': 'MediaObject', contentUrl: DOM + pdfCanonico, encodingFormat: 'application/pdf' } : undefined };
   const faixa = previa ? `<div style="position:sticky;top:76px;z-index:30;background:var(--cobre);color:#000;text-align:center;font:500 13px var(--sans);padding:10px">PRÉVIA · este artigo está como “${esc(a.status)}” e não aparece para o público · <a href="/admin.html#artigo/${a.id}" style="text-decoration:underline">voltar ao painel</a></div>` : '';
   const linhas = [
     ['m_author', 'Autor', `<a href="${autorLink}">${esc(a.autor)}</a>`],
@@ -151,6 +155,7 @@ export async function paginaArtigo(env, req, a, relacionados, previa, numeros) {
     ['m_date', 'Publicado na revista', `<span data-pt="${esc(dataPt)}" data-en="${esc(dataEn)}">${esc(dataPt)}</span>`],
     numeros && numeros.acessos + numeros.downloads > 0 && ['m_views', 'Acessos', `<span data-pt="${numeros.acessos.toLocaleString('pt-BR')}" data-en="${numeros.acessos.toLocaleString('en-US')}">${numeros.acessos.toLocaleString('pt-BR')}</span>`],
     numeros && numeros.acessos + numeros.downloads > 0 && ['m_dls', 'Downloads do PDF', `<span data-pt="${numeros.downloads.toLocaleString('pt-BR')}" data-en="${numeros.downloads.toLocaleString('en-US')}">${numeros.downloads.toLocaleString('pt-BR')}</span>`],
+    a.pdf_url && comentarios && ['m_access', 'Acesso', livre ? '<span data-i18n="acc_livre">Livre</span>' : '<span data-i18n="acc_cad">Gratuito, com cadastro</span>'],
     a.url_original && ['m_stable', 'Original', `<a href="${esc(a.url_original)}" target="_blank" rel="noopener">${esc(a.url_original.replace(/^https?:\/\/(www\.)?/, '').replace('jstor.org/stable/', 'JSTOR '))} ↗</a>`],
   ].filter(Boolean).map((l) => `<dt data-i18n="${l[0]}">${l[1]}</dt><dd>${l[2]}</dd>`).join('');
   const main = `${faixa}
@@ -164,8 +169,9 @@ export async function paginaArtigo(env, req, a, relacionados, previa, numeros) {
     ${fonte || trad ? `<p class="art-src">${fonte}${fonte && trad ? ' · ' : ''}${trad ? `<span data-i18n="m_trans">Tradução</span>: ${esc(a.tradutor)}` : ''}</p>` : ''}
     <div class="art-actions">
       ${pdf ? `<a href="#leitor" class="btn btn-creme"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2 5h7a3 3 0 0 1 3 3v12a2 2 0 0 0-2-2H2z"/><path d="M22 5h-7a3 3 0 0 0-3 3v12a2 2 0 0 1 2-2h8z"/></svg><span data-i18n="read_on">Ler online</span></a>
-      <a href="${esc(pdf)}" download class="btn btn-ghost"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5"/><path d="M4 19h16"/></svg><span data-i18n="dl">Baixar PDF</span>${a.pdf_paginas ? ` <small style="opacity:.7">(${a.pdf_paginas} p.)</small>` : ''}</a>` : ''}
+      <a href="${bloqueado ? '#leitor' : esc(pdf)}"${bloqueado ? ' data-cadastro' : ' download'} class="btn btn-ghost"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5"/><path d="M4 19h16"/></svg><span data-i18n="dl">Baixar PDF</span>${a.pdf_paginas ? ` <small style="opacity:.7">(${a.pdf_paginas} p.)</small>` : ''}</a>` : ''}
       <button type="button" class="btn btn-ghost" id="citeBtn"><span data-i18n="cite">Copiar citação</span></button>
+      ${!previa ? `<button type="button" class="btn btn-ghost" id="salvarBtn" data-slug="${esc(a.slug)}" hidden><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4z"/></svg><span data-i18n="save">Salvar na biblioteca</span></button>` : ''}
     </div>
   </div></div>
   <div class="wrap art-body">
@@ -176,10 +182,26 @@ export async function paginaArtigo(env, req, a, relacionados, previa, numeros) {
         ${a.resumo_editorial ? '<p class="art-note" data-i18n="abs_note">Resumo editorial da The Prophetic Voices; o artigo original não tem resumo.</p>' : ''}
         <div class="kw2" aria-label="Palavras-chave">${kw}</div>
       </section>
-      ${pdf ? `<section class="art-block" id="leitor">
+      ${pdf && bloqueado ? `<section class="art-block" id="leitor">
+        <div class="gate" id="gate" data-volta="/artigos/${esc(a.slug)}.html#leitor">
+          <div class="gate-ico" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 5h7a3 3 0 0 1 3 3v12a2 2 0 0 0-2-2H2z"/><path d="M22 5h-7a3 3 0 0 0-3 3v12a2 2 0 0 1 2-2h8z"/></svg></div>
+          <h2 data-pt="Leitura e download gratuitos" data-en="Free reading and download">Leitura e download gratuitos</h2>
+          <p class="gate-lede" data-pt="Para ler este artigo na íntegra ou baixar o PDF, faça seu login ou cadastro abaixo. A leitura, o download e o cadastro são totalmente gratuitos." data-en="To read this article in full or download the PDF, sign in or create your account below. Reading, downloading and signing up are completely free.">Para ler este artigo na íntegra ou baixar o PDF, faça seu login ou cadastro abaixo. A leitura, o download e o cadastro são totalmente gratuitos.</p>
+          <p class="gate-motivo" data-pt="Este texto foi publicado com a autorização do autor ou da editora. Por isso a leitura é feita com cadastro gratuito, e a sua conta vira uma biblioteca pessoal para salvar artigos, organizar coleções e guardar citações." data-en="This text is published with the permission of its author or publisher, so reading requires a free account, which also becomes your personal library to save articles, organize collections and keep quotations.">Este texto foi publicado com a autorização do autor ou da editora. Por isso a leitura é feita com cadastro gratuito, e a sua conta vira uma biblioteca pessoal para salvar artigos, organizar coleções e guardar citações.</p>
+          <div class="gate-botoes" id="gateBotoes"><a class="btn btn-creme" href="/entrar.html?motivo=leitura&amp;volta=${encodeURIComponent('/artigos/' + a.slug + '.html#leitor')}" data-pt="Entrar ou criar conta" data-en="Sign in or create an account">Entrar ou criar conta</a></div>
+          <p class="gate-nota"><span data-pt="Use a conta que preferir. Guardamos apenas seu nome e e-mail; o e-mail nunca aparece no site." data-en="Use whichever account you prefer. We only keep your name and e-mail; your e-mail never appears on the site.">Use a conta que preferir. Guardamos apenas seu nome e e-mail; o e-mail nunca aparece no site.</span> <a href="/privacidade.html" data-pt="Política de Privacidade" data-en="Privacy Policy">Política de Privacidade</a></p>
+        </div>
+      </section>` : ''}
+      ${pdf && !bloqueado ? `<section class="art-block" id="leitor">
         <div class="reader-bar"><h2 data-i18n="reader_h">Leitura</h2><a href="${esc(pdf)}" target="_blank" rel="noopener" class="reader-open" data-i18n="open">Abrir em tela cheia ↗</a></div>
-        <div class="reader"><iframe src="${esc(pdf)}#view=FitH" title="${esc(a.titulo)} — PDF" loading="lazy"></iframe></div>
+        <div class="reader" id="pdfLeitor" data-pdf="${esc(pdf)}" data-slug="${esc(a.slug)}" data-titulo="${esc(a.titulo)}"${a.pdf_paginas ? ` data-paginas="${a.pdf_paginas}"` : ''}><noscript><iframe src="${esc(pdf)}#view=FitH" title="${esc(a.titulo)} — PDF"></iframe></noscript></div>
         <p class="art-note"><span data-i18n="fb1">Se o documento não aparecer no seu aparelho,</span> <a href="${esc(pdf)}" target="_blank" rel="noopener" data-i18n="fb2">abra o PDF aqui</a>.</p>
+      </section>` : ''}
+      ${comentarios ? `<section class="art-block coments" id="comentarios" data-slug="${esc(a.slug)}" aria-labelledby="com-h">
+        <h2 id="com-h" data-i18n="com_h">Comentários</h2>
+        <p class="art-note" data-i18n="com_note">Os comentários passam pela equipe editorial antes de aparecer.</p>
+        <div class="com-lista" id="comLista" aria-live="polite"></div>
+        <div class="com-form" id="comForm"></div>
       </section>` : ''}
     </div>
     <aside class="art-side" aria-label="Informações do artigo">
@@ -188,7 +210,9 @@ export async function paginaArtigo(env, req, a, relacionados, previa, numeros) {
         <dl>${linhas}</dl>
         ${a.direitos ? `<p class="rights">${esc(a.direitos)}</p>` : ''}
       </div>
-      <div class="meta-card cite"><h3 data-i18n="cite_h">Como citar</h3><p id="citeText">${esc(citacao)}</p></div>
+      <div class="meta-card cite"><h3 data-i18n="cite_h">Como citar</h3>
+        <div class="cite-tabs" role="tablist"><button type="button" role="tab" aria-selected="true" data-fmt="abnt">ABNT</button><button type="button" role="tab" aria-selected="false" data-fmt="sbl">SBL</button><button type="button" role="tab" aria-selected="false" data-fmt="apa">APA</button></div>
+        <p id="citeText" data-abnt="${esc(refs.abnt)}" data-sbl="${esc(refs.sbl)}" data-apa="${esc(refs.apa)}">${esc(refs.abnt)}</p></div>
       ${rel ? `<div class="meta-card related"><h3 data-i18n="rel_h">Leia também</h3>${rel}</div>` : ''}
     </aside>
   </div>
@@ -199,6 +223,6 @@ export async function paginaArtigo(env, req, a, relacionados, previa, numeros) {
     head: (previa ? '<meta name="robots" content="noindex">' : '') + ogTags(a.titulo, (a.resumo || '').slice(0, 280), urlPag) + meta +
       `<script type="application/ld+json">${JSON.stringify(ld).replace(/</g, '\\u003c')}</script>`,
     main,
-    scripts: '<script src="/revista/revista.js"></script>',
+    scripts: '<script src="/revista/revista.js"></script>' + (comentarios ? '<script src="/conta/botoes.js"></script><script src="/revista/artigo.js"></script><script src="/revista/comentarios.js"></script>' : '') + (bloqueado ? '<script src="/revista/cadastro.js"></script>' : ''),
   });
 }

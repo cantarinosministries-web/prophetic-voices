@@ -3,13 +3,15 @@ import { aleatorio, sha256, hashSenha, iguais, senhaValida, lerCookie, cookieSes
 import { PAPEIS, PAPEIS_LOJA, pode, podeAtribuir, permissoesDe } from './permissoes.js';
 import { apiLoja } from './loja.js';
 import { relatorio } from './estatisticas.js';
+import { apiModeracao } from './leitores.js';
+import { enfileirar, processarFila, apiTestemunhosPainel, apiEmailsPainel } from './emails.js';
 
 const DIAS_SESSAO = 14;
 const AREAS = ['Antigo Testamento', 'Novo Testamento', 'Teologia bíblica', 'História'];
 const STATUS = ['rascunho', 'revisao', 'publicado', 'arquivado'];
 const CAMPOS = ['tipo', 'titulo', 'titulo_original', 'autor', 'autor_citacao', 'afiliacao', 'tradutor', 'periodico', 'volume', 'numero', 'ano', 'mes',
   'paginas_original', 'editora_original', 'url_original', 'area', 'tema', 'tema_en', 'resumo', 'resumo_en', 'resumo_editorial', 'palavras_chave', 'direitos',
-  'pdf_url', 'pdf_paginas', 'capa_url'];
+  'acesso', 'pdf_url', 'pdf_paginas', 'capa_url'];
 
 // ---------------------------------------------------------------- utilidades
 const agora = () => new Date().toISOString().replace('T', ' ').slice(0, 19);
@@ -74,6 +76,7 @@ function limpar(dados, atual = {}) {
   if ('resumo_editorial' in o) o.resumo_editorial = o.resumo_editorial ? 1 : 0;
   if ('pdf_paginas' in o) o.pdf_paginas = o.pdf_paginas ? parseInt(o.pdf_paginas, 10) || null : null;
   if ('tipo' in o && !['traducao', 'original'].includes(o.tipo)) o.tipo = 'traducao';
+  if ('acesso' in o && !['livre', 'cadastro'].includes(o.acesso)) o.acesso = atual.acesso || 'cadastro';
   if ('area' in o && !AREAS.includes(o.area)) o.area = atual.area || AREAS[0];
   for (const k of ['pdf_url', 'capa_url']) if (o[k] && !/^\/artigos\/[\w-]+\.(?:pdf|jpe?g|png|webp)$/i.test(o[k])) delete o[k];
   if (o.url_original && !/^https?:\/\//.test(o.url_original)) o.url_original = null;
@@ -105,7 +108,13 @@ function comPermissoes(u, a) {
 }
 
 // ---------------------------------------------------------------- roteador
-export async function api(req, env, url) {
+export async function api(req, env, url, ctx) {
+  // publicado pela primeira vez: avisa os inscritos por e-mail (fila; o resto sai a cada 10 minutos)
+  const aoPublicar = async (tipo, id, titulo) => {
+    try {
+      if ((await enfileirar(env, tipo, id, titulo)) && ctx) ctx.waitUntil(processarFila(env).catch((e) => console.error('fila de e-mails', e)));
+    } catch (e) { console.error('enfileirar', e); }
+  };
   const m = req.method;
   const p = url.pathname.replace(/^\/api/, '').replace(/\/+$/, '') || '/';
   const seg = p.split('/').filter(Boolean);
@@ -286,6 +295,7 @@ export async function api(req, env, url) {
       ).bind(status, u.id, a.id).run();
       const nomes = { rascunho: 'voltou para rascunho', revisao: 'enviou para revisão', publicado: 'publicou', arquivado: 'arquivou' };
       await registrar(env, u, nomes[status], a.titulo);
+      if (status === 'publicado' && !a.publicado_em) await aoPublicar('artigo', a.id, a.titulo);
       return json({ artigo: comPermissoes(u, await lerArtigo(env, a.id)) });
     }
 
@@ -410,6 +420,21 @@ export async function api(req, env, url) {
       }
     }
     return erro('Rota não encontrada.', 404);
+  }
+
+  if (seg[0] === 'testemunhos') {
+    if (!pode(u, 'publicar')) return erro('Apenas editores e acima publicam testemunhos.', 403);
+    return apiTestemunhosPainel(req, env, url, seg.slice(1), u, { registrar, aoPublicar });
+  }
+
+  if (p === '/emails' && m === 'GET') {
+    if (!pode(u, 'publicar')) return erro('Apenas editores e acima veem os e-mails.', 403);
+    return apiEmailsPainel(env);
+  }
+
+  if (seg[0] === 'moderacao') {
+    if (!pode(u, 'moderar_comentarios')) return erro('Apenas editores e acima moderam os comentários.', 403);
+    return apiModeracao(req, env, url, seg.slice(1), u, { registrar });
   }
 
   if (p === '/estatisticas' && m === 'GET') {

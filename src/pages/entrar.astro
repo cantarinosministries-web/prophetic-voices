@@ -1,0 +1,9 @@
+---
+// Cadastro e entrada dos leitores (Google, Apple, Facebook, Microsoft). Lógica em public/conta/conta.js.
+import Base from '../layouts/Base.astro';
+---
+<Base page="conta" title="Entrar ou criar conta — The Prophetic Voices" description="Crie sua conta no The Prophetic Voices com Google, Apple, Facebook ou Microsoft.">
+  <Fragment slot="head"><meta name="robots" content="noindex" /></Fragment>
+  <section class="pad conta-sec"><div class="wrap" id="conta" data-pagina="entrar"><p class="conta-carregando">…</p></div></section>
+  <Fragment slot="scripts"><script is:inline src="/conta/botoes.js"></script><script is:inline src="/conta/conta.js"></script></Fragment>
+</Base>

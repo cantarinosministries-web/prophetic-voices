@@ -24,6 +24,7 @@ export function contar(env, ctx, req, artigoId, tipo) {
     // o leitor embutido na página do artigo não conta como download; nem os pedaços que o visualizador de PDF pede depois do primeiro
     const destino = req.headers.get('Sec-Fetch-Dest') || '';
     if (['iframe', 'embed', 'object', 'frame'].includes(destino)) return;
+    if (req.headers.get('X-PV-Leitor')) return; // leitor de PDF próprio da página (pdf.js)
     const faixa = req.headers.get('Range');
     if (faixa && !/^bytes=0-/.test(faixa)) return;
   }
