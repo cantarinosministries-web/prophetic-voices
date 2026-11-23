@@ -43,7 +43,7 @@ const ogTags = (t, d, u) =>
   `<link rel="canonical" href="${u}"><meta property="og:type" content="article"><meta property="og:title" content="${esc(t)}"><meta property="og:description" content="${esc(d)}"><meta property="og:url" content="${u}">`;
 
 // ---------------------------------------------------------------- lista
-export async function paginaLista(env, req, artigos) {
+export async function paginaLista(env, req, artigos, bloqueado = false) {
   const t = await modelo(env, req, '/artigos.html');
   const pub = artigos.map(paraPublico);
   const autores = new Set(pub.map((a) => a.autor)).size;
@@ -101,12 +101,12 @@ export async function paginaLista(env, req, artigos) {
     head: ogTags('Artigos — The Prophetic Voices', 'Revista The Prophetic Voices: artigos e traduções em profetismo bíblico.', DOM + '/artigos.html') +
       `<script type="application/ld+json">${JSON.stringify(ld).replace(/</g, '\\u003c')}</script>`,
     main,
-    scripts: `<script>window.PV_ARTIGOS=${dados};</script><script src="/revista/revista.js"></script>`,
+    scripts: `<script>window.PV_ARTIGOS=${dados};${bloqueado ? 'window.PV_CADASTRO=true;' : ''}</script><script src="/revista/revista.js"></script>`,
   });
 }
 
 // ---------------------------------------------------------------- artigo
-export async function paginaArtigo(env, req, a, relacionados, previa, numeros, comentarios = false) {
+export async function paginaArtigo(env, req, a, relacionados, previa, numeros, comentarios = false, bloqueado = false) {
   const t = await modelo(env, req, '/artigos/modelo.html');
   const p = paraPublico(a);
   const trad = a.tipo === 'traducao' && a.tradutor;
@@ -164,7 +164,7 @@ export async function paginaArtigo(env, req, a, relacionados, previa, numeros, c
     ${fonte || trad ? `<p class="art-src">${fonte}${fonte && trad ? ' · ' : ''}${trad ? `<span data-i18n="m_trans">Tradução</span>: ${esc(a.tradutor)}` : ''}</p>` : ''}
     <div class="art-actions">
       ${pdf ? `<a href="#leitor" class="btn btn-creme"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2 5h7a3 3 0 0 1 3 3v12a2 2 0 0 0-2-2H2z"/><path d="M22 5h-7a3 3 0 0 0-3 3v12a2 2 0 0 1 2-2h8z"/></svg><span data-i18n="read_on">Ler online</span></a>
-      <a href="${esc(pdf)}" download class="btn btn-ghost"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5"/><path d="M4 19h16"/></svg><span data-i18n="dl">Baixar PDF</span>${a.pdf_paginas ? ` <small style="opacity:.7">(${a.pdf_paginas} p.)</small>` : ''}</a>` : ''}
+      <a href="${bloqueado ? '#leitor' : esc(pdf)}"${bloqueado ? ' data-cadastro' : ' download'} class="btn btn-ghost"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5"/><path d="M4 19h16"/></svg><span data-i18n="dl">Baixar PDF</span>${a.pdf_paginas ? ` <small style="opacity:.7">(${a.pdf_paginas} p.)</small>` : ''}</a>` : ''}
       <button type="button" class="btn btn-ghost" id="citeBtn"><span data-i18n="cite">Copiar citação</span></button>
     </div>
   </div></div>
@@ -176,7 +176,16 @@ export async function paginaArtigo(env, req, a, relacionados, previa, numeros, c
         ${a.resumo_editorial ? '<p class="art-note" data-i18n="abs_note">Resumo editorial da The Prophetic Voices; o artigo original não tem resumo.</p>' : ''}
         <div class="kw2" aria-label="Palavras-chave">${kw}</div>
       </section>
-      ${pdf ? `<section class="art-block" id="leitor">
+      ${pdf && bloqueado ? `<section class="art-block" id="leitor">
+        <div class="gate" id="gate" data-volta="/artigos/${esc(a.slug)}.html#leitor">
+          <div class="gate-ico" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 5h7a3 3 0 0 1 3 3v12a2 2 0 0 0-2-2H2z"/><path d="M22 5h-7a3 3 0 0 0-3 3v12a2 2 0 0 1 2-2h8z"/></svg></div>
+          <h2 data-pt="Leitura e download gratuitos" data-en="Free reading and download">Leitura e download gratuitos</h2>
+          <p class="gate-lede" data-pt="Para ler este artigo na íntegra ou baixar o PDF, faça seu login ou cadastro abaixo. A leitura, o download e o cadastro são totalmente gratuitos." data-en="To read this article in full or download the PDF, sign in or create your account below. Reading, downloading and signing up are completely free.">Para ler este artigo na íntegra ou baixar o PDF, faça seu login ou cadastro abaixo. A leitura, o download e o cadastro são totalmente gratuitos.</p>
+          <div class="gate-botoes" id="gateBotoes"><a class="btn btn-creme" href="/entrar.html?motivo=leitura&amp;volta=${encodeURIComponent('/artigos/' + a.slug + '.html#leitor')}" data-pt="Entrar ou criar conta" data-en="Sign in or create an account">Entrar ou criar conta</a></div>
+          <p class="gate-nota"><span data-pt="Use a conta que preferir. Guardamos apenas seu nome e e-mail; o e-mail nunca aparece no site." data-en="Use whichever account you prefer. We only keep your name and e-mail; your e-mail never appears on the site.">Use a conta que preferir. Guardamos apenas seu nome e e-mail; o e-mail nunca aparece no site.</span> <a href="/privacidade.html" data-pt="Política de Privacidade" data-en="Privacy Policy">Política de Privacidade</a></p>
+        </div>
+      </section>` : ''}
+      ${pdf && !bloqueado ? `<section class="art-block" id="leitor">
         <div class="reader-bar"><h2 data-i18n="reader_h">Leitura</h2><a href="${esc(pdf)}" target="_blank" rel="noopener" class="reader-open" data-i18n="open">Abrir em tela cheia ↗</a></div>
         <div class="reader"><iframe src="${esc(pdf)}#view=FitH" title="${esc(a.titulo)} — PDF" loading="lazy"></iframe></div>
         <p class="art-note"><span data-i18n="fb1">Se o documento não aparecer no seu aparelho,</span> <a href="${esc(pdf)}" target="_blank" rel="noopener" data-i18n="fb2">abra o PDF aqui</a>.</p>
@@ -205,6 +214,6 @@ export async function paginaArtigo(env, req, a, relacionados, previa, numeros, c
     head: (previa ? '<meta name="robots" content="noindex">' : '') + ogTags(a.titulo, (a.resumo || '').slice(0, 280), urlPag) + meta +
       `<script type="application/ld+json">${JSON.stringify(ld).replace(/</g, '\\u003c')}</script>`,
     main,
-    scripts: '<script src="/revista/revista.js"></script>' + (comentarios ? '<script src="/conta/botoes.js"></script><script src="/revista/comentarios.js"></script>' : ''),
+    scripts: '<script src="/revista/revista.js"></script>' + (comentarios ? '<script src="/conta/botoes.js"></script><script src="/revista/comentarios.js"></script>' : '') + (bloqueado ? '<script src="/revista/cadastro.js"></script>' : ''),
   });
 }

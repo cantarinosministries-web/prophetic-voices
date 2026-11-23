@@ -64,3 +64,10 @@ Configuração inicial (uma vez): veja `docs/CONFIGURAR-CLOUDFLARE.md`.
 - Testemunhos autorizados são publicados pelo painel e aparecem em `/testemunhos.html`.
 - Novo artigo ou testemunho publicado pela primeira vez → e-mail para os inscritos (conta do site ou rodapé com confirmação),
   via Cloudflare Email Service. Código: `worker/emails.js`. Configuração: `docs/CONFIGURAR-EMAILS.md`.
+
+## Leitura e download com cadastro gratuito (desde 22/11/2026)
+- Navegar pela revista, resumos e fichas é aberto; **ler o PDF e baixar exigem conta de leitor** (gratuita).
+- O Worker bloqueia `/artigos/*.pdf` e `/arquivos/artigos/*.pdf` sem login: navegação vai para `/entrar.html?motivo=leitura&volta=<artigo>#leitor`; pedidos embutidos recebem 401.
+- Passam direto: leitor logado, equipe logada no painel e robôs de busca acadêmica (Googlebot, Google Scholar etc., pelo User-Agent).
+- Se nenhum login estiver configurado, tudo volta a ser aberto (para ninguém ficar trancado).
+- Página do artigo sem login mostra o aviso "Leitura e download gratuitos" com os botões de login (`public/revista/cadastro.js`).

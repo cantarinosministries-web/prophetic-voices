@@ -11,7 +11,9 @@
   var T = {
     pt: {
       e_eyebrow: 'Cadastro', e_h: 'Entrar', e_em: 'ou criar sua conta',
-      e_lede: 'Com a sua conta você comenta nos artigos da revista The Prophetic Voices. Não há senha para criar: use uma conta que você já tem.',
+      e_lede: 'Com a sua conta você lê e baixa gratuitamente os artigos da revista The Prophetic Voices e pode comentar neles. Não há senha para criar: use uma conta que você já tem.',
+      l_eyebrow: 'Leitura gratuita', l_h: 'Leia e baixe', l_em: 'os artigos gratuitamente',
+      l_lede: 'Para ler e baixar os artigos da revista, entre ou crie sua conta. A leitura, o download e o cadastro são totalmente gratuitos. Não há senha para criar: use uma conta que você já tem.',
       e_card: 'Escolha como entrar', e_card_p: 'Se é a primeira vez, a conta é criada na hora.',
       priv: 'Guardamos apenas o seu nome e o seu e-mail, recebidos da conta escolhida. O e-mail não aparece no site, e você pode excluir a sua conta a qualquer momento.',
       priv_links: 'Ao continuar, você concorda com os <a href="/termos.html">Termos de Uso</a> e a <a href="/privacidade.html">Política de Privacidade</a>.',
@@ -32,7 +34,9 @@
     },
     en: {
       e_eyebrow: 'Sign up', e_h: 'Sign in', e_em: 'or create your account',
-      e_lede: 'With your account you can comment on The Prophetic Voices journal articles. There is no password to create: use an account you already have.',
+      e_lede: 'With your account you can read and download The Prophetic Voices journal articles for free and comment on them. There is no password to create: use an account you already have.',
+      l_eyebrow: 'Free reading', l_h: 'Read and download', l_em: 'the articles for free',
+      l_lede: 'To read and download the journal articles, sign in or create your account. Reading, downloading and signing up are completely free. There is no password to create: use an account you already have.',
       e_card: 'Choose how to sign in', e_card_p: 'If it is your first time, your account is created right away.',
       priv: 'We only keep your name and e-mail, received from the account you choose. Your e-mail never appears on the site, and you can delete your account at any time.',
       priv_links: 'By continuing you agree to the <a href="/termos.html">Terms of Use</a> and the <a href="/privacidade.html">Privacy Policy</a>.',
@@ -64,7 +68,8 @@
 
   function telaEntrar() {
     var tem = S.provedores && S.provedores.length;
-    raiz.innerHTML = '<div class="conta-grade"><div><div class="eyebrow">' + esc(t('e_eyebrow')) + '</div><h1>' + esc(t('e_h')) + '<em>' + esc(t('e_em')) + '</em></h1><p class="lede">' + esc(t('e_lede')) + '</p></div>' +
+    var k = params.get('motivo') === 'leitura' ? 'l_' : 'e_';
+    raiz.innerHTML = '<div class="conta-grade"><div><div class="eyebrow">' + esc(t(k + 'eyebrow')) + '</div><h1>' + esc(t(k + 'h')) + '<em>' + esc(t(k + 'em')) + '</em></h1><p class="lede">' + esc(t(k + 'lede')) + '</p></div>' +
       '<div class="conta-card">' + avisos() + (tem
         ? '<h2>' + esc(t('e_card')) + '</h2><p>' + esc(t('e_card_p')) + '</p>' + L.botoes(S.provedores, { volta: volta }) + '<p class="conta-priv">' + esc(t('priv')) + ' ' + t('priv_links') + '</p>'
         : '<h2>' + esc(t('breve')) + '</h2><p>' + esc(t('breve_p')) + '</p>') + '</div></div>';
@@ -104,7 +109,10 @@
     raiz.querySelectorAll('[data-email]').forEach(function (b) {
       b.addEventListener('click', function () {
         var sim = b.getAttribute('data-email') === '1';
-        L.api('/conta/email', 'POST', { receber: sim }).then(function () { aviso = sim ? 'em_sim_ok' : 'em_nao_ok'; erroAviso = ''; return iniciar(); }).catch(function (er) { alert(er.message); });
+        L.api('/conta/email', 'POST', { receber: sim }).then(function () {
+          if (voltaBv) { location.href = voltaBv; return; }
+          aviso = sim ? 'em_sim_ok' : 'em_nao_ok'; erroAviso = ''; return iniciar();
+        }).catch(function (er) { alert(er.message); });
       });
     });
     document.getElementById('sair').addEventListener('click', function () { L.api('/conta/sair', 'POST').then(function () { location.href = '/artigos.html'; }); });

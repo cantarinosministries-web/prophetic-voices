@@ -124,7 +124,7 @@
         '<p class="by"><a href="?autor=' + encodeURIComponent(a.autor) + '" data-autor="' + esc(a.autor) + '">' + hl(a.autor, terms) + '</a>' + (a.tradutor ? ' <span>· ' + t('trad') + ': ' + esc(a.tradutor) + '</span>' : '') + '</p>' +
         '<p class="abs">' + esc(lang === 'en' ? a.resumoEn : a.resumo) + '</p>' +
         '<div class="kw">' + a.palavrasChave.slice(0, 5).map(function (k) { return '<button data-k="' + esc(k) + '">' + hl(k, terms) + '</button>'; }).join('') + '</div>' +
-        '<div class="links"><a href="' + a.url + '" class="btn btn-creme sm">' + t('read') + '</a><a href="' + a.pdf + '" download class="btn btn-ghost sm">PDF ↓</a></div></div></article>';
+        '<div class="links"><a href="' + a.url + '" class="btn btn-creme sm">' + t('read') + '</a>' + (window.PV_CADASTRO ? '<a href="' + a.url + '#leitor" class="btn btn-ghost sm">PDF ↓</a>' : '<a href="' + a.pdf + '" download class="btn btn-ghost sm">PDF ↓</a>') + '</div></div></article>';
     }).join('');
     list.querySelectorAll('[data-autor]').forEach(function (el) { el.onclick = function (e) { e.preventDefault(); state.autor = el.dataset.autor; render(); }; });
     list.querySelectorAll('[data-k]').forEach(function (el) { el.onclick = function () { state.q = el.dataset.k; input.value = state.q; render(); }; });
