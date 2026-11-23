@@ -31,10 +31,13 @@ async function publicados(env) {
   return (await env.DB.prepare("SELECT * FROM artigos WHERE status = 'publicado' ORDER BY ano, titulo").all()).results;
 }
 
-// Leitura e download dos artigos: gratuitos, mas exigem conta de leitor (decisão de Gabriel, 22/11/2026).
-// Só vale quando há algum login ligado; a equipe logada no painel e os robôs de busca (Google Acadêmico etc.) passam direto.
+// Leitura e download dos artigos (decisão de Gabriel, 22 e 23/11/2026):
+//   acesso 'livre'    -> domínio público ou licença aberta: qualquer pessoa lê e baixa
+//   acesso 'cadastro' -> publicado com autorização (ou sem licença aberta): gratuito, mas exige conta de leitor
+// O cadastro só é exigido quando há algum login ligado; a equipe logada no painel e os robôs de busca (Google Acadêmico etc.) passam direto.
 const BUSCADORES = /Googlebot|Google-?Scholar|Google-InspectionTool|bingbot|DuckDuckBot|Applebot|YandexBot|Semantic ?Scholar|CiteSeerX|BASE|CORE|ia_archiver/i;
-async function acessoLeitura(env, req) {
+async function acessoLeitura(env, req, artigo) {
+  if (artigo && artigo.acesso === 'livre') return { livre: true, aberto: true };
   if (provedoresAtivos(env).length === 0) return { livre: true };
   if (BUSCADORES.test(req.headers.get('User-Agent') || '')) return { livre: true, robo: true };
   if (await leitorDaSessao(env, req)) return { livre: true };
@@ -74,18 +77,18 @@ export default {
       }
 
       if (path === '/artigos.html' || path === '/artigos' || path === '/artigos/') {
-        return html(await paginaLista(env, req, await publicados(env), !(await acessoLeitura(env, req)).livre));
+        return html(await paginaLista(env, req, await publicados(env), !(await acessoLeitura(env, req)).livre, provedoresAtivos(env).length > 0));
       }
 
       if (path.startsWith('/artigos/')) {
         const nome = decodeURIComponent(path.slice('/artigos/'.length));
         if (/\.pdf$/i.test(nome)) {
-          const a = await env.DB.prepare("SELECT id, slug FROM artigos WHERE pdf_url = ? AND status = 'publicado'").bind('/artigos/' + nome).first();
-          const acesso = await acessoLeitura(env, req);
+          const a = await env.DB.prepare("SELECT id, slug, acesso FROM artigos WHERE pdf_url = ? AND status = 'publicado'").bind('/artigos/' + nome).first();
+          const acesso = await acessoLeitura(env, req, a);
           if (!acesso.livre) return pedirCadastro(req, a && a.slug);
           const r = await env.ASSETS.fetch(req);
           if (r.ok && a) contar(env, ctx, req, a.id, 'downloads');
-          if (!r.ok || provedoresAtivos(env).length === 0) return r;
+          if (!r.ok || acesso.aberto || provedoresAtivos(env).length === 0) return r;
           const h = new Headers(r.headers);
           h.set('Cache-Control', 'private, no-store');
           return new Response(r.body, { status: r.status, headers: h });
@@ -109,7 +112,7 @@ export default {
           if (contavel(req)) numeros.acessos += 1; // a visita atual já entra na conta mostrada
         }
         const comentarios = !previa && provedoresAtivos(env).length > 0;
-        const bloqueado = !previa && !(await acessoLeitura(env, req)).livre;
+        const bloqueado = !previa && !(await acessoLeitura(env, req, a)).livre;
         const pagina = html(await paginaArtigo(env, req, a, rel, previa, numeros, comentarios, bloqueado));
         if (!previa) contar(env, ctx, req, a.id, 'acessos');
         return pagina;
@@ -128,20 +131,20 @@ export default {
         }
         if (!/^artigos\/[\w.-]+$/.test(chave)) return naoEncontrado(env, req);
         const ref = '/arquivos/' + chave;
-        const a = await env.DB.prepare('SELECT id, slug, status, pdf_url FROM artigos WHERE pdf_url = ? OR capa_url = ?').bind(ref, ref).first();
+        const a = await env.DB.prepare('SELECT id, slug, status, pdf_url, acesso FROM artigos WHERE pdf_url = ? OR capa_url = ?').bind(ref, ref).first();
         if (!a) return naoEncontrado(env, req);
         if (a.status !== 'publicado') {
           const u = await usuarioDaSessao(env, req);
           if (!u || !pode(u, 'ver_rascunhos')) return naoEncontrado(env, req);
         }
         const ehPdf = a.pdf_url === ref;
-        if (ehPdf && a.status === 'publicado' && !(await acessoLeitura(env, req)).livre) return pedirCadastro(req, a.slug);
+        if (ehPdf && a.status === 'publicado' && !(await acessoLeitura(env, req, a)).livre) return pedirCadastro(req, a.slug);
         const obj = await env.ARQUIVOS.get(chave);
         if (!obj) return naoEncontrado(env, req);
         const h = cabecalhos(new Headers());
         obj.writeHttpMetadata(h);
         h.set('ETag', obj.httpEtag);
-        h.set('Cache-Control', a.status !== 'publicado' || (ehPdf && provedoresAtivos(env).length > 0) ? 'private, no-store' : 'public, max-age=86400');
+        h.set('Cache-Control', a.status !== 'publicado' || (ehPdf && a.acesso !== 'livre' && provedoresAtivos(env).length > 0) ? 'private, no-store' : 'public, max-age=86400');
         if (a.status === 'publicado' && a.pdf_url === ref) contar(env, ctx, req, a.id, 'downloads');
         return new Response(obj.body, { headers: h });
       }

@@ -235,6 +235,10 @@ async function telaArtigo(id) {
         ${campo('resumo_en', 'Resumo em inglês', a, { area: true })}
         <label class="f"><span>Palavras-chave</span><input name="palavras_chave" value="${esc(kw.join(', '))}" placeholder="separe por vírgula"><small>Entram na busca do site e nos metadados do Google Acadêmico.</small></label>
         ${campo('direitos', 'Direitos', a, { ph: 'Original em domínio público. Tradução © 2026 …' })}
+        <label class="f"><span>Acesso ao PDF</span><select name="acesso">
+          <option value="livre" ${a.acesso === 'livre' ? 'selected' : ''}>Livre — qualquer pessoa lê e baixa (domínio público ou licença aberta)</option>
+          <option value="cadastro" ${a.acesso !== 'livre' ? 'selected' : ''}>Com cadastro gratuito — publicado com autorização do autor/editora</option>
+        </select><small>O resumo e a ficha do artigo continuam abertos nos dois casos.</small></label>
         ${!novo ? campo('slug', 'Endereço da página', a, { dica: `thepropheticvoices.com.br/artigos/<b>${esc(a.slug)}</b>.html — mude só antes de publicar.` }) : ''}
       </div></fieldset></form>
       <div class="stack">
@@ -690,6 +694,11 @@ async function telaEmails() {
   <div class="card" style="margin-top:16px"><h3>Últimos envios</h3>
     <table class="tb"><thead><tr><th>Quando</th><th>O quê</th><th>Situação</th><th class="num">Enviados</th><th class="num">Falhas</th></tr></thead><tbody>
     ${r.envios.map((e) => `<tr><td class="small muted" style="white-space:nowrap">${data(e.criado_em)}</td><td>${e.tipo === 'artigo' ? 'Artigo' : 'Testemunho'}: ${esc(e.titulo)}</td><td class="small">${ST[e.status]}${e.na_fila ? ` · ${e.na_fila} na fila` : ''}</td><td class="num">${e.enviados}/${e.total}</td><td class="num">${e.falhas || '—'}</td></tr>`).join('') || '<tr><td colspan="5" class="muted">Nenhum envio ainda.</td></tr>'}
+    </tbody></table></div>
+  <div class="card" style="margin-top:16px"><h3>Interessados em escrever para a revista</h3>
+    <p class="small muted">Leitores que marcaram, na Biblioteca, que querem ser avisados quando a chamada de artigos abrir.</p>
+    <table class="tb"><thead><tr><th>Nome</th><th>E-mail</th><th>Trilho</th><th>Desde</th></tr></thead><tbody>
+    ${(r.autores || []).map((x) => `<tr><td>${esc(x.nome)}</td><td class="small">${esc(x.email || '—')}</td><td class="small">${{ academico: 'Artigo acadêmico', ensaio: 'Ensaio teológico', ambos: 'Os dois' }[x.interesse_autor] || ''}</td><td class="small muted" style="white-space:nowrap">${data(x.interesse_autor_em)}</td></tr>`).join('') || '<tr><td colspan="4" class="muted">Ninguém ainda.</td></tr>'}
     </tbody></table></div>`;
 }
 

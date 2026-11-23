@@ -11,7 +11,7 @@ const AREAS = ['Antigo Testamento', 'Novo Testamento', 'Teologia bíblica', 'His
 const STATUS = ['rascunho', 'revisao', 'publicado', 'arquivado'];
 const CAMPOS = ['tipo', 'titulo', 'titulo_original', 'autor', 'autor_citacao', 'afiliacao', 'tradutor', 'periodico', 'volume', 'numero', 'ano', 'mes',
   'paginas_original', 'editora_original', 'url_original', 'area', 'tema', 'tema_en', 'resumo', 'resumo_en', 'resumo_editorial', 'palavras_chave', 'direitos',
-  'pdf_url', 'pdf_paginas', 'capa_url'];
+  'acesso', 'pdf_url', 'pdf_paginas', 'capa_url'];
 
 // ---------------------------------------------------------------- utilidades
 const agora = () => new Date().toISOString().replace('T', ' ').slice(0, 19);
@@ -76,6 +76,7 @@ function limpar(dados, atual = {}) {
   if ('resumo_editorial' in o) o.resumo_editorial = o.resumo_editorial ? 1 : 0;
   if ('pdf_paginas' in o) o.pdf_paginas = o.pdf_paginas ? parseInt(o.pdf_paginas, 10) || null : null;
   if ('tipo' in o && !['traducao', 'original'].includes(o.tipo)) o.tipo = 'traducao';
+  if ('acesso' in o && !['livre', 'cadastro'].includes(o.acesso)) o.acesso = atual.acesso || 'cadastro';
   if ('area' in o && !AREAS.includes(o.area)) o.area = atual.area || AREAS[0];
   for (const k of ['pdf_url', 'capa_url']) if (o[k] && !/^\/(artigos|arquivos)\/[\w./-]+$/.test(o[k])) delete o[k];
   if (o.url_original && !/^https?:\/\//.test(o.url_original)) o.url_original = null;

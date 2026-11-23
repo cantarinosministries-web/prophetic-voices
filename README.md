@@ -65,9 +65,17 @@ Configuração inicial (uma vez): veja `docs/CONFIGURAR-CLOUDFLARE.md`.
 - Novo artigo ou testemunho publicado pela primeira vez → e-mail para os inscritos (conta do site ou rodapé com confirmação),
   via Cloudflare Email Service. Código: `worker/emails.js`. Configuração: `docs/CONFIGURAR-EMAILS.md`.
 
-## Leitura e download com cadastro gratuito (desde 22/11/2026)
-- Navegar pela revista, resumos e fichas é aberto; **ler o PDF e baixar exigem conta de leitor** (gratuita).
+## Leitura e download: acesso por artigo (desde 23/11/2026)
+- Cada artigo tem `acesso` (painel → artigo → "Acesso ao PDF"): **livre** (domínio público ou licença aberta: qualquer um lê e baixa) ou **cadastro** (publicado com autorização: gratuito, mas exige conta de leitor). Migração 0014.
+- Navegar pela revista, resumos e fichas é sempre aberto.
 - O Worker bloqueia `/artigos/*.pdf` e `/arquivos/artigos/*.pdf` sem login: navegação vai para `/entrar.html?motivo=leitura&volta=<artigo>#leitor`; pedidos embutidos recebem 401.
 - Passam direto: leitor logado, equipe logada no painel e robôs de busca acadêmica (Googlebot, Google Scholar etc., pelo User-Agent).
 - Se nenhum login estiver configurado, tudo volta a ser aberto (para ninguém ficar trancado).
 - Página do artigo sem login mostra o aviso "Leitura e download gratuitos" com os botões de login (`public/revista/cadastro.js`).
+
+## Biblioteca do leitor e leitor de PDF próprio (desde 23/11/2026)
+- `/conta.html` tem duas abas: **Biblioteca** (padrão) e **Dados da conta**. API em `worker/biblioteca.js` (`/api/conta/biblioteca`, `salvos`, `colecoes`, `citacoes`, `progresso`, `historico`, `interesse`, `artigo/<slug>`).
+- Biblioteca: continuar lendo, artigos salvos, coleções, citações guardadas (com chamada ABNT), comentários enviados, publicados recentemente e "Escreva para a revista" (interesse por trilho; a lista aparece no painel → E-mails). Página `/proponha.html`.
+- Leitor de PDF próprio (`src/scripts/leitor-pdf.js`, pdf.js carregado só na página do artigo): páginas, zoom, tela cheia, texto selecionável, "Guardar citação" e "Copiar com referência". Se falhar, volta ao visualizador do navegador. Os pedidos dele levam `X-PV-Leitor` e não contam como download.
+- **Histórico de leitura é opcional** (`leitores.historico`: NULL = não respondeu, 1 = ligado, 0 = desligado). Só grava a página com ele ligado; desligar apaga tudo. Política de Privacidade 1.3, seção 5.1.
+- "Como citar" na página do artigo: ABNT, SBL e APA (`worker/citacao.js`).

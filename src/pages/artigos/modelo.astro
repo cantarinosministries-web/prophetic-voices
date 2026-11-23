@@ -7,4 +7,5 @@ const slot = (k: string) => `<pv-slot data-k="${k}"></pv-slot>`;
   <Fragment slot="head"><link rel="stylesheet" href="/revista/revista.css" /><Fragment set:html={slot('head')} /></Fragment>
   <Fragment set:html={slot('main')} />
   <Fragment slot="scripts" set:html={slot('scripts')} />
+  <script>import '../../scripts/leitor-pdf.js';</script>
 </Base>

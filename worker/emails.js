@@ -302,5 +302,7 @@ export async function apiEmailsPainel(env) {
        (SELECT COUNT(*) FROM envio_destinos d WHERE d.envio_id = e.id AND d.status = 'fila') na_fila
      FROM envios e ORDER BY e.id DESC LIMIT 50`,
   ).all()).results;
-  return json({ configurado: emailConfigurado(env), remetente: remetente(env).address, inscritos: cont, envios });
+  // leitores que marcaram interesse em escrever para a revista (Biblioteca → "Escreva para a revista")
+  const autores = (await env.DB.prepare('SELECT nome, email, interesse_autor, interesse_autor_em FROM leitores WHERE interesse_autor IS NOT NULL ORDER BY interesse_autor_em DESC LIMIT 500').all()).results;
+  return json({ configurado: emailConfigurado(env), remetente: remetente(env).address, inscritos: cont, envios, autores });
 }

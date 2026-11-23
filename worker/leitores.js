@@ -10,6 +10,7 @@
 // Cada provedor só aparece no site quando os segredos dele estão no Cloudflare (ver docs/CONFIGURAR-LOGINS.md).
 import { aleatorio, sha256, lerCookie, json, erro, cabecalhos } from './seguranca.js';
 import { inscricaoDoLeitor, definirInscricaoLeitor, emailConfigurado } from './emails.js';
+import { apiBiblioteca, ROTAS_BIBLIOTECA } from './biblioteca.js';
 
 const DOM = 'https://thepropheticvoices.com.br';
 const COOKIE_LEITOR = 'pv_leitor';
@@ -325,8 +326,9 @@ export async function apiLeitores(req, env, url) {
       await env.DB.prepare('DELETE FROM leitor_contas WHERE leitor_id = ? AND provedor = ?').bind(l.id, seg[2]).run();
       return json({ ok: true });
     }
+    if (ROTAS_BIBLIOTECA.includes(seg[1])) return apiBiblioteca(req, env, url, seg, l);
     if (p === '/conta' && m === 'DELETE') {
-      // LGPD: apaga o cadastro, os logins, as sessões e os comentários do leitor
+      // LGPD: apaga o cadastro, os logins, as sessões, os comentários e toda a Biblioteca (salvos, coleções, citações, histórico)
       await env.DB.prepare('DELETE FROM leitores WHERE id = ?').bind(l.id).run();
       return json({ ok: true }, 200, { 'Set-Cookie': limparCookieLeitor() });
     }
