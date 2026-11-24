@@ -2,7 +2,11 @@
 // Spirit Immersion — movimento de oração em línguas, 1 hora por dia. Números em src/data/spirit.js;
 // inscrição pela conta de leitor (worker/spirit.js); a jornada fica em /conta.html#spirit.
 import Base from '../layouts/Base.astro';
-import { destaques, frutos, constancia, ultimaEdicao, fonte, relatos } from '../data/spirit.js';
+import { destaques, frutos, constancia, ultimaEdicao, fonte, relatos, ufsParticipantes, paisesParticipantes, nomesPaises } from '../data/spirit.js';
+import { brasil, BR_VIEW, mundo, MUNDO_VIEW, pontos } from '../data/mapas.js';
+const ufOn = new Set(ufsParticipantes);
+const paisOn = new Set(paisesParticipantes);
+const brOrd = [...brasil].sort((a, b) => (ufOn.has(b.uf) - ufOn.has(a.uf)));
 const pct = (n) => Math.round((100 * n) / fonte.respostas);
 const fmt = (n) => n.toLocaleString('pt-BR');
 const ticks = Array.from({ length: 60 }, (_, i) => i);
@@ -136,10 +140,38 @@ const ticks = Array.from({ length: 60 }, (_, i) => i);
             <p data-en={`Half of the participants prayed ${constancia.mediana} days or more; ${constancia.vinteOuMais}% prayed 20 days or more. Constancy is not perfection: it is coming back.`}>Metade dos participantes orou {constancia.mediana} dias ou mais; {constancia.vinteOuMais}% oraram 20 dias ou mais. Constância não é perfeição: é voltar.</p>
           </div>
 
-          <div class="si-box si-alcance rv">
-            <div><b class="mono">{ultimaEdicao.estados}</b><span data-en="states + the Federal District">estados + o DF</span></div>
-            <div><b class="mono">{ultimaEdicao.paises}</b><span data-en="nations">nações</span></div>
-            <div><b class="mono">{ultimaEdicao.idadeMin}–{ultimaEdicao.idadeMax}</b><span data-en="years old">anos de idade</span></div>
+        </div>
+      </div>
+
+      <!-- ALCANCE: mapas -->
+      <div class="si-mapas rv">
+        <span class="si-c tl"></span><span class="si-c br"></span>
+        <div class="si-ptit mono"><span data-en="REACH · LAST EDITION">ALCANCE · ÚLTIMA EDIÇÃO</span><span id="siMapaInfo" aria-live="polite" data-pt="PASSE O MOUSE NO MAPA" data-en="HOVER OVER THE MAP">PASSE O MOUSE NO MAPA</span></div>
+        <div class="si-mapas-grade">
+          <div class="si-mapa-br">
+            <svg viewBox={BR_VIEW} role="img" aria-label={`Mapa do Brasil: ${ufsParticipantes.length - 1} estados e o Distrito Federal com participantes`}>
+              {brOrd.map((e, i) => (
+                <path d={e.d} class={ufOn.has(e.uf) ? 'on' : 'off'} data-nome={e.nome} data-uf={e.uf} style={`--d:${i * 45}ms`} />
+              ))}
+            </svg>
+          </div>
+          <div class="si-mapa-lado">
+            <div class="si-mapa-mundo">
+              <svg viewBox={MUNDO_VIEW} role="img" aria-label="Mapa-múndi: Brasil, Portugal e Japão com participantes">
+                {mundo.map((c) => (
+                  <path d={c.d} class={paisOn.has(c.nome) ? 'on' : 'off'} data-nome={paisOn.has(c.nome) ? nomesPaises[c.nome].pt : ''} data-nome-en={paisOn.has(c.nome) ? nomesPaises[c.nome].en : ''} />
+                ))}
+                {paisesParticipantes.map((k) => (
+                  <g class="si-pino" transform={`translate(${pontos[k][0]} ${pontos[k][1]})`}><circle r="14" class="p-anel" /><circle r="4.5" class="p-c" /></g>
+                ))}
+              </svg>
+            </div>
+            <div class="si-alcance">
+              <div><b class="mono">{ultimaEdicao.estados}</b><span data-en="states + the Federal District">estados + o DF</span></div>
+              <div><b class="mono">{ultimaEdicao.paises}</b><span data-en="nations · Brazil, Portugal, Japan">nações · Brasil, Portugal, Japão</span></div>
+              <div><b class="mono">{ultimaEdicao.idadeMin}–{ultimaEdicao.idadeMax}</b><span data-en="years old">anos de idade</span></div>
+            </div>
+            <div class="si-leg mono"><span><i class="on"></i><span data-en="with participants">com participantes</span></span><span><i></i><span data-en="no record yet">ainda sem registro</span></span></div>
           </div>
         </div>
       </div>
@@ -234,7 +266,24 @@ const ticks = Array.from({ length: 60 }, (_, i) => i);
             } else el.classList.add('vivo');
           });
         }, { threshold: 0.3 });
-        document.querySelectorAll('.si-num, .si-barras, .si-gauges, .si-cal31, .si-cal100').forEach(function (el) { io.observe(el); });
+        document.querySelectorAll('.si-num, .si-barras, .si-gauges, .si-cal31, .si-cal100, .si-mapas').forEach(function (el) { io.observe(el); });
+
+        // mapas: o estado (ou país) sob o mouse acende e o nome aparece no painel
+        var info = document.getElementById('siMapaInfo');
+        if (window.matchMedia && matchMedia('(hover: none)').matches) { info.setAttribute('data-pt', 'TOQUE NO MAPA'); info.setAttribute('data-en', 'TAP THE MAP'); }
+        document.querySelectorAll('.si-mapas path').forEach(function (pth) {
+          var nome = function () { return en() && pth.getAttribute('data-nome-en') ? pth.getAttribute('data-nome-en') : pth.getAttribute('data-nome'); };
+          var mostrar = function () {
+            if (!nome()) return;
+            pth.classList.add('luz'); clearTimeout(pth._t);
+            var on = pth.classList.contains('on');
+            info.textContent = '▸ ' + nome().toUpperCase() + ' · ' + (on ? (en() ? 'PARTICIPATED' : 'PARTICIPOU') : (en() ? 'NO RECORD YET' : 'AINDA SEM REGISTRO'));
+          };
+          var apagar = function () { pth._t = setTimeout(function () { pth.classList.remove('luz'); }, 200); };
+          pth.addEventListener('pointerenter', mostrar);
+          pth.addEventListener('pointerleave', apagar);
+          pth.addEventListener('pointerdown', mostrar);
+        });
 
         // grade dos 100 dias: cada número acende sob o mouse (ou o dedo) e apaga devagar, deixando um rastro
         var g100 = document.querySelector('.si-cal100');
@@ -284,7 +333,7 @@ const ticks = Array.from({ length: 60 }, (_, i) => i);
         };
         var t = function (k) { return T[en() ? 'en' : 'pt'][k]; };
         var box = document.getElementById('siInsc');
-        var consentido = false, devocionais = true, fase = 'antes';
+        var consentido = true, devocionais = true, fase = 'antes';
 
         function voltaUrl() { return '/spirit-immersion.html?inscrever=1&dev=' + (devocionais ? 1 : 0); }
         function inscrever(dev) {
@@ -437,9 +486,6 @@ const ticks = Array.from({ length: 60 }, (_, i) => i);
   .si-big b{font-weight:400;font-size:46px;color:var(--creme)}
   .si-big span{font-family:var(--mono);font-size:18px;color:var(--areia)}
   .si-box>p{margin:0;font-size:14.5px;line-height:1.6;color:var(--areia)}
-  .si-alcance{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-  .si-alcance b{display:block;font-weight:400;font-size:30px;color:var(--creme)}
-  .si-alcance span{font-size:13px;color:var(--areia)}
   .si-metodo{margin:22px 0 0;max-width:860px;font-size:13px;line-height:1.6;color:#8C7D6E}
 
   /* edição 2027 */
@@ -449,7 +495,7 @@ const ticks = Array.from({ length: 60 }, (_, i) => i);
   .si-dl div{display:grid;grid-template-columns:150px 1fr;gap:16px;padding:16px 0;border-top:1px solid var(--line)}
   .si-dl dt{font-size:11px;letter-spacing:.2em;color:var(--cobre);padding-top:4px}
   .si-dl dd{margin:0;font-size:17px;color:var(--creme);line-height:1.5}
-  @media(max-width:560px){.si-dl div{grid-template-columns:96px 1fr}.si-alcance b{font-size:22px;white-space:nowrap}}
+  @media(max-width:560px){.si-dl div{grid-template-columns:96px 1fr}.si-alcance b{font-size:24px;white-space:nowrap}}
   .si-inscritos{margin:24px 0 0;font-size:12px;letter-spacing:.2em;color:var(--cobre)}
   .si-cal100{display:grid;grid-template-columns:repeat(10,1fr);gap:6px}
   .si-cal100 i{position:relative;aspect-ratio:1;border:1px solid rgba(248,233,183,.1);display:flex;align-items:center;justify-content:center;font-style:normal;transition:background .5s var(--d),border-color .5s var(--d)}
@@ -461,6 +507,38 @@ const ticks = Array.from({ length: 60 }, (_, i) => i);
   .si-cal100 i.luz{background:var(--cobre);border-color:var(--creme);box-shadow:0 0 22px rgba(191,137,87,.65);transition:background 0s,border-color 0s,box-shadow 0s}
   .si-cal100 i.luz span{color:#000;transition:color 0s}
   .si-cal100{touch-action:pan-y;cursor:crosshair}
+
+  /* mapas */
+  .si-mapas{position:relative;margin-top:16px;border:1px solid var(--line);background:rgba(10,9,7,.75);padding:26px 26px 24px}
+  .si-mapas-grade{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:40px;align-items:center}
+  @media(max-width:900px){.si-mapas-grade{grid-template-columns:1fr;gap:28px}}
+  .si-mapa-br svg,.si-mapa-mundo svg{display:block;width:100%;height:auto;overflow:visible}
+  .si-mapa-mundo svg{overflow:hidden}
+  .si-mapa-br{max-width:520px;margin:0 auto;width:100%}
+  .si-mapas path{stroke-linejoin:round;transition:fill .5s ease,stroke .5s ease,filter .5s ease}
+  .si-mapa-br path{stroke-width:1.1}
+  .si-mapa-mundo path{stroke-width:.6}
+  .si-mapas path.off{fill:rgba(248,233,183,.035);stroke:rgba(248,233,183,.16)}
+  .si-mapas path.on{fill:rgba(248,233,183,.035);stroke:rgba(191,137,87,.35)}
+  .si-mapas.vivo path.on{fill:rgba(191,137,87,.78);stroke:var(--creme);transition-delay:var(--d,0s)}
+  .si-mapas.vivo path.on{filter:drop-shadow(0 0 6px rgba(191,137,87,.45))}
+  .si-mapas path.luz{transition-delay:0s!important;transition-duration:0s}
+  .si-mapas path.on.luz{fill:var(--creme);stroke:var(--creme);filter:drop-shadow(0 0 14px rgba(248,233,183,.7))}
+  .si-mapas path.off.luz{fill:rgba(202,181,160,.16);stroke:rgba(248,233,183,.5)}
+  .si-mapa-mundo path.off{pointer-events:none}
+  .si-pino .p-c{fill:var(--creme)}
+  .si-pino .p-anel{fill:none;stroke:var(--cobre);stroke-width:1.5;transform-origin:center;transform-box:fill-box;animation:si-pino 2.4s ease-out infinite}
+  .si-pino:nth-of-type(2) .p-anel{animation-delay:.8s}.si-pino:nth-of-type(3) .p-anel{animation-delay:1.6s}
+  @keyframes si-pino{0%{transform:scale(.3);opacity:1}100%{transform:scale(1.6);opacity:0}}
+  .si-mapa-lado{display:flex;flex-direction:column;gap:26px}
+  .si-alcance{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding-top:20px;border-top:1px dashed rgba(191,137,87,.3)}
+  .si-alcance b{display:block;font-weight:400;font-size:34px;color:var(--creme)}
+  .si-alcance span{font-size:13px;color:var(--areia);line-height:1.4}
+  .si-leg{display:flex;flex-wrap:wrap;gap:18px;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--areia)}
+  .si-leg>span{display:inline-flex;align-items:center;gap:8px}
+  .si-leg i{width:14px;height:10px;border:1px solid rgba(248,233,183,.25);background:rgba(248,233,183,.04)}
+  .si-leg i.on{background:var(--cobre);border-color:var(--creme)}
+  #siMapaInfo{color:var(--creme)}
 
   /* relatos */
   .si-rel-grade{display:grid;grid-template-columns:repeat(6,1fr);gap:16px;margin-top:56px}

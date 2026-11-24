@@ -40,6 +40,11 @@ export const frutos = [
 export const constancia = { mediana: 24, de: 31, vinteOuMais: 63, completos: 32 };
 
 // edição dez 2025 – jan 2026 (133 respostas)
+// estados (com o DF) e países citados na edição dez 2025 – jan 2026 (pergunta "Onde você mora?")
+export const ufsParticipantes = ['AL','AM','AP','BA','CE','DF','ES','GO','MA','MG','PA','PB','PE','PI','PR','RJ','RN','RO','RR','RS','SC','SE','SP'];
+export const paisesParticipantes = ['Brazil', 'Portugal', 'Japan'];
+export const nomesPaises = { Brazil: { pt: 'Brasil', en: 'Brazil' }, Portugal: { pt: 'Portugal', en: 'Portugal' }, Japan: { pt: 'Japão', en: 'Japan' } };
+
 export const ultimaEdicao = { n: 133, cemDias: 97, consagracao: 92, linguas: 87, idadeMin: 16, idadeMax: 69, idadeMediana: 31, estados: 22, paises: 3 }; // 22 estados + DF; Brasil, Portugal e Japão
 
 // cinco relatos, sem identificação (trechos editados; sem nomes, lugares ou dados pessoais)
