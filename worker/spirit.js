@@ -10,7 +10,16 @@ import { json, erro, aleatorio } from './seguranca.js';
 import { emailConfigurado, enviarEmail, moldura } from './emails.js';
 import { esc } from './paginas.js';
 
-export const EDICAO = { id: '2027', inicio: '2027-01-01', dias: 100, inscricoes_desde: '2026-11-24' };
+// Ciclo 2027 (decisão do Gabriel, 24/11/2026): 31 dias de PREPARAÇÃO em dezembro, em quatro jornadas de tempo
+// crescente (15 min, 30 min, 45 min, 1 h), e depois a JORNADA de 100 dias (1 h por dia), que a pessoa aceita ao fim
+// da preparação. Cada etapa tem a sua "edicao" no banco (os dias marcados ficam separados); o diário é um só por ciclo.
+export const EDICAO = {
+  id: '2027', inicio: '2027-01-01', dias: 100, minutos: 60, inscricoes_desde: '2026-11-24',
+  prep: { id: '2027-prep', inicio: '2026-12-01', dias: 31,
+    blocos: [{ n: 1, de: 1, ate: 8, minutos: 15 }, { n: 2, de: 9, ate: 16, minutos: 30 }, { n: 3, de: 17, ate: 24, minutos: 45 }, { n: 4, de: 25, ate: 31, minutos: 60 }] },
+};
+export const EDICOES = [EDICAO.id, EDICAO.prep.id];
+const ACEITE_A_PARTIR = 25; // o convite para os 100 dias aparece na 4ª jornada da preparação
 const DOM = 'https://thepropheticvoices.com.br';
 const MAX_TESTEMUNHO = 4000;
 const AUT = ['equipe', 'anonimo', 'nome'];
@@ -22,70 +31,103 @@ const LOTE = 150, PARALELO = 6, MAX_TENTATIVAS = 3;
 async function corpo(req) { try { return await req.json(); } catch (e) { return {}; } }
 
 // data de hoje em Brasília (UTC-3, sem horário de verão)
-export const hojeBrasilia = () => new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10);
+// SI_HOJE_TESTE (só no .dev.vars, nunca em produção) simula a data de hoje para testar as etapas
+export const hojeBrasilia = () => globalThis.__SI_HOJE || new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10);
 const diaDe = (data, ed = EDICAO) => Math.floor((Date.parse(data + 'T00:00:00Z') - Date.parse(ed.inicio + 'T00:00:00Z')) / 86400e3) + 1;
 const dataDoDia = (n, ed = EDICAO) => new Date(Date.parse(ed.inicio + 'T00:00:00Z') + (n - 1) * 86400e3).toISOString().slice(0, 10);
-export function situacao(ed = EDICAO) {
-  const hoje = diaDe(hojeBrasilia(), ed);
-  return { ...ed, fim: dataDoDia(ed.dias, ed), hoje: hojeBrasilia(), dia_atual: hoje, // <1: ainda não começou; >dias: terminou
-    fase: hoje < 1 ? 'antes' : hoje > ed.dias ? 'depois' : 'durante' };
+function ciclo(c) {
+  const hoje = diaDe(hojeBrasilia(), c);
+  const { prep, ...resto } = c;
+  return { ...resto, fim: dataDoDia(c.dias, c), hoje: hojeBrasilia(), dia_atual: hoje, // <1: ainda não começou; >dias: terminou
+    fase: hoje < 1 ? 'antes' : hoje > c.dias ? 'depois' : 'durante' };
 }
+// etapa do ciclo: antes (até 30/11) → preparacao (dezembro) → jornada (1º/01–10/04) → fim
+export function situacao(ed = EDICAO) {
+  const j = ciclo(ed), p = ciclo(ed.prep);
+  const etapa = p.fase === 'antes' ? 'antes' : p.fase === 'durante' ? 'preparacao' : j.fase === 'depois' ? 'fim' : 'jornada';
+  return { ...j, prep: p, etapa };
+}
+const cicloDe = (s, qual) => (qual === 'prep' ? s.prep : s);
 // último dia que o participante já pode marcar
 const ultimoMarcavel = (s) => Math.min(Math.max(s.dia_atual, 0), s.dias);
 
 const participante = (env, leitorId, ed = EDICAO.id) =>
   env.DB.prepare('SELECT * FROM si_participantes WHERE leitor_id = ? AND edicao = ?').bind(leitorId, ed).first();
+// inscrições do leitor no ciclo (preparação e/ou jornada), por edição
+async function participacoes(env, leitorId) {
+  const r = (await env.DB.prepare(`SELECT * FROM si_participantes WHERE leitor_id = ? AND edicao IN (${EDICOES.map(() => '?').join(',')})`).bind(leitorId, ...EDICOES).all()).results;
+  const o = {}; r.forEach((x) => (o[x.edicao] = x)); return o;
+}
 
 // ---------------------------------------------------------------- área do participante
 export async function apiSpiritLeitor(req, env, url, seg, l) {
   const m = req.method;
   const acao = seg[2]; // seg = ['conta', 'spirit', acao?]
   const s = situacao();
-  const p = await participante(env, l.id);
+  const ps = await participacoes(env, l.id);
+  const p = ps[s.id] || ps[s.prep.id] || null;
+  const naJornada = !!ps[s.id], naPrep = !!ps[s.prep.id];
 
   if (!acao && m === 'GET') {
     if (!p) return json({ edicao: s, inscrito: false });
-    const [dias, devs, diario] = await Promise.all([
+    const [dias, diasPrep, devs, diario] = await Promise.all([
       env.DB.prepare('SELECT dia, orou, testemunho, autorizacao, atualizado_em FROM si_dias WHERE leitor_id = ? AND edicao = ? ORDER BY dia').bind(l.id, s.id).all(),
+      env.DB.prepare('SELECT dia, orou, atualizado_em FROM si_dias WHERE leitor_id = ? AND edicao = ? ORDER BY dia').bind(l.id, s.prep.id).all(),
       env.DB.prepare("SELECT id, titulo, resumo, liberar_em, pdf_url FROM si_devocionais WHERE edicao = ? AND status = 'publicado' AND pdf_url IS NOT NULL AND liberar_em <= ? ORDER BY liberar_em DESC, id DESC").bind(s.id, s.hoje).all(),
       env.DB.prepare('SELECT id, data, tipo, referencia, texto, autorizacao, criado_em, atualizado_em FROM si_diario WHERE leitor_id = ? AND edicao = ? ORDER BY data DESC, id DESC').bind(l.id, s.id).all(),
     ]);
-    return json({ edicao: s, inscrito: true, inscrito_em: p.inscrito_em, devocionais_email: !!p.devocionais_email, email: l.email || null,
-      email_servico: emailConfigurado(env), dias: dias.results, devocionais: devs.results, diario: diario.results });
+    const podeAceitar = !naJornada && ((s.etapa === 'preparacao' && s.prep.dia_atual >= ACEITE_A_PARTIR) || s.etapa === 'jornada');
+    return json({ edicao: s, inscrito: true, na_preparacao: naPrep, na_jornada: naJornada, pode_aceitar: podeAceitar,
+      inscrito_em: p.inscrito_em, aceitou_jornada_em: naJornada ? ps[s.id].inscrito_em : null, devocionais_email: !!p.devocionais_email, email: l.email || null,
+      email_servico: emailConfigurado(env), dias: dias.results, dias_prep: diasPrep.results, devocionais: devs.results, diario: diario.results });
   }
 
   if (acao === 'inscrever' && m === 'POST') {
     const b = await corpo(req);
     if (!b.consentimento) return erro('Para participar, marque que concorda com o registro da sua jornada de oração.');
-    if (s.fase === 'depois') return erro('Esta edição do Spirit Immersion já terminou.');
+    if (s.etapa === 'fim') return erro('Esta edição do Spirit Immersion já terminou.');
+    // até 31/12 a inscrição começa pela preparação; depois disso, entra direto nos 100 dias
+    const ed = s.etapa === 'jornada' ? s.id : s.prep.id;
     if (!p) {
       await env.DB.prepare("INSERT INTO si_participantes (leitor_id, edicao, devocionais_email, consentimento_em) VALUES (?,?,?,datetime('now'))")
-        .bind(l.id, s.id, b.devocionais === false ? 0 : 1).run();
+        .bind(l.id, ed, b.devocionais === false ? 0 : 1).run();
     }
     return json({ ok: true, ja: !!p }, p ? 200 : 201);
   }
 
   if (!p) return erro('Você ainda não está inscrito no Spirit Immersion.', 403);
 
+  // ao fim da preparação, a pessoa aceita fazer parte dos 100 dias
+  if (acao === 'aceitar' && m === 'POST') {
+    if (naJornada) return json({ ok: true, ja: true });
+    if (s.etapa === 'fim') return erro('Esta edição do Spirit Immersion já terminou.');
+    if (s.etapa !== 'jornada' && !(s.etapa === 'preparacao' && s.prep.dia_atual >= ACEITE_A_PARTIR)) return erro('O convite para os 100 dias abre na quarta jornada da preparação.');
+    await env.DB.prepare("INSERT INTO si_participantes (leitor_id, edicao, devocionais_email, consentimento_em) VALUES (?,?,?,datetime('now'))")
+      .bind(l.id, s.id, p.devocionais_email).run();
+    return json({ ok: true }, 201);
+  }
+
   if (acao === 'devocionais' && m === 'POST') {
-    await env.DB.prepare('UPDATE si_participantes SET devocionais_email = ? WHERE leitor_id = ? AND edicao = ?').bind((await corpo(req)).receber ? 1 : 0, l.id, s.id).run();
+    await env.DB.prepare(`UPDATE si_participantes SET devocionais_email = ? WHERE leitor_id = ? AND edicao IN (${EDICOES.map(() => '?').join(',')})`).bind((await corpo(req)).receber ? 1 : 0, l.id, ...EDICOES).run();
     return json({ ok: true });
   }
 
   if (acao === 'dia' && m === 'POST') {
     const b = await corpo(req);
+    const c = cicloDe(s, b.ciclo);
+    if (!ps[c.id]) return erro(b.ciclo === 'prep' ? 'Você não está na preparação.' : 'Aceite os 100 dias para marcar os dias da jornada.', 403);
     const dia = parseInt(b.dia, 10);
-    if (!(dia >= 1 && dia <= s.dias)) return erro('Dia inválido.');
-    if (dia > ultimoMarcavel(s)) return erro(s.fase === 'antes' ? 'A jornada ainda não começou.' : 'Este dia ainda não chegou.');
+    if (!(dia >= 1 && dia <= c.dias)) return erro('Dia inválido.');
+    if (dia > ultimoMarcavel(c)) return erro(c.fase === 'antes' ? (b.ciclo === 'prep' ? 'A preparação ainda não começou.' : 'A jornada ainda não começou.') : 'Este dia ainda não chegou.');
     const testemunho = String(b.testemunho || '').replace(/\r\n?/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
     if (testemunho.length > MAX_TESTEMUNHO) return erro(`O testemunho pode ter até ${MAX_TESTEMUNHO} caracteres.`);
     const aut = AUT.includes(b.autorizacao) ? b.autorizacao : 'equipe';
     const orou = b.orou ? 1 : 0;
-    if (!orou && !testemunho) await env.DB.prepare('DELETE FROM si_dias WHERE leitor_id = ? AND edicao = ? AND dia = ?').bind(l.id, s.id, dia).run();
+    if (!orou && !testemunho) await env.DB.prepare('DELETE FROM si_dias WHERE leitor_id = ? AND edicao = ? AND dia = ?').bind(l.id, c.id, dia).run();
     else await env.DB.prepare(
       `INSERT INTO si_dias (leitor_id, edicao, dia, orou, testemunho, autorizacao) VALUES (?,?,?,?,?,?)
        ON CONFLICT (leitor_id, edicao, dia) DO UPDATE SET orou = excluded.orou, testemunho = excluded.testemunho, autorizacao = excluded.autorizacao, atualizado_em = datetime('now')`,
-    ).bind(l.id, s.id, dia, orou, testemunho || null, aut).run();
+    ).bind(l.id, c.id, dia, orou, testemunho || null, aut).run();
     return json({ ok: true });
   }
 
@@ -123,10 +165,10 @@ export async function apiSpiritLeitor(req, env, url, seg, l) {
   if (acao === 'sair' && m === 'POST') {
     // sair do movimento apaga a inscrição e todo o registro desta edição (dias e testemunhos)
     await env.DB.batch([
-      env.DB.prepare('DELETE FROM si_dias WHERE leitor_id = ? AND edicao = ?').bind(l.id, s.id),
+      env.DB.prepare('DELETE FROM si_dias WHERE leitor_id = ? AND edicao IN (?,?)').bind(l.id, ...EDICOES),
       env.DB.prepare('DELETE FROM si_diario WHERE leitor_id = ? AND edicao = ?').bind(l.id, s.id),
       env.DB.prepare('DELETE FROM si_envios WHERE leitor_id = ?').bind(l.id),
-      env.DB.prepare('DELETE FROM si_participantes WHERE leitor_id = ? AND edicao = ?').bind(l.id, s.id),
+      env.DB.prepare('DELETE FROM si_participantes WHERE leitor_id = ? AND edicao IN (?,?)').bind(l.id, ...EDICOES),
     ]);
     return json({ ok: true });
   }
@@ -134,11 +176,11 @@ export async function apiSpiritLeitor(req, env, url, seg, l) {
 }
 
 export async function spiritPublico(env) {
-  const n = (await env.DB.prepare('SELECT COUNT(*) n FROM si_participantes WHERE edicao = ?').bind(EDICAO.id).first()).n;
+  const n = (await env.DB.prepare('SELECT COUNT(DISTINCT leitor_id) n FROM si_participantes WHERE edicao IN (?,?)').bind(...EDICOES).first()).n;
   return json({ edicao: situacao(), inscritos: n }, 200, { 'Cache-Control': 'public, max-age=120' });
 }
 
-export async function participanteAtivo(env, leitorId) { return !!(await participante(env, leitorId)); }
+export async function participanteAtivo(env, leitorId) { return Object.keys(await participacoes(env, leitorId)).length > 0; }
 
 // ---------------------------------------------------------------- painel
 export async function apiSpiritPainel(req, env, url, seg, u, { registrar }) {
@@ -147,7 +189,7 @@ export async function apiSpiritPainel(req, env, url, seg, u, { registrar }) {
   const q = (sql, ...b) => env.DB.prepare(sql).bind(...b).all().then((r) => r.results);
 
   if (!seg.length && m === 'GET') {
-    const [part, porDia, devs, tes, fila] = await Promise.all([
+    const [part, porDia, devs, tes, fila, partPrep, porDiaPrep, total] = await Promise.all([
       env.DB.prepare('SELECT COUNT(*) n, SUM(devocionais_email) dev FROM si_participantes WHERE edicao = ?').bind(s.id).first(),
       q('SELECT dia, SUM(orou) orou, SUM(testemunho IS NOT NULL) tes FROM si_dias WHERE edicao = ? GROUP BY dia ORDER BY dia', s.id),
       q(`SELECT d.*, (SELECT COUNT(*) FROM si_envios e WHERE e.devocional_id = d.id AND e.status = 'enviado') enviados,
@@ -160,10 +202,15 @@ export async function apiSpiritPainel(req, env, url, seg, u, { registrar }) {
            SELECT NULL, 'testemunho', NULL, d.testemunho, d.autorizacao, d.atualizado_em, l.nome, l.email FROM si_dias d JOIN leitores l ON l.id = d.leitor_id
              WHERE d.edicao = ? AND d.testemunho IS NOT NULL) x ORDER BY x.atualizado_em DESC LIMIT 500`, s.id, s.id),
       env.DB.prepare("SELECT COUNT(*) n FROM si_envios WHERE status = 'fila'").first(),
+      env.DB.prepare('SELECT COUNT(*) n FROM si_participantes WHERE edicao = ?').bind(s.prep.id).first(),
+      q('SELECT dia, SUM(orou) orou FROM si_dias WHERE edicao = ? GROUP BY dia ORDER BY dia', s.prep.id),
+      env.DB.prepare('SELECT COUNT(DISTINCT leitor_id) n, SUM(devocionais_email) dev FROM si_participantes WHERE edicao IN (?,?)').bind(...EDICOES).first(),
     ]);
-    const dias = (await env.DB.prepare('SELECT leitor_id, SUM(orou) n FROM si_dias WHERE edicao = ? GROUP BY leitor_id').bind(s.id).all()).results;
-    return json({ edicao: s, participantes: part.n, com_email: part.dev || 0, por_dia: porDia, devocionais: devs, testemunhos: tes,
-      dias_orados_total: dias.reduce((t, x) => t + x.n, 0), na_fila: fila.n, email_servico: emailConfigurado(env) });
+    const orados = (await env.DB.prepare('SELECT edicao, SUM(orou) n FROM si_dias WHERE edicao IN (?,?) GROUP BY edicao').bind(...EDICOES).all()).results;
+    const so = (ed) => (orados.find((x) => x.edicao === ed) || { n: 0 }).n || 0;
+    return json({ edicao: s, participantes: part.n, participantes_prep: partPrep.n, total_pessoas: total.n, com_email: part.dev || 0,
+      por_dia: porDia, por_dia_prep: porDiaPrep, devocionais: devs, testemunhos: tes,
+      dias_orados_total: so(s.id), dias_orados_prep: so(s.prep.id), na_fila: fila.n, email_servico: emailConfigurado(env) });
   }
 
   if (seg[0] === 'devocionais') {
@@ -223,7 +270,7 @@ export async function pdfDevocional(env, req, chave, { leitor, equipe }) {
   const d = await env.DB.prepare('SELECT * FROM si_devocionais WHERE pdf_url = ?').bind('/arquivos/' + chave).first();
   if (!d) return null;
   const liberado = d.status === 'publicado' && d.liberar_em <= hojeBrasilia();
-  if (!equipe && !(leitor && liberado && (await participante(env, leitor.id, d.edicao)))) return 'negado';
+  if (!equipe && !(leitor && liberado && (await participanteAtivo(env, leitor.id)))) return 'negado';
   return env.ARQUIVOS.get(chave);
 }
 
@@ -235,7 +282,7 @@ export async function enfileirarDevocionais(env) {
   const prontos = (await env.DB.prepare("SELECT * FROM si_devocionais WHERE status = 'publicado' AND pdf_url IS NOT NULL AND enfileirado_em IS NULL AND liberar_em <= ?").bind(hoje).all()).results;
   for (const d of prontos) {
     await env.DB.batch([
-      env.DB.prepare("INSERT OR IGNORE INTO si_envios (devocional_id, leitor_id) SELECT ?, p.leitor_id FROM si_participantes p JOIN leitores l ON l.id = p.leitor_id WHERE p.edicao = ? AND p.devocionais_email = 1 AND l.email IS NOT NULL AND l.bloqueado = 0").bind(d.id, d.edicao),
+      env.DB.prepare("INSERT OR IGNORE INTO si_envios (devocional_id, leitor_id) SELECT DISTINCT ?, p.leitor_id FROM si_participantes p JOIN leitores l ON l.id = p.leitor_id WHERE p.edicao IN (?,?) AND p.devocionais_email = 1 AND l.email IS NOT NULL AND l.bloqueado = 0").bind(d.id, ...EDICOES),
       env.DB.prepare("UPDATE si_devocionais SET enfileirado_em = datetime('now') WHERE id = ?").bind(d.id),
     ]);
   }
@@ -259,9 +306,9 @@ export async function processarFilaSpirit(env, limite = LOTE) {
   if (!emailConfigurado(env)) return { enviados: 0 };
   await enfileirarDevocionais(env);
   const lista = (await env.DB.prepare(
-    `SELECT e.devocional_id, e.leitor_id, e.tentativas, l.email, l.nome, p.devocionais_email
+    `SELECT e.devocional_id, e.leitor_id, e.tentativas, l.email, l.nome,
+            (SELECT MAX(p.devocionais_email) FROM si_participantes p WHERE p.leitor_id = e.leitor_id AND p.edicao IN ('${EDICOES.join("','")}')) AS devocionais_email
      FROM si_envios e JOIN leitores l ON l.id = e.leitor_id JOIN si_devocionais d ON d.id = e.devocional_id
-     LEFT JOIN si_participantes p ON p.leitor_id = e.leitor_id AND p.edicao = d.edicao
      WHERE e.status = 'fila' ORDER BY e.devocional_id, e.leitor_id LIMIT ?`,
   ).bind(limite).all()).results;
   const cache = {};

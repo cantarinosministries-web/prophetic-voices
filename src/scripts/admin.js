@@ -710,20 +710,22 @@ async function telaSpirit() {
   app.innerHTML = '<p class="muted center">Carregando…</p>';
   const r = await api('/spirit');
   const e = r.edicao;
-  const fase = e.fase === 'antes' ? `Começa em ${1 - e.dia_atual} dia(s) (1º de janeiro)` : e.fase === 'durante' ? `Dia ${e.dia_atual} de ${e.dias}` : 'Edição encerrada';
-  const max = Math.max(1, r.participantes);
-  const pd = {}; r.por_dia.forEach((x) => (pd[x.dia] = x));
-  const ult = Math.min(Math.max(e.dia_atual, 0), e.dias);
-  const barras = Array.from({ length: e.dias }, (_, i) => {
-    const x = pd[i + 1] || { orou: 0 }; const h = Math.round((100 * x.orou) / max);
-    return `<i title="Dia ${i + 1}: ${x.orou} de ${r.participantes} oraram" style="flex:1;display:block;min-width:2px;height:${i + 1 > ult ? 2 : Math.max(2, h)}%;background:${i + 1 > ult ? 'rgba(248,233,183,.1)' : 'var(--cobre)'}"></i>`;
-  }).join('');
+  const pr = e.prep;
+  const fase = { antes: `A preparação começa em ${1 - pr.dia_atual} dia(s) (1º de dezembro)`, preparacao: `Preparação · dia ${pr.dia_atual} de ${pr.dias}`, jornada: `Jornada · dia ${e.dia_atual} de ${e.dias}`, fim: 'Edição encerrada' }[e.etapa];
+  const grafico = (porDia, total, c, rot) => {
+    const max = Math.max(1, total), pd = {}; porDia.forEach((x) => (pd[x.dia] = x));
+    const ult = Math.min(Math.max(c.dia_atual, 0), c.dias);
+    return `<div style="display:flex;align-items:flex-end;gap:2px;height:90px;border-bottom:1px solid rgba(248,233,183,.15)">${Array.from({ length: c.dias }, (_, i) => {
+      const x = pd[i + 1] || { orou: 0 }; const h = Math.round((100 * x.orou) / max);
+      return `<i title="${rot} ${i + 1}: ${x.orou} de ${total} oraram" style="flex:1;display:block;min-width:2px;height:${i + 1 > ult ? 2 : Math.max(2, h)}%;background:${i + 1 > ult ? 'rgba(248,233,183,.1)' : 'var(--cobre)'}"></i>`;
+    }).join('')}</div>`;
+  };
   const filtro = sessionStorage.getItem('si-aut') || '';
   const tes = r.testemunhos.filter((t) => !filtro || t.autorizacao === filtro);
-  app.innerHTML = `<div class="head"><div><h1>Spirit Immersion ${esc(e.id)}</h1><p class="muted">${esc(fase)} · 100 dias, de 1º/01 a 10/04/2027. Página pública: <a href="/spirit-immersion.html" target="_blank" rel="noopener">/spirit-immersion.html ↗</a></p></div></div>
+  app.innerHTML = `<div class="head"><div><h1>Spirit Immersion ${esc(e.id)}</h1><p class="muted">${esc(fase)} · preparação de 31 dias em dezembro (15, 30, 45 min e 1 h) e jornada de 100 dias, de 1º/01 a 10/04/2027. Página pública: <a href="/spirit-immersion.html" target="_blank" rel="noopener">/spirit-immersion.html ↗</a></p></div></div>
   <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:16px">
-    <div class="card"><h3>Participantes</h3><p style="font-size:42px;margin:4px 0">${r.participantes}</p><p class="small muted" style="margin:0">${r.com_email} pediram os devocionais por e-mail · ${r.dias_orados_total} dias de oração marcados (≈ ${r.dias_orados_total} horas)</p></div>
-    <div class="card"><h3>Quantos oraram em cada dia</h3><div style="display:flex;align-items:flex-end;gap:2px;height:110px;border-bottom:1px solid var(--line, #333)">${barras}</div><p class="small muted" style="margin:8px 0 0">Passe o mouse sobre a barra para ver o dia. Cada participante vê só o próprio registro.</p></div>
+    <div class="card"><h3>Participantes</h3><p style="font-size:42px;margin:4px 0">${r.total_pessoas}</p><p class="small muted" style="margin:0">${r.participantes_prep} na preparação · ${r.participantes} aceitaram os 100 dias<br>${r.dias_orados_prep} dias marcados na preparação · ${r.dias_orados_total} dias (≈ ${r.dias_orados_total} h) na jornada</p></div>
+    <div class="card"><h3>Quantos oraram em cada dia</h3><p class="small muted" style="margin:0 0 6px">Preparação · 31 dias</p>${grafico(r.por_dia_prep, r.participantes_prep, pr, 'Preparação, dia')}<p class="small muted" style="margin:14px 0 6px">Jornada · 100 dias</p>${grafico(r.por_dia, r.participantes, e, 'Dia')}<p class="small muted" style="margin:8px 0 0">Passe o mouse sobre a barra para ver o dia. Cada participante vê só o próprio registro.</p></div>
   </div>
   <div class="card" style="margin-top:16px"><h3>Devocionais em PDF</h3>
     <p class="small muted">O devocional aparece na conta dos participantes a partir da data de liberação${r.email_servico ? ' e, nesse dia, vai por e-mail a quem pediu' : '. Os e-mails automáticos ainda não estão ligados (aba E-mails): por enquanto, o PDF fica só na conta'}. Pode cadastrar a série inteira com antecedência.${r.na_fila ? ` · ${r.na_fila} e-mail(s) na fila.` : ''}</p>

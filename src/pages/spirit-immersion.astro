@@ -33,7 +33,7 @@ const ticks = Array.from({ length: 60 }, (_, i) => i);
       <div class="si-meta"><span>SI · 2027</span><span data-en="PRAYER MOVEMENT">MOVIMENTO DE ORAÇÃO</span><span class="si-live"><i></i><span id="siHeroStatus" data-en="ENROLLMENT OPEN">INSCRIÇÕES ABERTAS</span></span></div>
       <h1 class="disp si-h1">Spirit<br /><span>Immersion</span></h1>
       <p class="si-lede" data-en="One hour a day praying in the Spirit. A movement born in a home in January 2024 that now gathers hundreds of people across Brazil and among the nations.">Uma hora por dia orando no Espírito. Um movimento que nasceu numa casa em janeiro de 2024 e hoje reúne centenas de pessoas pelo Brasil e nas nações.</p>
-      <div class="si-clock" aria-label="1 hora por dia"><b>01:00:00</b><span data-en="/ DAY · 100 DAYS · JAN 1 → APR 10, 2027">/ DIA · 100 DIAS · 01.01 → 10.04.2027</span></div>
+      <div class="si-clock" aria-label="1 hora por dia"><b>01:00:00</b><span data-en="/ DAY · 31 DAYS OF PREPARATION IN DECEMBER + 100 DAYS · JAN 1 → APR 10, 2027">/ DIA · 31 DIAS DE PREPARAÇÃO EM DEZEMBRO + 100 DIAS · 01.01 → 10.04.2027</span></div>
       <div class="si-ctas">
         <a href="#inscricao" class="btn btn-creme" data-en="Join the 2027 edition">Participar da edição 2027</a>
         <a href="#frutos" class="btn btn-ghost" data-en="See the fruit">Ver os frutos</a>
@@ -209,16 +209,25 @@ const ticks = Array.from({ length: 60 }, (_, i) => i);
     <div class="wrap si-ed-grid">
       <div>
         <div class="eyebrow" data-en="2027 edition">Edição 2027</div>
-        <h2 class="si-h2 rv">100 <em data-en="days.">dias.</em></h2>
+        <h2 class="si-h2 rv">31 + 100 <em data-en="days.">dias.</em></h2>
         <dl class="si-dl rv">
-          <div><dt class="mono" data-en="START">INÍCIO</dt><dd data-en="January 1, 2027">1º de janeiro de 2027</dd></div>
-          <div><dt class="mono" data-en="END">FIM</dt><dd data-en="April 10, 2027">10 de abril de 2027</dd></div>
-          <div><dt class="mono" data-en="RHYTHM">RITMO</dt><dd data-en="1 hour a day praying in tongues">1 hora por dia orando em línguas</dd></div>
-          <div><dt class="mono" data-en="IN YOUR ACCOUNT">NA SUA CONTA</dt><dd data-en="Day counter, daily check-in, daily testimonies and PDF devotionals">Contagem dos dias, check diário, testemunhos diários e devocionais em PDF</dd></div>
+          <div><dt class="mono" data-en="PREPARATION">PREPARAÇÃO</dt><dd data-en="December 1–31, 2026, in four journeys of increasing prayer: 15 minutes, 30, 45 and 1 hour a day">1 a 31 de dezembro de 2026, em quatro jornadas de oração crescente: 15 minutos, 30, 45 e 1 hora por dia</dd></div>
+          <div><dt class="mono" data-en="JOURNEY">JORNADA</dt><dd data-en="100 days, January 1 to April 10, 2027: 1 hour a day praying in tongues">100 dias, de 1º de janeiro a 10 de abril de 2027: 1 hora por dia orando em línguas</dd></div>
+          <div><dt class="mono" data-en="THE STEP">O PASSO</dt><dd data-en="At the end of the preparation you accept the 100 days and begin the new journey">Ao fim da preparação, você aceita os 100 dias e inicia a nova jornada</dd></div>
+          <div><dt class="mono" data-en="IN YOUR ACCOUNT">NA SUA CONTA</dt><dd data-en="Day counter, daily check-in, prayer journal and PDF devotionals, with the whole record of the preparation and the 100 days">Contagem dos dias, check diário, diário de oração e devocionais em PDF, com todo o histórico da preparação e dos 100 dias</dd></div>
         </dl>
         <p class="si-inscritos mono" id="siInscritos" hidden></p>
       </div>
+      <div class="si-cal-col">
+      <div class="si-prep rv" aria-hidden="true">
+        {[[1, 8, '15 MIN'], [9, 16, '30 MIN'], [17, 24, '45 MIN'], [25, 31, '1 H']].map(([de, ate, rot], k) => (
+          <div class="si-prep-b"><span class="mono">{`${String(k + 1).padStart(2, '0')} · ${rot}`}</span><div class="si-cal100 si-calp">{Array.from({ length: ate - de + 1 }, (_, i) => <i style={`--d:${(de + i) * 25}ms`}><span>{de + i}</span></i>)}</div></div>
+        ))}
+        <p class="si-prep-leg mono" data-en="PREPARATION · DECEMBER">PREPARAÇÃO · DEZEMBRO</p>
+      </div>
+      <p class="si-prep-leg mono" data-en="JOURNEY · 100 DAYS · JANUARY → APRIL">JORNADA · 100 DIAS · JANEIRO → ABRIL</p>
       <div class="si-cal100 rv" aria-hidden="true">{Array.from({ length: 100 }, (_, i) => <i style={`--d:${i * 18}ms`}><span>{i + 1}</span></i>)}</div>
+      </div>
     </div>
   </section>
 
@@ -230,7 +239,7 @@ const ticks = Array.from({ length: 60 }, (_, i) => i);
         <div>
           <div class="eyebrow" data-en="Enrollment">Inscrição</div>
           <h2 class="si-h2"><span data-en="Enter the">Entre no</span> <em>Spirit Immersion.</em></h2>
-          <p class="si-insc-p" data-en="Sign up with an account you already have. Your journey stays in your account on the site: you mark each day you completed your hour of prayer, write what God is doing and receive the devotionals.">Inscreva-se com uma conta que você já tem. A sua jornada fica na sua conta do site: você marca cada dia em que completou a hora de oração, escreve o que Deus está fazendo e recebe os devocionais.</p>
+          <p class="si-insc-p" data-en="Sign up with an account you already have. You begin with the 31 days of preparation in December and, at the end, accept the 100 days. Everything stays in your account: you mark each day you prayed, keep your prayer journal and receive the devotionals.">Inscreva-se com uma conta que você já tem. Você começa pelos 31 dias de preparação em dezembro e, ao fim, aceita os 100 dias. Tudo fica na sua conta: você marca cada dia em que orou, mantém o seu diário de oração e recebe os devocionais.</p>
         </div>
         <div id="siInsc" class="si-insc-box"><p class="conta-carregando">…</p></div>
       </div>
@@ -288,8 +297,7 @@ const ticks = Array.from({ length: 60 }, (_, i) => i);
         });
 
         // grade dos 100 dias: cada número acende sob o mouse (ou o dedo) e apaga devagar, deixando um rastro
-        var g100 = document.querySelector('.si-cal100');
-        if (g100) {
+        document.querySelectorAll('.si-cal100').forEach(function (g100) {
           var acender = function (x, y) {
             var c = document.elementFromPoint(x, y);
             c = c && c.closest ? c.closest('.si-cal100 i') : null;
@@ -303,17 +311,16 @@ const ticks = Array.from({ length: 60 }, (_, i) => i);
           g100.addEventListener('touchmove', function (e) { var t = e.touches[0]; if (t) acender(t.clientX, t.clientY); }, { passive: true });
           // depois da entrada em cascata, a grade passa a reagir sem atraso
           new IntersectionObserver(function (es, o) { if (es[0].isIntersecting) { o.disconnect(); setTimeout(function () { g100.classList.add('pronto'); }, 2600); } }).observe(g100);
-        }
+        });
 
         // inscritos na edição
         fetch('/api/publico/spirit').then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
           if (!d) return;
           var box = document.getElementById('siInscritos');
-          if (d.edicao.fase === 'durante') {
-            document.getElementById('siHeroStatus').setAttribute('data-pt', 'DIA ' + d.edicao.dia_atual + ' DE 100');
-            document.getElementById('siHeroStatus').setAttribute('data-en', 'DAY ' + d.edicao.dia_atual + ' OF 100');
-          }
-          if (d.edicao.fase === 'depois') {
+          var hs = document.getElementById('siHeroStatus'), et = d.edicao.etapa;
+          if (et === 'preparacao') { hs.setAttribute('data-pt', 'PREPARAÇÃO · DIA ' + d.edicao.prep.dia_atual + ' DE 31'); hs.setAttribute('data-en', 'PREPARATION · DAY ' + d.edicao.prep.dia_atual + ' OF 31'); }
+          if (et === 'jornada') { hs.setAttribute('data-pt', 'DIA ' + d.edicao.dia_atual + ' DE 100'); hs.setAttribute('data-en', 'DAY ' + d.edicao.dia_atual + ' OF 100'); }
+          if (et === 'fim') {
             document.getElementById('siHeroStatus').setAttribute('data-pt', 'EDIÇÃO 2027 ENCERRADA');
             document.getElementById('siHeroStatus').setAttribute('data-en', '2027 EDITION CLOSED');
           }
@@ -376,7 +383,7 @@ const ticks = Array.from({ length: 60 }, (_, i) => i);
         }
 
         Promise.all([L.sessao(), fetch('/api/publico/spirit').then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })]).then(function (r) {
-          S = r[0]; if (r[1]) fase = r[1].edicao.fase;
+          S = r[0]; if (r[1]) fase = r[1].edicao.etapa === 'fim' ? 'depois' : 'aberta';
           // voltou do login com o aceite já marcado na página: inscreve na hora e leva à jornada
           if (params.get('inscrever') === '1' && S.leitor) {
             if (S.leitor.spirit) return location.replace('/conta.html#spirit');
@@ -499,6 +506,14 @@ const ticks = Array.from({ length: 60 }, (_, i) => i);
   .si-dl dt{font-size:11px;letter-spacing:.2em;color:var(--cobre);padding-top:4px}
   .si-dl dd{margin:0;font-size:17px;color:var(--creme);line-height:1.5}
   @media(max-width:560px){.si-dl div{grid-template-columns:96px 1fr}.si-alcance b{font-size:24px;white-space:nowrap}}
+  .si-cal-col{display:flex;flex-direction:column;gap:12px}
+  .si-prep{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:10px}
+  .si-prep .si-prep-leg{grid-column:1/-1}
+  .si-prep-b{display:flex;flex-direction:column;gap:8px}
+  .si-prep-b>span{font-size:10.5px;letter-spacing:.16em;color:var(--cobre)}
+  .si-calp{grid-template-columns:repeat(4,1fr)!important;gap:4px!important}
+  .si-prep-leg{margin:0;font-size:10.5px;letter-spacing:.2em;color:var(--areia)}
+  @media(max-width:560px){.si-prep{grid-template-columns:repeat(2,minmax(0,1fr))}}
   .si-inscritos{margin:24px 0 0;font-size:12px;letter-spacing:.2em;color:var(--cobre)}
   .si-cal100{display:grid;grid-template-columns:repeat(10,1fr);gap:6px}
   .si-cal100 i{position:relative;aspect-ratio:1;border:1px solid rgba(248,233,183,.1);display:flex;align-items:center;justify-content:center;font-style:normal;transition:background .5s var(--d),border-color .5s var(--d)}

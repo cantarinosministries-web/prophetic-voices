@@ -63,6 +63,7 @@ export default {
   },
 
   async fetch(req, env, ctx) {
+    globalThis.__SI_HOJE = /^\d{4}-\d{2}-\d{2}$/.test(env.SI_HOJE_TESTE || '') ? env.SI_HOJE_TESTE : undefined;
     const url = new URL(req.url);
     const path = url.pathname;
     try {

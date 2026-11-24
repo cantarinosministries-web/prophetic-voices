@@ -1,17 +1,28 @@
 /* The Prophetic Voices — aba "Spirit Immersion" da conta (/conta.html#spirit).
-   Contagem dos 100 dias, check diário da hora de oração, DIÁRIO (testemunhos, impressões proféticas,
-   o que ouviu de Deus, texto lido, orações) e devocionais em PDF. API em /api/conta/spirit (worker/spirit.js). */
+   Ciclo 2027: PREPARAÇÃO de 31 dias em dezembro (quatro jornadas: 15, 30, 45 min e 1 h) e, depois do aceite,
+   a JORNADA de 100 dias (1 h por dia, de 1º/01 a 10/04). As duas ficam no histórico da pessoa.
+   Também: DIÁRIO (testemunhos, impressões proféticas, o que ouviu de Deus, texto lido, orações) e devocionais em PDF.
+   API em /api/conta/spirit (worker/spirit.js). */
 (function () {
   var T = {
     pt: {
-      antes: 'A jornada começa em', antes_d: 'dias', antes_1: 'A jornada começa amanhã', durante: 'Dia {d} de {t}', depois: 'Jornada encerrada',
+      e_antes: 'A preparação começa em', e_antes_1: 'A preparação começa amanhã', dias: 'dias',
+      e_prep: 'Preparação · dia {d} de {t}', e_jornada: 'Dia {d} de {t}', e_espera: 'Os 100 dias começam em 1º de janeiro', e_aberta: 'Os 100 dias começaram', e_fim: 'Jornada encerrada',
+      bloco: '{n}ª jornada · {m} por dia', bloco_c: '{n}ª jornada · {m}', min: '{m} minutos', hora: '1 hora',
       orados: 'dias orados', horas: 'horas de oração', seq: 'dias seguidos', reg: 'registros no diário',
-      hoje_q: 'Hoje é o dia {d}. Você completou a sua hora de oração?', hoje_sim: 'Sim, orei 1 hora hoje ✓', hoje_ok: 'Hoje está marcado. Glória a Deus!', hoje_dia: 'Escrever no diário',
-      antes_p: 'De 1º de janeiro a 10 de abril de 2027 você vai marcar aqui cada dia em que completou a hora de oração em línguas. Enquanto isso, prepare o coração: o diário já está aberto, e os devocionais de preparação aparecem logo abaixo.',
-      cal_h: 'Os 100 dias', cal_p: 'Toque em um dia para marcar a oração. Você pode completar dias anteriores.',
-      cal_antes: 'Os dias se abrem em 1º de janeiro de 2027: a partir daí, toque em um dia para marcar que orou. Até lá, use o diário para registrar a sua preparação.',
+      q_prep: 'Hoje é o dia {d} da preparação. Você completou os seus {m} de oração?', sim_prep: 'Sim, orei {m} hoje ✓',
+      q_jor: 'Hoje é o dia {d}. Você completou a sua hora de oração?', sim_jor: 'Sim, orei 1 hora hoje ✓', hoje_ok: 'Hoje está marcado. Glória a Deus!', hoje_dia: 'Escrever no diário',
+      antes_p: 'De 1º a 31 de dezembro: 31 dias de preparação em quatro jornadas, com tempo crescente de oração em línguas (15 minutos, 30, 45 e 1 hora por dia). Ao fim, você aceita os 100 dias, de 1º de janeiro a 10 de abril. O diário já está aberto.',
+      espera_p: 'Você aceitou os 100 dias. Eles se abrem em 1º de janeiro: 1 hora por dia orando em línguas, até 10 de abril.',
+      fim_p: 'Obrigado por perseverar. O seu histórico da preparação, dos 100 dias e o diário continuam aqui.',
+      conv_e: 'Convite · 100 dias', conv_h: 'A preparação está chegando ao fim.', conv_h2: 'Os 100 dias começaram.',
+      conv_p: 'De 1º de janeiro a 10 de abril de 2027: 1 hora por dia orando em línguas. Você quer fazer parte dos 100 dias?', conv_b: 'Sim, quero fazer parte dos 100 dias', conv_ok: 'Você entrou nos 100 dias. A nova jornada começa em 1º de janeiro.', conv_ok2: 'Você entrou nos 100 dias. Bem-vindo à jornada!',
+      prep_h: 'Preparação · 31 dias', prep_hist: 'Histórico · Preparação · 31 dias', prep_p: 'Toque em um dia para marcar a oração. Você pode completar dias anteriores.',
+      prep_antes: 'A preparação começa em 1º de dezembro: a partir daí, toque em cada dia para marcar que orou. Até lá, use o diário.',
+      jor_h: 'Jornada · 100 dias', jor_p: 'Toque em um dia para marcar a oração. Você pode completar dias anteriores.',
       leg_orou: 'orou', leg_tes: 'com registro no diário', leg_hoje: 'hoje', leg_vazio: 'não marcado',
-      dia_h: 'Dia {d} · {data}', orei: 'Completei 1 hora de oração neste dia', salvar_dia: 'Salvar', salvo_dia: 'Dia {d} salvo.', fechar: 'Fechar',
+      dia_prep: 'Preparação · dia {d}', dia_jor: 'Dia {d}', orei_prep: 'Completei os {m} de oração neste dia', orei_jor: 'Completei 1 hora de oração neste dia',
+      salvar_dia: 'Salvar', salvo_dia: 'Dia salvo.', fechar: 'Fechar',
       dia_reg: 'Registros deste dia', dia_escrever: 'Escrever no diário deste dia', dia_vazio: 'Nenhum registro no diário neste dia.',
       di_h: 'Diário', di_p: 'Registre como estão sendo os seus dias de oração: testemunhos, impressões proféticas, o que você ouviu de Deus, o texto que leu, orações. Volte aqui sempre que quiser reler a sua caminhada.',
       di_novo: 'Novo registro', di_editando: 'Editando registro', di_data: 'Data', di_tipo: 'Tipo', di_ref: 'Texto bíblico ou referência (opcional)', di_ref_ph: 'Ex.: Salmo 27; Zacarias 12.10',
@@ -23,18 +34,27 @@
       t_testemunho: 'Testemunho', t_profetica: 'Impressão profética', t_ouvi: 'O que ouvi de Deus', t_texto: 'Texto que li', t_oracao: 'Oração', t_outro: 'Outro',
       dev_h: 'Devocionais', dev_vazio: 'Os devocionais aparecem aqui assim que forem liberados.', dev_abrir: 'Abrir PDF', dev_de: 'Liberado em {d}',
       cfg_h: 'Preferências', dev_email_on: 'Você recebe os devocionais também no e-mail', dev_email_off: 'Você não recebe os devocionais por e-mail (eles continuam aqui)', dev_email_srv: 'Os e-mails ainda estão sendo ligados; enquanto isso, os devocionais ficam aqui.',
-      ligar: 'Receber por e-mail', desligar: 'Parar de receber', sair_p: 'Sair do Spirit Immersion apaga a sua inscrição, os dias marcados e todo o seu diário desta edição.', sair: 'Sair e apagar meu registro', sair_conf: 'Confirmar: sair e apagar',
+      ligar: 'Receber por e-mail', desligar: 'Parar de receber', sair_p: 'Sair do Spirit Immersion apaga a sua inscrição, os dias marcados (preparação e 100 dias) e todo o seu diário desta edição.', sair: 'Sair e apagar meu registro', sair_conf: 'Confirmar: sair e apagar',
       priv: 'Seu registro é pessoal: só você vê os dias marcados e o diário que não liberar. <a href="/privacidade.html#spirit">Como cuidamos dos seus dados</a>.', sobre: 'Sobre o movimento'
     },
     en: {
-      antes: 'The journey begins in', antes_d: 'days', antes_1: 'The journey begins tomorrow', durante: 'Day {d} of {t}', depois: 'Journey completed',
+      e_antes: 'Preparation begins in', e_antes_1: 'Preparation begins tomorrow', dias: 'days',
+      e_prep: 'Preparation · day {d} of {t}', e_jornada: 'Day {d} of {t}', e_espera: 'The 100 days begin on January 1', e_aberta: 'The 100 days have begun', e_fim: 'Journey completed',
+      bloco: 'Journey {n} · {m} a day', bloco_c: 'Journey {n} · {m}', min: '{m} minutes', hora: '1 hour',
       orados: 'days prayed', horas: 'hours of prayer', seq: 'days in a row', reg: 'journal entries',
-      hoje_q: 'Today is day {d}. Did you complete your hour of prayer?', hoje_sim: 'Yes, I prayed 1 hour today ✓', hoje_ok: 'Today is marked. Glory to God!', hoje_dia: 'Write in the journal',
-      antes_p: 'From January 1 to April 10, 2027 you will mark here each day you completed your hour of praying in tongues. Meanwhile, prepare your heart: the journal is already open, and the preparation devotionals appear below.',
-      cal_h: 'The 100 days', cal_p: 'Tap a day to mark your prayer. You can fill in earlier days.',
-      cal_antes: 'The days open on January 1, 2027: from then on, tap a day to mark that you prayed. Until then, use the journal to record your preparation.',
+      q_prep: 'Today is day {d} of the preparation. Did you complete your {m} of prayer?', sim_prep: 'Yes, I prayed {m} today ✓',
+      q_jor: 'Today is day {d}. Did you complete your hour of prayer?', sim_jor: 'Yes, I prayed 1 hour today ✓', hoje_ok: 'Today is marked. Glory to God!', hoje_dia: 'Write in the journal',
+      antes_p: 'From December 1 to 31: 31 days of preparation in four journeys, with increasing time praying in tongues (15 minutes, 30, 45 and 1 hour a day). At the end you accept the 100 days, from January 1 to April 10. The journal is already open.',
+      espera_p: 'You accepted the 100 days. They open on January 1: 1 hour a day praying in tongues, until April 10.',
+      fim_p: 'Thank you for persevering. Your record of the preparation, the 100 days and your journal stay here.',
+      conv_e: 'Invitation · 100 days', conv_h: 'The preparation is coming to an end.', conv_h2: 'The 100 days have begun.',
+      conv_p: 'From January 1 to April 10, 2027: 1 hour a day praying in tongues. Do you want to be part of the 100 days?', conv_b: 'Yes, I want to join the 100 days', conv_ok: 'You joined the 100 days. The new journey begins on January 1.', conv_ok2: 'You joined the 100 days. Welcome to the journey!',
+      prep_h: 'Preparation · 31 days', prep_hist: 'Record · Preparation · 31 days', prep_p: 'Tap a day to mark your prayer. You can fill in earlier days.',
+      prep_antes: 'Preparation begins on December 1: from then on, tap each day to mark that you prayed. Until then, use the journal.',
+      jor_h: 'Journey · 100 days', jor_p: 'Tap a day to mark your prayer. You can fill in earlier days.',
       leg_orou: 'prayed', leg_tes: 'with journal entry', leg_hoje: 'today', leg_vazio: 'not marked',
-      dia_h: 'Day {d} · {data}', orei: 'I completed 1 hour of prayer on this day', salvar_dia: 'Save', salvo_dia: 'Day {d} saved.', fechar: 'Close',
+      dia_prep: 'Preparation · day {d}', dia_jor: 'Day {d}', orei_prep: 'I completed {m} of prayer on this day', orei_jor: 'I completed 1 hour of prayer on this day',
+      salvar_dia: 'Save', salvo_dia: 'Day saved.', fechar: 'Close',
       dia_reg: 'Entries for this day', dia_escrever: 'Write in the journal for this day', dia_vazio: 'No journal entries on this day.',
       di_h: 'Journal', di_p: 'Record how your days of prayer are going: testimonies, prophetic impressions, what you heard from God, the passage you read, prayers. Come back whenever you want to reread your journey.',
       di_novo: 'New entry', di_editando: 'Editing entry', di_data: 'Date', di_tipo: 'Type', di_ref: 'Bible passage or reference (optional)', di_ref_ph: 'E.g.: Psalm 27; Zechariah 12:10',
@@ -46,7 +66,7 @@
       t_testemunho: 'Testimony', t_profetica: 'Prophetic impression', t_ouvi: 'What I heard from God', t_texto: 'Passage I read', t_oracao: 'Prayer', t_outro: 'Other',
       dev_h: 'Devotionals', dev_vazio: 'Devotionals appear here as soon as they are released.', dev_abrir: 'Open PDF', dev_de: 'Released on {d}',
       cfg_h: 'Preferences', dev_email_on: 'You also receive the devotionals by e-mail', dev_email_off: 'You do not receive the devotionals by e-mail (they stay here)', dev_email_srv: 'E-mails are still being set up; meanwhile, the devotionals stay here.',
-      ligar: 'Receive by e-mail', desligar: 'Stop receiving', sair_p: 'Leaving the Spirit Immersion erases your enrollment, the days you marked and your whole journal for this edition.', sair: 'Leave and erase my record', sair_conf: 'Confirm: leave and erase',
+      ligar: 'Receive by e-mail', desligar: 'Stop receiving', sair_p: 'Leaving the Spirit Immersion erases your enrollment, the days you marked (preparation and 100 days) and your whole journal for this edition.', sair: 'Leave and erase my record', sair_conf: 'Confirm: leave and erase',
       priv: 'Your record is personal: only you see the days you marked and the journal entries you do not share. <a href="/privacidade.html#spirit">How we care for your data</a>.', sobre: 'About the movement'
     }
   };
@@ -60,24 +80,32 @@
   function tela(alvo, opcoes) {
     var L = window.PV_LOGIN, esc = L.esc;
     var t = function (k) { var l = L.lingua(); return (T[l] && T[l][k]) || T.pt[k] || k; };
-    var D = null, aberto = null, msg = '';
+    var D = null, aberto = null, msg = ''; // aberto = { c: 'prep' | 'jor', n }
 
-    var dataDia = function (n) { return new Date(Date.parse(D.edicao.inicio + 'T12:00:00Z') + (n - 1) * 864e5); };
-    var isoDia = function (n) { return dataDia(n).toISOString().slice(0, 10); };
-    var diaDeIso = function (iso) { return Math.round((Date.parse(iso + 'T12:00:00Z') - Date.parse(D.edicao.inicio + 'T12:00:00Z')) / 864e5) + 1; };
-    var fmtData = function (d, longo) { return d.toLocaleDateString(L.lingua() === 'en' ? 'en-US' : 'pt-BR', longo ? { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' } : { day: 'numeric', month: 'short' }); };
+    var en = function () { return L.lingua() === 'en'; };
+    var C = function (c) { return c === 'prep' ? D.edicao.prep : D.edicao; };
+    var dataDia = function (c, n) { return new Date(Date.parse(C(c).inicio + 'T12:00:00Z') + (n - 1) * 864e5); };
+    var isoDia = function (c, n) { return dataDia(c, n).toISOString().slice(0, 10); };
+    var diaDeIso = function (c, iso) { return Math.round((Date.parse(iso + 'T12:00:00Z') - Date.parse(C(c).inicio + 'T12:00:00Z')) / 864e5) + 1; };
+    var fmtData = function (d, longo) { return d.toLocaleDateString(en() ? 'en-US' : 'pt-BR', longo ? { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' } : { day: 'numeric', month: 'short' }); };
     var fmtIso = function (iso, longo) { return fmtData(new Date(iso + 'T12:00:00Z'), longo); };
-    var mapa = function () { var m = {}; D.dias.forEach(function (x) { m[x.dia] = x; }); return m; };
+    var mapa = function (lista) { var m = {}; lista.forEach(function (x) { m[x.dia] = x; }); return m; };
     var porData = function () { var m = {}; D.diario.forEach(function (x) { (m[x.data] = m[x.data] || []).push(x); }); return m; };
-    var rotDia = function (n) { return t('dia_h').replace('{d}', n).replace(' · {data}', ''); };
+    var ult = function (c) { return Math.min(Math.max(c.dia_atual, 0), c.dias); };
+    var blocoDe = function (n) { return D.edicao.prep.blocos.filter(function (b) { return n >= b.de && n <= b.ate; })[0]; };
+    var tempo = function (minutos) { return minutos >= 60 ? t('hora') : t('min').replace('{m}', minutos); };
+    var rotIso = function (iso) {
+      var np = diaDeIso('prep', iso), nj = diaDeIso('jor', iso);
+      if (np >= 1 && np <= D.edicao.prep.dias) return t('dia_prep').replace('{d}', np);
+      if (nj >= 1 && nj <= D.edicao.dias) return t('dia_jor').replace('{d}', nj);
+      return '';
+    };
+    var seqDe = function (m, u) { var s = 0; for (var k = (m[u] && m[u].orou) ? u : u - 1; k >= 1 && m[k] && m[k].orou; k--) s++; return s; };
 
     function carregar() { return L.api('/conta/spirit').then(function (d) { D = d; if (!rasc.data) rasc.data = d.edicao.hoje; desenhar(); }).catch(function (er) { alvo.innerHTML = '<p class="conta-erro">' + esc(er.message) + '</p>'; }); }
 
-    function salvarDia(n, orou) {
-      var x = mapa()[n] || {};
-      return L.api('/conta/spirit/dia', 'POST', { dia: n, orou: orou, testemunho: x.testemunho || '', autorizacao: x.autorizacao || 'equipe' }).then(function () {
-        msg = t('salvo_dia').replace('{d}', n); return carregar();
-      });
+    function salvarDia(c, n, orou) {
+      return L.api('/conta/spirit/dia', 'POST', { ciclo: c === 'prep' ? 'prep' : 'jornada', dia: n, orou: orou }).then(function () { msg = t('salvo_dia'); return carregar(); });
     }
 
     function itemDiario(x) {
@@ -87,50 +115,106 @@
         '<div class="sj-reg-pe"><small>' + esc(t('aut_' + x.autorizacao)) + '</small><span><button type="button" class="lnk-x" data-editreg="' + x.id + '">' + esc(t('di_editar')) + '</button> <button type="button" class="lnk-x" data-delreg="' + x.id + '">' + esc(t('di_apagar')) + '</button></span></div></li>';
     }
 
+    // uma célula da grade
+    function celula(c, n, m, pd) {
+      var cc = C(c), u = ult(cc), x = m[n], cls = n > u ? 'fut' : x && x.orou ? 'orou' : 'vazio';
+      if (n === cc.dia_atual) cls += ' hoje';
+      if (pd[isoDia(c, n)]) cls += ' tes';
+      if (aberto && aberto.c === c && aberto.n === n) cls += ' sel';
+      var rot = (c === 'prep' ? t('dia_prep') : t('dia_jor')).replace('{d}', n) + ' · ' + fmtData(dataDia(c, n));
+      return '<button type="button" class="sj-d ' + cls + '" data-dia="' + n + '" data-ciclo="' + c + '"' + (n > u ? ' disabled' : '') + ' title="' + esc(fmtData(dataDia(c, n))) + '" aria-label="' + esc(rot) + '"><span>' + n + '</span></button>';
+    }
+
+    // editor do dia aberto (dentro do cartão do ciclo)
+    function editor(c, m, pd) {
+      if (!aberto || aberto.c !== c) return '';
+      var n = aberto.n, y = m[n] || { orou: 0 }, regs = pd[isoDia(c, n)] || [];
+      var tit = (c === 'prep' ? t('dia_prep') : t('dia_jor')).replace('{d}', n) + ' · ' + fmtData(dataDia(c, n), true);
+      var orei = c === 'prep' ? t('orei_prep').replace('{m}', tempo(blocoDe(n).minutos)) : t('orei_jor');
+      return '<form class="sj-ed" id="sjEd"><h4>' + esc(tit) + '</h4>' +
+        '<label class="si-check"><input type="checkbox" name="orou"' + (y.orou ? ' checked' : '') + '><span>' + esc(orei) + '</span></label>' +
+        '<div class="conta-perigo"><button class="btn btn-creme sm" type="submit">' + esc(t('salvar_dia')) + '</button><button type="button" class="lnk-x" id="sjFechar">' + esc(t('fechar')) + '</button></div>' +
+        '<h5>' + esc(t('dia_reg')) + '</h5>' + (regs.length ? '<ul class="sj-regs">' + regs.map(itemDiario).join('') + '</ul>' : '<p class="sj-mudo">' + esc(t('dia_vazio')) + '</p>') +
+        '<a class="btn btn-ghost sm" href="#sjDiario" data-irdiario="' + isoDia(c, n) + '">' + esc(t('dia_escrever')) + '</a></form>';
+    }
+
+    var legenda = function () { return '<div class="sj-leg"><span><i class="orou"></i>' + esc(t('leg_orou')) + '</span><span><i class="tes"></i>' + esc(t('leg_tes')) + '</span><span><i class="hoje"></i>' + esc(t('leg_hoje')) + '</span><span><i></i>' + esc(t('leg_vazio')) + '</span></div>'; };
+
+    function cartaoPrep(mp, pd) {
+      var e = D.edicao, p = e.prep, hist = e.etapa === 'jornada' || e.etapa === 'fim';
+      var h = '<section class="conta-card sj-cal-card' + (hist ? ' sj-hist' : '') + '" id="sjPrep"><h3>' + esc(hist ? t('prep_hist') : t('prep_h')) + '</h3>' +
+        '<p' + (e.etapa === 'antes' ? ' class="sj-aviso"' : '') + '>' + esc(e.etapa === 'antes' ? t('prep_antes') : t('prep_p')) + '</p><div class="sj-blocos">';
+      p.blocos.forEach(function (b) {
+        var ativo = p.fase === 'durante' && p.dia_atual >= b.de && p.dia_atual <= b.ate;
+        h += '<div class="sj-bloco' + (ativo ? ' ativo' : '') + '"><div class="sj-bloco-t"><b>' + esc(t('bloco_c').replace('{n}', b.n).replace('{m}', b.minutos >= 60 ? '1 h' : b.minutos + ' min')) + '</b><small>' + esc(fmtData(dataDia('prep', b.de)) + ' – ' + fmtData(dataDia('prep', b.ate))) + '</small></div><div class="sj-cal sj-cal-p">';
+        for (var n = b.de; n <= b.ate; n++) h += celula('prep', n, mp, pd);
+        h += '</div></div>';
+      });
+      return h + '</div>' + legenda() + editor('prep', mp, pd) + '</section>';
+    }
+
+    function cartaoJornada(mj, pd) {
+      var h = '<section class="conta-card sj-cal-card" id="sjJor"><h3>' + esc(t('jor_h')) + '</h3><p>' + esc(t('jor_p')) + '</p><div class="sj-cal">';
+      for (var n = 1; n <= D.edicao.dias; n++) h += celula('jor', n, mj, pd);
+      return h + '</div>' + legenda() + editor('jor', mj, pd) + '</section>';
+    }
+
     function desenhar() {
-      var e = D.edicao, m = mapa(), pd = porData(), hoje = e.dia_atual, ult = Math.min(Math.max(hoje, 0), e.dias);
-      var orados = D.dias.filter(function (x) { return x.orou; }).length;
-      var seq = 0;
-      for (var k = (m[ult] && m[ult].orou) ? ult : ult - 1; k >= 1 && m[k] && m[k].orou; k--) seq++;
-      var pct = ult ? Math.round(100 * orados / ult) : 0;
-      var titulo = e.fase === 'antes' ? (1 - hoje === 1 ? t('antes_1') : t('antes') + ' <b>' + (1 - hoje) + '</b> ' + t('antes_d')) : e.fase === 'durante' ? t('durante').replace('{d}', '<b>' + hoje + '</b>').replace('{t}', e.dias) : t('depois');
+      var e = D.edicao, p = e.prep, mp = mapa(D.dias_prep), mj = mapa(D.dias), pd = porData();
+      var oradosP = D.dias_prep.filter(function (x) { return x.orou; }), oradosJ = D.dias.filter(function (x) { return x.orou; }).length;
+      var minutos = oradosP.reduce(function (s, x) { return s + blocoDe(x.dia).minutos; }, 0) + 60 * oradosJ;
+      var horas = (Math.round(minutos / 6) / 10).toLocaleString(en() ? 'en-US' : 'pt-BR');
+      var naJor = D.na_jornada, emJornada = e.etapa === 'jornada' && naJor;
+      var cicloAtual = emJornada ? 'jor' : 'prep';
+      var cc = C(cicloAtual), u = ult(cc);
+      var seq = emJornada ? seqDe(mj, u) : (e.etapa === 'preparacao' ? seqDe(mp, u) : 0);
+      var anelPct = e.etapa === 'antes' ? 0 : emJornada || e.etapa === 'fim' ? Math.round(100 * ult(e) / e.dias) : Math.round(100 * ult(p) / p.dias);
+      var anelN = e.etapa === 'antes' ? '00' : emJornada || e.etapa === 'fim' ? String(ult(e)).padStart(2, '0') : String(ult(p)).padStart(2, '0');
+      var anelT = emJornada || e.etapa === 'fim' ? e.dias : p.dias;
+      var titulo, sub = '', corpo = '';
+      if (e.etapa === 'antes') {
+        titulo = 1 - p.dia_atual === 1 ? t('e_antes_1') : t('e_antes') + ' <b>' + (1 - p.dia_atual) + '</b> ' + t('dias');
+        corpo = '<p class="sj-q">' + esc(t('antes_p')) + '</p><a class="btn btn-creme sm" href="#sjDiario" data-irdiario="' + e.hoje + '">' + esc(t('hoje_dia')) + '</a>';
+      } else if (e.etapa === 'preparacao') {
+        var b = blocoDe(p.dia_atual), tm = tempo(b.minutos);
+        titulo = t('e_prep').replace('{d}', '<b>' + p.dia_atual + '</b>').replace('{t}', p.dias);
+        sub = t('bloco').replace('{n}', b.n).replace('{m}', tm);
+        corpo = mp[p.dia_atual] && mp[p.dia_atual].orou
+          ? '<p class="sj-ok">' + esc(t('hoje_ok')) + '</p><a class="btn btn-ghost sm" href="#sjDiario" data-irdiario="' + e.hoje + '">' + esc(t('hoje_dia')) + '</a>'
+          : '<p class="sj-q">' + esc(t('q_prep').replace('{d}', p.dia_atual).replace('{m}', tm)) + '</p><div class="conta-perigo"><button type="button" class="btn btn-creme" id="sjHoje" data-ciclo="prep">' + esc(t('sim_prep').replace('{m}', tm)) + '</button><a class="btn btn-ghost sm" href="#sjDiario" data-irdiario="' + e.hoje + '">' + esc(t('hoje_dia')) + '</a></div>';
+        if (naJor) corpo += '<p class="sj-mudo" style="margin-top:14px">' + esc(t('espera_p')) + '</p>';
+      } else if (e.etapa === 'jornada') {
+        if (naJor) {
+          titulo = t('e_jornada').replace('{d}', '<b>' + e.dia_atual + '</b>').replace('{t}', e.dias);
+          corpo = mj[e.dia_atual] && mj[e.dia_atual].orou
+            ? '<p class="sj-ok">' + esc(t('hoje_ok')) + '</p><a class="btn btn-ghost sm" href="#sjDiario" data-irdiario="' + e.hoje + '">' + esc(t('hoje_dia')) + '</a>'
+            : '<p class="sj-q">' + esc(t('q_jor').replace('{d}', e.dia_atual)) + '</p><div class="conta-perigo"><button type="button" class="btn btn-creme" id="sjHoje" data-ciclo="jor">' + esc(t('sim_jor')) + '</button><a class="btn btn-ghost sm" href="#sjDiario" data-irdiario="' + e.hoje + '">' + esc(t('hoje_dia')) + '</a></div>';
+        } else titulo = t('e_aberta');
+      } else { titulo = t('e_fim'); corpo = '<p class="sj-q">' + esc(t('fim_p')) + '</p>'; }
 
       var h = '<div class="sj">';
       h += '<section class="sj-hud"><span class="si-c tl"></span><span class="si-c br"></span>' +
-        '<div class="sj-anel"><svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="52" class="g-bg" pathLength="100"/><circle cx="60" cy="60" r="52" class="g-v" pathLength="100" style="stroke-dasharray:' + (e.fase === 'antes' ? 0 : Math.round(100 * ult / e.dias)) + ' 100"/></svg>' +
-        '<div><small>SI · ' + esc(e.id) + '</small><b>' + (e.fase === 'antes' ? '00' : String(ult).padStart(2, '0')) + '</b><small>/ ' + e.dias + '</small></div></div>' +
-        '<div class="sj-hud-txt"><h2>' + titulo + '</h2>' +
-        '<div class="sj-kpis"><div><b>' + orados + '</b><span>' + esc(t('orados')) + '</span></div><div><b>' + orados + 'h</b><span>' + esc(t('horas')) + '</span></div><div><b>' + seq + '</b><span>' + esc(t('seq')) + '</span></div><div><b>' + D.diario.length + '</b><span>' + esc(t('reg')) + '</span></div></div>';
-      if (e.fase === 'durante') {
-        var hj = m[hoje];
-        h += hj && hj.orou
-          ? '<p class="sj-ok">' + esc(t('hoje_ok')) + '</p><a class="btn btn-ghost sm" href="#sjDiario" data-irdiario="' + e.hoje + '">' + esc(t('hoje_dia')) + '</a>'
-          : '<p class="sj-q">' + esc(t('hoje_q').replace('{d}', hoje)) + '</p><div class="conta-perigo"><button type="button" class="btn btn-creme" id="sjHoje">' + esc(t('hoje_sim')) + '</button><a class="btn btn-ghost sm" href="#sjDiario" data-irdiario="' + e.hoje + '">' + esc(t('hoje_dia')) + '</a></div>';
-      } else if (e.fase === 'antes') h += '<p class="sj-q">' + esc(t('antes_p')) + '</p><a class="btn btn-creme sm" href="#sjDiario" data-irdiario="' + e.hoje + '">' + esc(t('hoje_dia')) + '</a>';
-      if (ult && e.fase !== 'antes') h += '<div class="sj-barra" aria-hidden="true"><i style="width:' + pct + '%"></i></div><small class="sj-pct">' + pct + '% · ' + orados + '/' + ult + '</small>';
+        '<div class="sj-anel"><svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="52" class="g-bg" pathLength="100"/><circle cx="60" cy="60" r="52" class="g-v" pathLength="100" style="stroke-dasharray:' + anelPct + ' 100"/></svg>' +
+        '<div><small>SI · ' + esc(e.id) + '</small><b>' + anelN + '</b><small>/ ' + anelT + '</small></div></div>' +
+        '<div class="sj-hud-txt">' + (sub ? '<div class="sj-sub">' + esc(sub) + '</div>' : '') + '<h2>' + titulo + '</h2>' +
+        '<div class="sj-kpis"><div><b>' + (oradosP.length + oradosJ) + '</b><span>' + esc(t('orados')) + '</span></div><div><b>' + horas + 'h</b><span>' + esc(t('horas')) + '</span></div><div><b>' + seq + '</b><span>' + esc(t('seq')) + '</span></div><div><b>' + D.diario.length + '</b><span>' + esc(t('reg')) + '</span></div></div>' +
+        corpo;
+      if (e.etapa !== 'antes' && u) {
+        var marcados = cicloAtual === 'jor' ? oradosJ : oradosP.length, pct = Math.round(100 * marcados / u);
+        if (e.etapa !== 'fim' && (emJornada || e.etapa === 'preparacao')) h += '<div class="sj-barra" aria-hidden="true"><i style="width:' + pct + '%"></i></div><small class="sj-pct">' + pct + '% · ' + marcados + '/' + u + '</small>';
+      }
       h += '</div></section>';
       if (msg) h += '<p class="conta-ok" role="status">' + esc(msg) + '</p>';
 
-      // calendário dos 100 dias
-      h += '<section class="conta-card sj-cal-card"><h3>' + esc(t('cal_h')) + '</h3><p' + (e.fase === 'antes' ? ' class="sj-aviso"' : '') + '>' + esc(e.fase === 'antes' ? t('cal_antes') : t('cal_p')) + '</p><div class="sj-cal">';
-      for (var n = 1; n <= e.dias; n++) {
-        var x = m[n], cls = n > ult ? 'fut' : x && x.orou ? 'orou' : 'vazio';
-        if (n === hoje) cls += ' hoje';
-        if (pd[isoDia(n)] || (x && x.testemunho)) cls += ' tes';
-        if (aberto === n) cls += ' sel';
-        h += '<button type="button" class="sj-d ' + cls + '" data-dia="' + n + '"' + (n > ult ? ' disabled' : '') + ' title="' + esc(fmtData(dataDia(n))) + '" aria-label="' + esc(t('dia_h').replace('{d}', n).replace('{data}', fmtData(dataDia(n)))) + '"><span>' + n + '</span></button>';
+      // convite para os 100 dias
+      if (D.pode_aceitar) {
+        h += '<section class="sj-convite"><span class="si-c tl"></span><span class="si-c br"></span><div class="eyebrow">' + esc(t('conv_e')) + '</div><h2>' + esc(e.etapa === 'jornada' ? t('conv_h2') : t('conv_h')) + '</h2><p>' + esc(t('conv_p')) + '</p>' +
+          '<button type="button" class="btn btn-creme" id="sjAceitar">' + esc(t('conv_b')) + '</button></section>';
       }
-      h += '</div><div class="sj-leg"><span><i class="orou"></i>' + esc(t('leg_orou')) + '</span><span><i class="tes"></i>' + esc(t('leg_tes')) + '</span><span><i class="hoje"></i>' + esc(t('leg_hoje')) + '</span><span><i></i>' + esc(t('leg_vazio')) + '</span></div>';
 
-      if (aberto) {
-        var y = m[aberto] || { orou: 0 }, regs = pd[isoDia(aberto)] || [];
-        h += '<form class="sj-ed" id="sjEd"><h4>' + esc(t('dia_h').replace('{d}', aberto).replace('{data}', fmtData(dataDia(aberto), true))) + '</h4>' +
-          '<label class="si-check"><input type="checkbox" name="orou"' + (y.orou ? ' checked' : '') + '><span>' + esc(t('orei')) + '</span></label>' +
-          '<div class="conta-perigo"><button class="btn btn-creme sm" type="submit">' + esc(t('salvar_dia')) + '</button><button type="button" class="lnk-x" id="sjFechar">' + esc(t('fechar')) + '</button></div>' +
-          '<h5>' + esc(t('dia_reg')) + '</h5>' + (regs.length ? '<ul class="sj-regs">' + regs.map(itemDiario).join('') + '</ul>' : '<p class="sj-mudo">' + esc(t('dia_vazio')) + '</p>') +
-          '<a class="btn btn-ghost sm" href="#sjDiario" data-irdiario="' + isoDia(aberto) + '">' + esc(t('dia_escrever')) + '</a></form>';
-      }
-      h += '</section>';
+      // grades: na jornada, os 100 dias primeiro e a preparação como histórico; antes disso, só a preparação
+      if (emJornada || (e.etapa === 'fim' && naJor)) h += cartaoJornada(mj, pd);
+      if (D.na_preparacao) h += cartaoPrep(mp, pd);
 
       // diário
       var cont = {}; D.diario.forEach(function (r) { cont[r.tipo] = (cont[r.tipo] || 0) + 1; });
@@ -158,8 +242,8 @@
           if (r.data !== ultData) {
             if (ultData) h += '</ul>';
             ultData = r.data;
-            var nd = diaDeIso(r.data);
-            h += '<h5 class="sj-dt"><span>' + esc(fmtIso(r.data, true)) + '</span>' + (nd >= 1 && nd <= e.dias ? '<b>' + esc(rotDia(nd)) + '</b>' : '') + '</h5><ul class="sj-regs">';
+            var rot = rotIso(r.data);
+            h += '<h5 class="sj-dt"><span>' + esc(fmtIso(r.data, true)) + '</span>' + (rot ? '<b>' + esc(rot) + '</b>' : '') + '</h5><ul class="sj-regs">';
           }
           h += itemDiario(r);
         });
@@ -189,18 +273,25 @@
     }
 
     function ligar() {
-      var hoje = D.edicao.dia_atual;
       var bh = document.getElementById('sjHoje');
-      if (bh) bh.onclick = function () { bh.disabled = true; salvarDia(hoje, true).catch(function (er) { alert(er.message); bh.disabled = false; }); };
+      if (bh) bh.onclick = function () {
+        var c = bh.getAttribute('data-ciclo'); bh.disabled = true;
+        salvarDia(c, C(c).dia_atual, true).catch(function (er) { alert(er.message); bh.disabled = false; });
+      };
+      var ac = document.getElementById('sjAceitar');
+      if (ac) ac.onclick = function () {
+        ac.disabled = true;
+        L.api('/conta/spirit/aceitar', 'POST').then(function () { msg = D.edicao.etapa === 'jornada' ? t('conv_ok2') : t('conv_ok'); return carregar(); }).catch(function (er) { alert(er.message); ac.disabled = false; });
+      };
       alvo.querySelectorAll('[data-dia]').forEach(function (b) {
         b.onclick = function () {
-          aberto = +b.getAttribute('data-dia'); msg = ''; desenhar();
+          aberto = { c: b.getAttribute('data-ciclo'), n: +b.getAttribute('data-dia') }; msg = ''; desenhar();
           var f = document.getElementById('sjEd'); if (f) f.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         };
       });
       alvo.querySelectorAll('[data-irdiario]').forEach(function (a) { a.onclick = function (ev) { ev.preventDefault(); irDiario(a.getAttribute('data-irdiario')); }; });
       var f = document.getElementById('sjEd');
-      if (f) f.onsubmit = function (ev) { ev.preventDefault(); var n = aberto; salvarDia(n, f.orou.checked).then(function () { aberto = null; desenhar(); }).catch(function (er) { alert(er.message); }); };
+      if (f) f.onsubmit = function (ev) { ev.preventDefault(); var a = aberto; salvarDia(a.c, a.n, f.orou.checked).then(function () { aberto = null; desenhar(); }).catch(function (er) { alert(er.message); }); };
       var fc = document.getElementById('sjFechar'); if (fc) fc.onclick = function () { aberto = null; desenhar(); };
 
       // diário: o rascunho acompanha o que a pessoa digita

@@ -10,11 +10,11 @@ export const novidades = [
     id: 'spirit-immersion',
     destaque: true,
     tipo: { pt: 'Evento', en: 'Event' },
-    quando: { pt: '1º de janeiro a 10 de abril de 2027', en: 'January 1 to April 10, 2027' },
-    titulo: { pt: 'Spirit Immersion 2027: 100 dias', en: 'Spirit Immersion 2027: 100 days' },
+    quando: { pt: 'Preparação em dezembro · 100 dias de 1º/01 a 10/04/2027', en: 'Preparation in December · 100 days, Jan 1 – Apr 10, 2027' },
+    titulo: { pt: 'Spirit Immersion 2027: 31 + 100 dias', en: 'Spirit Immersion 2027: 31 + 100 days' },
     texto: {
-      pt: 'Uma hora por dia orando em línguas, durante 100 dias. As inscrições estão abertas: entre com a sua conta e acompanhe a jornada no site, com a contagem dos dias, o check diário, os testemunhos e os devocionais.',
-      en: 'One hour a day praying in tongues, for 100 days. Enrollment is open: sign in with your account and follow the journey on the site, with the day counter, daily check-in, testimonies and devotionals.',
+      pt: 'Oração em línguas: 31 dias de preparação em dezembro (15, 30, 45 minutos e 1 hora por dia) e, depois, 100 dias de 1 hora por dia. As inscrições estão abertas: entre com a sua conta e acompanhe tudo no site, com a contagem dos dias, o check diário, o diário de oração e os devocionais.',
+      en: 'Praying in tongues: 31 days of preparation in December (15, 30, 45 minutes and 1 hour a day), then 100 days of 1 hour a day. Enrollment is open: sign in with your account and follow everything on the site, with the day counter, daily check-in, prayer journal and devotionals.',
     },
     botoes: [
       { pt: 'Conhecer e participar', en: 'Learn more and join', url: '/spirit-immersion.html' },
