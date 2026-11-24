@@ -10,15 +10,14 @@ export const novidades = [
     id: 'spirit-immersion',
     destaque: true,
     tipo: { pt: 'Evento', en: 'Event' },
-    quando: { pt: 'Em breve', en: 'Coming soon' },
-    titulo: { pt: 'Spirit Immersion', en: 'Spirit Immersion' },
+    quando: { pt: '1º de janeiro a 10 de abril de 2027', en: 'January 1 to April 10, 2027' },
+    titulo: { pt: 'Spirit Immersion 2027: 100 dias', en: 'Spirit Immersion 2027: 100 days' },
     texto: {
-      pt: 'O Spirit Immersion vai acontecer novamente. Em breve divulgaremos data, local e inscrições. Entre na nossa comunidade no WhatsApp e acompanhe o Instagram para receber as informações em primeira mão.',
-      en: 'Spirit Immersion is coming back. We will soon announce the date, venue and registration. Join our WhatsApp community and follow us on Instagram to be the first to know.',
+      pt: 'Uma hora por dia orando em línguas, durante 100 dias. As inscrições estão abertas: entre com a sua conta e acompanhe a jornada no site, com a contagem dos dias, o check diário, os testemunhos e os devocionais.',
+      en: 'One hour a day praying in tongues, for 100 days. Enrollment is open: sign in with your account and follow the journey on the site, with the day counter, daily check-in, testimonies and devotionals.',
     },
     botoes: [
-      { pt: 'Quero ser avisado', en: 'Notify me', url: LINKS.grupo1 },
-      { pt: 'Acompanhar no Instagram', en: 'Follow on Instagram', url: LINKS.instagram },
+      { pt: 'Conhecer e participar', en: 'Learn more and join', url: '/spirit-immersion.html' },
     ],
   },
   {

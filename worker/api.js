@@ -5,6 +5,7 @@ import { apiLoja } from './loja.js';
 import { relatorio } from './estatisticas.js';
 import { apiModeracao } from './leitores.js';
 import { enfileirar, processarFila, apiTestemunhosPainel, apiEmailsPainel } from './emails.js';
+import { apiSpiritPainel } from './spirit.js';
 
 const DIAS_SESSAO = 14;
 const AREAS = ['Antigo Testamento', 'Novo Testamento', 'Teologia bíblica', 'História'];
@@ -421,6 +422,11 @@ export async function api(req, env, url, ctx) {
   if (seg[0] === 'testemunhos') {
     if (!pode(u, 'publicar')) return erro('Apenas editores e acima publicam testemunhos.', 403);
     return apiTestemunhosPainel(req, env, url, seg.slice(1), u, { registrar, aoPublicar });
+  }
+
+  if (seg[0] === 'spirit') {
+    if (!pode(u, 'publicar')) return erro('Apenas editores e acima cuidam do Spirit Immersion.', 403);
+    return apiSpiritPainel(req, env, url, seg.slice(1), u, { registrar });
   }
 
   if (p === '/emails' && m === 'GET') {

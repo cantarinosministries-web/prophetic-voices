@@ -79,3 +79,9 @@ Configuração inicial (uma vez): veja `docs/CONFIGURAR-CLOUDFLARE.md`.
 - Leitor de PDF próprio (`src/scripts/leitor-pdf.js`, pdf.js carregado só na página do artigo): páginas, zoom, tela cheia, texto selecionável, "Guardar citação" e "Copiar com referência". Se falhar, volta ao visualizador do navegador. Os pedidos dele levam `X-PV-Leitor` e não contam como download.
 - **Histórico de leitura é opcional** (`leitores.historico`: NULL = não respondeu, 1 = ligado, 0 = desligado). Só grava a página com ele ligado; desligar apaga tudo. Política de Privacidade 1.3, seção 5.1.
 - "Como citar" na página do artigo: ABNT, SBL e APA (`worker/citacao.js`).
+
+## Spirit Immersion (/spirit-immersion, /conta#spirit, painel → Spirit Immersion)
+- Página pública com visão, origem e estatísticas agregadas (`src/pages/spirit-immersion.astro`, números em `src/data/spirit.js`).
+- Inscrição pela conta de leitor (aceite destacado); a jornada de 100 dias fica na aba Spirit Immersion da conta (`public/conta/spirit.js`):
+  contagem dos dias, check diário, testemunho por dia com autorização própria e devocionais em PDF.
+- API e e-mails dos devocionais: `worker/spirit.js` (datas da edição em `EDICAO`). Banco: `migrations/0016_spirit_immersion.sql`.
