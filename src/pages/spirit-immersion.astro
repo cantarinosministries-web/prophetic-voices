@@ -71,7 +71,7 @@ const ticks = Array.from({ length: 60 }, (_, i) => i);
         </figure>
         <div>
           <div class="eyebrow" data-en="How it began">Como nasceu</div>
-          <p data-en="In 2023, Gabriel Cantarino was struck by Obed-Edom (2 Sam 6:11): before David’s tent, God made a home a dwelling place for the Ark, and that family went on to minister day and night. A prayer was born: “Before the church becomes a house of prayer, I want my home to be one; and before my home, I want to be one.” On January 1, 2024, he returned to the practice of setting apart hours of the day to pray in tongues and was inspired by the Spirit to establish one hour a day for it. Months later, the Spirit led him to open it to the Church, and the Spirit Immersion was born.">Em 2023, Gabriel Cantarino foi atravessado pela história de Obede-Edom (2Sm 6.11): antes da Tenda de Davi, Deus fez de uma casa a habitação da Arca, e aquela família passou a ministrar dia e noite. Nasceu uma oração: “Antes de a igreja ser uma casa de oração, quero que a minha casa seja; e, antes da minha casa, quero eu ser uma casa de oração.” Em 1º de janeiro de 2024, ele voltou à prática de separar horas do dia para orar em línguas e foi inspirado pelo Espírito a estabelecer uma hora por dia para isso. Meses depois, o Espírito o levou a abrir isso à Igreja, e nasceu o Spirit Immersion.</p>
+          <p data-en="In 2023, Gabriel Cantarino was struck by Obed-Edom (2 Sam 6:11): before David’s tent, God made a home a dwelling place for the Ark, and that family went on to minister day and night. A prayer was born: “Before the church becomes a house of prayer, I want my home to be one; and before my home, I want to be one.” On January 1, 2024, after an angelic visitation, he returned to the practice of setting apart hours of the day to pray in tongues and was inspired by the Spirit to establish one hour a day for it. Months later, the Spirit led him to open it to the Church, and the Spirit Immersion was born.">Em 2023, Gabriel Cantarino foi atravessado pela história de Obede-Edom (2Sm 6.11): antes da Tenda de Davi, Deus fez de uma casa a habitação da Arca, e aquela família passou a ministrar dia e noite. Nasceu uma oração: “Antes de a igreja ser uma casa de oração, quero que a minha casa seja; e, antes da minha casa, quero eu ser uma casa de oração.” Em 1º de janeiro de 2024, após uma visitação angelical, ele voltou à prática de separar horas do dia para orar em línguas e foi inspirado pelo Espírito a estabelecer uma hora por dia para isso. Meses depois, o Espírito o levou a abrir isso à Igreja, e nasceu o Spirit Immersion.</p>
           <p class="si-sub" data-en="The goal is not to fill a 24/7 schedule, but to form inside each person an inner structure that sustains a real life of prayer, one that does not depend on a shift at church.">O alvo não é preencher uma escala 24/7, mas formar dentro de cada pessoa uma estrutura interior que sustente uma vida de oração de verdade, que não dependa de um turno na igreja.</p>
         </div>
       </div>
@@ -89,6 +89,8 @@ const ticks = Array.from({ length: 60 }, (_, i) => i);
         </div>
         <p class="si-fonte mono" data-en={`SOURCE · ${fonte.respostas} CLOSING SURVEYS · JAN 2024 + DEC 2025–JAN 2026`}>FONTE · {fonte.respostas} FORMULÁRIOS DE ENCERRAMENTO · JAN 2024 + DEZ 2025–JAN 2026</p>
       </div>
+
+      <p class="si-intro rv" data-en="Since 2024, thousands of people have joined this prayer journey with us, and among them, 382 chose to record the effects of this prayer movement.">Desde 2024, milhares de pessoas participaram dessa jornada de oração conosco, e dentre elas, 382 decidiram registrar os efeitos desse movimento de oração.</p>
 
       <div class="si-kpis">
         {destaques.map((d, i) => (
@@ -444,7 +446,8 @@ const ticks = Array.from({ length: 60 }, (_, i) => i);
   .si-frutos{overflow:hidden}
   .si-head{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap}
   .si-fonte{font-size:11px;letter-spacing:.18em;color:var(--areia);max-width:380px;line-height:1.7;margin:0}
-  .si-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:56px}
+  .si-intro{margin:34px 0 0;max-width:760px;font-family:var(--serif);font-size:clamp(22px,2vw,28px);line-height:1.4;color:var(--creme)}
+  .si-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:40px}
   @media(max-width:1000px){.si-kpis{grid-template-columns:repeat(2,1fr)}}
   @media(max-width:520px){.si-kpis{grid-template-columns:1fr}}
   .si-kpi{position:relative;padding:26px 24px 28px;border:1px solid var(--line);background:rgba(10,9,7,.75);backdrop-filter:blur(4px)}

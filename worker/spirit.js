@@ -14,6 +14,9 @@ export const EDICAO = { id: '2027', inicio: '2027-01-01', dias: 100, inscricoes_
 const DOM = 'https://thepropheticvoices.com.br';
 const MAX_TESTEMUNHO = 4000;
 const AUT = ['equipe', 'anonimo', 'nome'];
+const AUT_DIARIO = ['privado', 'equipe', 'anonimo', 'nome'];
+const TIPOS = ['testemunho', 'profetica', 'ouvi', 'texto', 'oracao', 'outro'];
+const MAX_DIARIO = 10000;
 const LOTE = 150, PARALELO = 6, MAX_TENTATIVAS = 3;
 
 async function corpo(req) { try { return await req.json(); } catch (e) { return {}; } }
@@ -42,12 +45,13 @@ export async function apiSpiritLeitor(req, env, url, seg, l) {
 
   if (!acao && m === 'GET') {
     if (!p) return json({ edicao: s, inscrito: false });
-    const [dias, devs] = await Promise.all([
+    const [dias, devs, diario] = await Promise.all([
       env.DB.prepare('SELECT dia, orou, testemunho, autorizacao, atualizado_em FROM si_dias WHERE leitor_id = ? AND edicao = ? ORDER BY dia').bind(l.id, s.id).all(),
       env.DB.prepare("SELECT id, titulo, resumo, liberar_em, pdf_url FROM si_devocionais WHERE edicao = ? AND status = 'publicado' AND pdf_url IS NOT NULL AND liberar_em <= ? ORDER BY liberar_em DESC, id DESC").bind(s.id, s.hoje).all(),
+      env.DB.prepare('SELECT id, data, tipo, referencia, texto, autorizacao, criado_em, atualizado_em FROM si_diario WHERE leitor_id = ? AND edicao = ? ORDER BY data DESC, id DESC').bind(l.id, s.id).all(),
     ]);
     return json({ edicao: s, inscrito: true, inscrito_em: p.inscrito_em, devocionais_email: !!p.devocionais_email, email: l.email || null,
-      email_servico: emailConfigurado(env), dias: dias.results, devocionais: devs.results });
+      email_servico: emailConfigurado(env), dias: dias.results, devocionais: devs.results, diario: diario.results });
   }
 
   if (acao === 'inscrever' && m === 'POST') {
@@ -85,10 +89,42 @@ export async function apiSpiritLeitor(req, env, url, seg, l) {
     return json({ ok: true });
   }
 
+  // diário: registros livres (testemunho, impressão profética, o que ouviu de Deus, texto lido, oração…)
+  if (acao === 'diario') {
+    const id = parseInt(seg[3], 10);
+    if (m === 'POST') {
+      const b = await corpo(req);
+      const texto = String(b.texto || '').replace(/\r\n?/g, '\n').replace(/\n{4,}/g, '\n\n\n').trim();
+      if (!texto) return erro('Escreva o registro.');
+      if (texto.length > MAX_DIARIO) return erro(`O registro pode ter até ${MAX_DIARIO} caracteres.`);
+      const data = /^\d{4}-\d{2}-\d{2}$/.test(b.data || '') ? b.data : s.hoje;
+      if (data > s.hoje) return erro('Esta data ainda não chegou.');
+      const tipo = TIPOS.includes(b.tipo) ? b.tipo : 'testemunho';
+      const aut = AUT_DIARIO.includes(b.autorizacao) ? b.autorizacao : 'privado';
+      const ref = String(b.referencia || '').trim().slice(0, 200) || null;
+      if (id) {
+        const r = await env.DB.prepare("UPDATE si_diario SET data = ?, tipo = ?, referencia = ?, texto = ?, autorizacao = ?, atualizado_em = datetime('now') WHERE id = ? AND leitor_id = ?")
+          .bind(data, tipo, ref, texto, aut, id, l.id).run();
+        if (!r.meta.changes) return erro('Registro não encontrado.', 404);
+        return json({ ok: true, id });
+      }
+      const n = (await env.DB.prepare("SELECT COUNT(*) n FROM si_diario WHERE leitor_id = ? AND criado_em > datetime('now','-1 day')").bind(l.id).first()).n;
+      if (n >= 60) return erro('Muitos registros nas últimas 24 horas. Tente mais tarde.', 429);
+      const r = await env.DB.prepare('INSERT INTO si_diario (leitor_id, edicao, data, tipo, referencia, texto, autorizacao) VALUES (?,?,?,?,?,?,?) RETURNING id')
+        .bind(l.id, s.id, data, tipo, ref, texto, aut).first();
+      return json({ ok: true, id: r.id }, 201);
+    }
+    if (id && m === 'DELETE') {
+      await env.DB.prepare('DELETE FROM si_diario WHERE id = ? AND leitor_id = ?').bind(id, l.id).run();
+      return json({ ok: true });
+    }
+  }
+
   if (acao === 'sair' && m === 'POST') {
     // sair do movimento apaga a inscrição e todo o registro desta edição (dias e testemunhos)
     await env.DB.batch([
       env.DB.prepare('DELETE FROM si_dias WHERE leitor_id = ? AND edicao = ?').bind(l.id, s.id),
+      env.DB.prepare('DELETE FROM si_diario WHERE leitor_id = ? AND edicao = ?').bind(l.id, s.id),
       env.DB.prepare('DELETE FROM si_envios WHERE leitor_id = ?').bind(l.id),
       env.DB.prepare('DELETE FROM si_participantes WHERE leitor_id = ? AND edicao = ?').bind(l.id, s.id),
     ]);
@@ -117,8 +153,12 @@ export async function apiSpiritPainel(req, env, url, seg, u, { registrar }) {
       q(`SELECT d.*, (SELECT COUNT(*) FROM si_envios e WHERE e.devocional_id = d.id AND e.status = 'enviado') enviados,
                 (SELECT COUNT(*) FROM si_envios e WHERE e.devocional_id = d.id) total_envio
          FROM si_devocionais d WHERE edicao = ? ORDER BY liberar_em, id`, s.id),
-      q(`SELECT d.dia, d.testemunho, d.autorizacao, d.atualizado_em, l.nome, l.email FROM si_dias d JOIN leitores l ON l.id = d.leitor_id
-         WHERE d.edicao = ? AND d.testemunho IS NOT NULL ORDER BY d.atualizado_em DESC LIMIT 500`, s.id),
+      q(`SELECT x.* FROM (
+           SELECT d.data, d.tipo, d.referencia, d.texto AS testemunho, d.autorizacao, d.atualizado_em, l.nome, l.email FROM si_diario d JOIN leitores l ON l.id = d.leitor_id
+             WHERE d.edicao = ? AND d.autorizacao <> 'privado'
+           UNION ALL
+           SELECT NULL, 'testemunho', NULL, d.testemunho, d.autorizacao, d.atualizado_em, l.nome, l.email FROM si_dias d JOIN leitores l ON l.id = d.leitor_id
+             WHERE d.edicao = ? AND d.testemunho IS NOT NULL) x ORDER BY x.atualizado_em DESC LIMIT 500`, s.id, s.id),
       env.DB.prepare("SELECT COUNT(*) n FROM si_envios WHERE status = 'fila'").first(),
     ]);
     const dias = (await env.DB.prepare('SELECT leitor_id, SUM(orou) n FROM si_dias WHERE edicao = ? GROUP BY leitor_id').bind(s.id).all()).results;

@@ -12,7 +12,7 @@ export const fonte = {
 
 // contadores do topo
 export const destaques = [
-  { valor: 382, sufixo: '', pt: 'participantes responderam ao formulário de encerramento', en: 'participants answered the closing survey' },
+  { valor: 382, sufixo: '', pt: 'participantes registraram os efeitos no formulário de encerramento', en: 'participants recorded the effects in the closing survey' },
   { valor: 7908, sufixo: 'h', pt: 'de oração registradas (dias marcados × 1 hora)', en: 'of prayer recorded (days marked × 1 hour)' },
   { valor: 93, sufixo: '%', pt: 'sentiram o chamado para uma vida de oração diária', en: 'felt called to a daily life of prayer' },
   { valor: 60, sufixo: '%', pt: 'oraram mais de uma hora em algum dos dias', en: 'prayed more than one hour on some days' },

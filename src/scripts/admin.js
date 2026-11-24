@@ -704,6 +704,7 @@ async function telaEmails() {
 
 // ---------------------------------------------------------------- Spirit Immersion (participantes, devocionais, testemunhos)
 const AUT_SI = { equipe: 'Só a equipe', anonimo: 'Publicar sem identificar', nome: 'Publicar com o nome' };
+const TIPO_SI = { testemunho: 'Testemunho', profetica: 'Impressão profética', ouvi: 'O que ouvi de Deus', texto: 'Texto lido', oracao: 'Oração', outro: 'Registro' };
 async function telaSpirit() {
   marcarMenu('spirit');
   app.innerHTML = '<p class="muted center">Carregando…</p>';
@@ -739,10 +740,10 @@ async function telaSpirit() {
       <label class="f"><span>Resumo (vai no e-mail; opcional)</span><textarea name="resumo" rows="2" maxlength="1000"></textarea></label>
       <div><button class="btn pri" type="submit">Criar</button> <span class="small muted">Depois de criar, envie o PDF e publique.</span></div></form>
   </div>
-  <div class="card" style="margin-top:16px"><h3>Testemunhos diários · ${r.testemunhos.length}</h3>
-    <p class="small muted">Escritos pelos participantes na conta. Só publique (aba Testemunhos) os que trazem autorização para isso, respeitando o nível escolhido; “só a equipe” fica restrito ao ministério.</p>
+  <div class="card" style="margin-top:16px"><h3>Diário · registros liberados para a equipe · ${r.testemunhos.length}</h3>
+    <p class="small muted">Registros do diário que os participantes liberaram (os marcados “só eu” nunca aparecem aqui). Só publique (aba Testemunhos) os que trazem autorização para isso, respeitando o nível escolhido; “só a equipe” fica restrito ao ministério.</p>
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">${[['', 'Todos'], ['equipe', AUT_SI.equipe], ['anonimo', AUT_SI.anonimo], ['nome', AUT_SI.nome]].map(([k, v]) => `<button class="btn sm${filtro === k ? ' pri' : ''}" data-faut="${k}">${esc(v)} (${k ? r.testemunhos.filter((t) => t.autorizacao === k).length : r.testemunhos.length})</button>`).join('')}</div>
-    <div class="stack">${tes.map((t) => `<div style="border-top:1px solid rgba(248,233,183,.12);padding-top:12px"><div class="small muted">Dia ${t.dia} · ${esc(t.nome)}${t.email ? ' · ' + esc(t.email) : ''} · <b>${esc(AUT_SI[t.autorizacao])}</b> · ${data(t.atualizado_em)}</div><p style="white-space:pre-wrap;margin:6px 0 0">${esc(t.testemunho)}</p></div>`).join('') || '<p class="muted" style="margin:0">Nenhum testemunho ainda.</p>'}</div>
+    <div class="stack">${tes.map((t) => `<div style="border-top:1px solid rgba(248,233,183,.12);padding-top:12px"><div class="small muted">${t.data ? esc(t.data.split('-').reverse().join('/')) + ' · ' : ''}${esc(TIPO_SI[t.tipo] || 'Testemunho')}${t.referencia ? ' · ' + esc(t.referencia) : ''} · ${esc(t.nome)}${t.email ? ' · ' + esc(t.email) : ''} · <b>${esc(AUT_SI[t.autorizacao])}</b> · ${data(t.atualizado_em)}</div><p style="white-space:pre-wrap;margin:6px 0 0">${esc(t.testemunho)}</p></div>`).join('') || '<p class="muted" style="margin:0">Nenhum testemunho ainda.</p>'}</div>
   </div>`;
 
   $$('[data-faut]').forEach((b) => b.addEventListener('click', () => { sessionStorage.setItem('si-aut', b.dataset.faut); telaSpirit(); }));
