@@ -25,7 +25,8 @@ O endereço de retorno do login vem de `SITE_URL` (variável do ambiente). Para 
    `https://pv-homologacao.cantarinosministries.workers.dev/auth/google/retorno`.
    O retorno de produção continua cadastrado; os dois convivem.
 2. Em Cloudflare → pv-homologacao → Settings → Variables and secrets, criar `GOOGLE_CLIENT_ID` e `GOOGLE_CLIENT_SECRET` (o Gabriel cola os valores).
-3. Roteiro: abrir um artigo com acesso "cadastro" → "Ler online" → entrar com o Google → conferir que volta ao mesmo artigo e o PDF abre. Conferir também um artigo de acesso livre (abre sem login) e `/sitemap.xml`.
+3. **Depois de salvar um segredo pelo painel, publique de novo pelo build** (Deployments → último build da branch → Retry build, ou um novo commit na branch). Em 24/11/2026 a versão criada pelo botão "Add variables and deploy" deu "Erro interno" nas páginas de artigo (o Worker não achou o modelo `/artigos/modelo.html`); o build seguinte, que manteve os segredos, voltou ao normal.
+4. Roteiro: abrir um artigo com acesso "cadastro" → "Ler online" → entrar com o Google → conferir que volta ao mesmo artigo e o PDF abre. Conferir também um artigo de acesso livre (abre sem login) e `/sitemap.xml`.
 
 ## Depois do ensaio
 
