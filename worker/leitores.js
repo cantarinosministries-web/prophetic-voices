@@ -11,6 +11,7 @@
 import { aleatorio, sha256, lerCookie, json, erro, cabecalhos } from './seguranca.js';
 import { inscricaoDoLeitor, definirInscricaoLeitor, emailConfigurado } from './emails.js';
 import { apiBiblioteca, ROTAS_BIBLIOTECA } from './biblioteca.js';
+import { apiSpiritLeitor, participanteAtivo } from './spirit.js';
 
 const DOM = 'https://thepropheticvoices.com.br';
 const COOKIE_LEITOR = 'pv_leitor';
@@ -284,7 +285,7 @@ const publicoLeitor = async (env, l) => {
   const contas = (await env.DB.prepare('SELECT provedor, email, criado_em FROM leitor_contas WHERE leitor_id = ? ORDER BY criado_em').bind(l.id).all()).results;
   const insc = await inscricaoDoLeitor(env, l.id);
   return { nome: l.nome, email: l.email, criado_em: l.criado_em, bloqueado: !!l.bloqueado, contas,
-    recebe_email: !!(insc && insc.status === 'ativo'), perguntar_email: !l.respondeu_email && !!l.email };
+    recebe_email: !!(insc && insc.status === 'ativo'), perguntar_email: !l.respondeu_email && !!l.email, spirit: await participanteAtivo(env, l.id) };
 };
 
 export async function apiLeitores(req, env, url) {
@@ -320,6 +321,7 @@ export async function apiLeitores(req, env, url) {
       return json({ ok: true });
     }
     if (ROTAS_BIBLIOTECA.includes(seg[1])) return apiBiblioteca(req, env, url, seg, l);
+    if (seg[1] === 'spirit') return apiSpiritLeitor(req, env, url, seg, l);
     if (p === '/conta' && m === 'DELETE') {
       // LGPD: apaga o cadastro, os logins, as sessões, os comentários e toda a Biblioteca (salvos, coleções, citações, histórico)
       await env.DB.prepare('DELETE FROM leitores WHERE id = ?').bind(l.id).run();

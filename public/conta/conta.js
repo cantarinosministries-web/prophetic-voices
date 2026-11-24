@@ -25,7 +25,7 @@
       nome_h: 'Nome exibido', nome_p: 'É o nome que aparece nos seus comentários.', salvar: 'Salvar', salvo: 'Nome atualizado.',
       logins_h: 'Logins vinculados', logins_p: 'Você pode entrar por qualquer um destes.', remover: 'Remover', vincular_h: 'Vincular outro login',
       vinculado: 'Login vinculado à sua conta.', sair: 'Sair', excluir: 'Excluir minha conta', excluir_conf: 'Confirmar exclusão',
-      excluir_p: 'Excluir apaga o seu cadastro, os logins vinculados, os seus comentários e toda a sua Biblioteca (salvos, coleções, citações e histórico). Não é possível desfazer.',
+      excluir_p: 'Excluir apaga o seu cadastro, os logins vinculados, os seus comentários e toda a sua Biblioteca (salvos, coleções, citações e histórico) e o seu registro no Spirit Immersion. Não é possível desfazer.',
       excluida: 'Sua conta foi excluída.', voltar_rev: 'Ir para a revista', email: 'E-mail',
       bv_h: 'Bem-vindo ao The Prophetic Voices', bv_p: 'Quer receber no seu e-mail ({e}) os novos artigos da revista e os novos testemunhos assim que forem publicados? Você pode cancelar quando quiser, com um clique em qualquer e-mail.',
       bv_sim: 'Sim, quero receber', bv_nao: 'Agora não', bv_seguir: 'Continuar para onde eu estava →',
@@ -62,7 +62,7 @@
       nome_h: 'Display name', nome_p: 'This is the name shown on your comments.', salvar: 'Save', salvo: 'Name updated.',
       logins_h: 'Linked logins', logins_p: 'You can sign in with any of these.', remover: 'Remove', vincular_h: 'Link another login',
       vinculado: 'Login linked to your account.', sair: 'Sign out', excluir: 'Delete my account', excluir_conf: 'Confirm deletion',
-      excluir_p: 'Deleting removes your profile, linked logins, your comments and your whole Library (saved articles, collections, quotations and history). This cannot be undone.',
+      excluir_p: 'Deleting removes your profile, linked logins, your comments and your whole Library (saved articles, collections, quotations and history) and your Spirit Immersion record. This cannot be undone.',
       excluida: 'Your account was deleted.', voltar_rev: 'Go to the journal', email: 'E-mail',
       bv_h: 'Welcome to The Prophetic Voices', bv_p: 'Would you like to receive new journal articles and new testimonies at your e-mail ({e}) as soon as they are published? You can unsubscribe at any time with one click in any e-mail.',
       bv_sim: 'Yes, send them to me', bv_nao: 'Not now', bv_seguir: 'Continue where I was →',
@@ -121,22 +121,25 @@
       (l.recebe_email ? '<button type="button" class="btn btn-ghost sm" data-email="0">' + esc(t('em_desligar')) + '</button>' : '<button type="button" class="btn btn-creme sm" data-email="1">' + esc(t('em_ligar')) + '</button>') + '</div>';
   }
 
-  var aba = /^#(dados)$/.test(location.hash) || params.get('bemvindo') || params.get('ok') ? 'dados' : 'biblioteca';
+  var aba = /^#(dados)$/.test(location.hash) || params.get('bemvindo') || params.get('ok') ? 'dados' : /^#spirit$/.test(location.hash) ? 'spirit' : 'biblioteca';
   var B = null, filtroCol = 0;
 
   function telaConta() {
     var l = S.leitor;
     raiz.innerHTML = '<div class="conta-topo"><div><div class="eyebrow">' + esc(t('c_eyebrow')) + '</div><h1>' + esc(t('c_h')) + '<em>' + esc(l.nome) + '</em></h1></div>' +
       '<div class="conta-abas" role="tablist"><button type="button" role="tab" data-aba="biblioteca" aria-selected="' + (aba === 'biblioteca') + '">' + esc(t('aba_bib')) + '</button>' +
+      (l.spirit && window.PV_SPIRIT ? '<button type="button" role="tab" data-aba="spirit" aria-selected="' + (aba === 'spirit') + '">Spirit<span class="ab-l"> Immersion</span></button>' : '') +
       '<button type="button" role="tab" data-aba="dados" aria-selected="' + (aba === 'dados') + '">' + esc(t('aba_dados')) + '</button></div></div><div id="painelAba"></div>';
     raiz.querySelectorAll('[data-aba]').forEach(function (b) {
       b.addEventListener('click', function () {
         aba = b.getAttribute('data-aba');
-        try { history.replaceState(null, '', location.pathname + location.search + (aba === 'dados' ? '#dados' : '')); } catch (e) {}
+        try { history.replaceState(null, '', location.pathname + location.search + (aba === 'dados' ? '#dados' : aba === 'spirit' ? '#spirit' : '')); } catch (e) {}
         telaConta();
       });
     });
+    if (aba === 'spirit' && !(l.spirit && window.PV_SPIRIT)) aba = 'biblioteca';
     if (aba === 'dados') telaDados(document.getElementById('painelAba'));
+    else if (aba === 'spirit') window.PV_SPIRIT.tela(document.getElementById('painelAba'), { aoSair: function () { aba = 'biblioteca'; history.replaceState(null, '', location.pathname); iniciar(); } });
     else telaBiblioteca(document.getElementById('painelAba'));
   }
 

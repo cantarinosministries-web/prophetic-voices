@@ -45,9 +45,9 @@ const isHome = page === 'home';
         <a href={SCHOOL} target="_blank" rel="noopener" data-i18n="nav_school">Escola de Profetas</a>
         <a href="/artigos.html" data-i18n="nav_articles" class:list={[{ 'nav-active': page === 'artigos' }]}>Artigos</a>
         <a href="/cursos.html" data-i18n="nav_courses" class:list={[{ 'nav-active': page === 'cursos' }]}>Cursos</a>
-        <a href="/novidades.html" data-i18n="nav_news" class:list={[{ 'nav-active': page === 'novidades' }]}>Novidades</a>
         <a href="/testemunhos.html" data-i18n="nav_testimonies" class:list={[{ 'nav-active': page === 'testemunhos' }]}>Testemunhos</a>
-        <a href="/loja.html" data-i18n="nav_store" class:list={[{ 'nav-active': page === 'loja' }]}>Loja</a>
+        <a href="/spirit-immersion.html" class:list={['nav-si', { 'nav-active': page === 'spirit' }]}>Spirit Immersion 2027</a>
+        {/* Loja e Novidades ocultas do menu por decisão do Gabriel (24/11/2026); as páginas continuam no ar. */}
       </div>
       <div class="acts">
         <div class="lang" role="group" aria-label="Idioma / Language">
@@ -60,7 +60,7 @@ const isHome = page === 'home';
         </div>
         <button type="button" class="icon-btn menu-btn" id="menuBtn" aria-label="Abrir menu" aria-expanded="false" aria-controls="navLinks"><svg width="18" height="14" viewBox="0 0 18 14" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M0 1h18M0 7h18M0 13h18"/></svg></button>
         <a href="/entrar.html" class="icon-btn conta-btn" id="contaBtn" aria-label="Entrar ou criar conta"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></a>
-        <a href="/carrinho.html" class="icon-btn" aria-label="Carrinho"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M6 7h12l-1 13H7L6 7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg><span class="count" id="cartCount">0</span></a>
+        <a href="/carrinho.html" class="icon-btn" aria-label="Carrinho" hidden style="display:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M6 7h12l-1 13H7L6 7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg><span class="count" id="cartCount">0</span></a>
       </div>
     </nav>
   </header>
@@ -99,7 +99,7 @@ const isHome = page === 'home';
           <p class="news-nota" id="newsNote" hidden data-i18n-html="news_note">Você recebe um e-mail para confirmar. Pode cancelar quando quiser. <a href="/privacidade.html">Política de Privacidade</a>.</p>
         </div>
         <div class="cols">
-          <div><span data-i18n="f_nav">NAVEGAR</span><a href="/index.html#quem-somos" data-i18n="nav_about">Quem Somos</a><a href={SCHOOL} target="_blank" rel="noopener" data-i18n="nav_school">Escola de Profetas</a><a href="/artigos.html" data-i18n="nav_articles">Artigos</a><a href="/cursos.html" data-i18n="nav_courses">Cursos</a><a href="/loja.html" data-i18n="nav_store">Loja</a></div>
+          <div><span data-i18n="f_nav">NAVEGAR</span><a href="/index.html#quem-somos" data-i18n="nav_about">Quem Somos</a><a href={SCHOOL} target="_blank" rel="noopener" data-i18n="nav_school">Escola de Profetas</a><a href="/artigos.html" data-i18n="nav_articles">Artigos</a><a href="/cursos.html" data-i18n="nav_courses">Cursos</a><a href="/spirit-immersion.html">Spirit Immersion 2027</a></div>
           <div><span data-i18n="f_contact">CONTATO</span><a href="https://wa.me/5599920017003" target="_blank" rel="noopener">WhatsApp · +55 99 92001-7003</a><a href="https://wa.me/5511960578932" target="_blank" rel="noopener"><span data-i18n="f_agenda">Agenda</span> · +55 11 96057-8932</a><a href={IG} target="_blank" rel="noopener">Instagram · @thepropheticvoices</a></div>
           <div><span data-i18n="f_comm">COMUNIDADE</span><a href={WA1} target="_blank" rel="noopener" data-i18n="g1">WhatsApp · Grupo 1</a><a href={WA2} target="_blank" rel="noopener" data-i18n="g2">WhatsApp · Grupo 2</a></div>
         </div>

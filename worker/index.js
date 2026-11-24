@@ -16,6 +16,7 @@ import { apiLojaPublica, webhookMercadoPago } from './loja.js';
 import { contar, contavel, totaisArtigo } from './estatisticas.js';
 import { rotaAuth, apiLeitores, provedoresAtivos, leitorDaSessao } from './leitores.js';
 import { rotaEmail, apiNewsletter, testemunhosPublicos, processarFila } from './emails.js';
+import { spiritPublico, pdfDevocional, processarFilaSpirit } from './spirit.js';
 
 function html(texto, status = 200) {
   const h = cabecalhos(new Headers({ 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' }));
@@ -72,9 +73,11 @@ export default {
   // a cada 10 minutos: envia o que ficou na fila de e-mails (novos artigos e testemunhos)
   async scheduled(evento, env, ctx) {
     ctx.waitUntil(processarFila(env).catch((e) => console.error('fila de e-mails', e)));
+    ctx.waitUntil(processarFilaSpirit(env).catch((e) => console.error('fila do Spirit Immersion', e)));
   },
 
   async fetch(req, env, ctx) {
+    globalThis.__SI_HOJE = /^\d{4}-\d{2}-\d{2}$/.test(env.SI_HOJE_TESTE || '') ? env.SI_HOJE_TESTE : undefined;
     const url = new URL(req.url);
     let path = url.pathname;
     try {
@@ -90,6 +93,7 @@ export default {
         if (path.startsWith('/api/conta/') || path === '/api/conta' || path.startsWith('/api/comentarios/')) return await apiLeitores(req, env, url);
         if (path === '/api/newsletter') return await apiNewsletter(req, env);
         if (path === '/api/publico/testemunhos' && req.method === 'GET') return await testemunhosPublicos(env);
+        if (path === '/api/publico/spirit' && req.method === 'GET') return await spiritPublico(env);
         return await api(req, env, url, ctx);
       }
 
@@ -149,6 +153,16 @@ export default {
 
       if (path.startsWith('/arquivos/')) {
         const chave = decodeURIComponent(path.slice('/arquivos/'.length));
+        if (/^spirit\/[\w.-]+\.pdf$/.test(chave)) {
+          // devocionais do Spirit Immersion: só participantes inscritos (e a equipe logada no painel)
+          const obj = await pdfDevocional(env, req, chave, { leitor: await leitorDaSessao(env, req), equipe: !!(await usuarioDaSessao(env, req)) });
+          if (obj === 'negado') return new Response(null, { status: 303, headers: cabecalhos(new Headers({ Location: '/spirit-immersion.html', 'Cache-Control': 'no-store' })) });
+          if (!obj) return naoEncontrado(env, req);
+          const h = cabecalhos(new Headers());
+          obj.writeHttpMetadata(h);
+          h.set('Cache-Control', 'private, no-store');
+          return new Response(obj.body, { headers: h });
+        }
         if (/^loja\/[\w.-]+$/.test(chave)) {
           const obj = await env.ARQUIVOS.get(chave);
           if (!obj) return naoEncontrado(env, req);

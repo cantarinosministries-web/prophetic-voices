@@ -5,19 +5,19 @@ import unittest
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 
 class AtualizacaoBanco(unittest.TestCase):
-    def test_atualiza_0015_preservando_biblioteca_e_fila(self):
+    def test_atualiza_0018_preservando_biblioteca_e_fila(self):
         with sqlite3.connect(":memory:") as db:
             db.execute("PRAGMA foreign_keys = ON")
             migrations = sorted((ROOT / "migrations").glob("*.sql"))
             for migration in migrations:
-                if migration.name[:4] <= "0015":
+                if migration.name[:4] <= "0018":
                     db.executescript(migration.read_text(encoding="utf-8"))
             leitor = db.execute("INSERT INTO leitores(nome) VALUES ('Leitor')").lastrowid
             inscrito = db.execute("INSERT INTO inscritos(email, origem, status, token) VALUES ('teste@example.com', 'rodape', 'ativo', 'teste')").lastrowid
             envio = db.execute("INSERT INTO envios(tipo, ref_id, titulo) VALUES ('artigo', 1, 'Teste')").lastrowid
             db.execute("INSERT INTO envio_destinos(envio_id, inscrito_id) VALUES (?,?)", (envio, inscrito))
             for migration in migrations:
-                if migration.name[:4] > "0015":
+                if migration.name[:4] > "0018":
                     db.executescript(migration.read_text(encoding="utf-8"))
             self.assertEqual(db.execute("SELECT nome FROM leitores WHERE id = ?", (leitor,)).fetchone(), ("Leitor",))
             self.assertEqual(db.execute("SELECT status, reserva FROM envio_destinos").fetchone(), ("fila", None))

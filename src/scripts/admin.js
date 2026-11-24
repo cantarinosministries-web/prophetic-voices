@@ -702,6 +702,81 @@ async function telaEmails() {
     </tbody></table></div>`;
 }
 
+// ---------------------------------------------------------------- Spirit Immersion (participantes, devocionais, testemunhos)
+const AUT_SI = { equipe: 'Só a equipe', anonimo: 'Publicar sem identificar', nome: 'Publicar com o nome' };
+const TIPO_SI = { testemunho: 'Testemunho', profetica: 'Impressão profética', ouvi: 'O que ouvi de Deus', texto: 'Texto lido', oracao: 'Oração', outro: 'Registro' };
+async function telaSpirit() {
+  marcarMenu('spirit');
+  app.innerHTML = '<p class="muted center">Carregando…</p>';
+  const r = await api('/spirit');
+  const e = r.edicao;
+  const pr = e.prep;
+  const fase = { antes: `A preparação começa em ${1 - pr.dia_atual} dia(s) (1º de dezembro)`, preparacao: `Preparação · dia ${pr.dia_atual} de ${pr.dias}`, jornada: `Jornada · dia ${e.dia_atual} de ${e.dias}`, fim: 'Edição encerrada' }[e.etapa];
+  const grafico = (porDia, total, c, rot) => {
+    const max = Math.max(1, total), pd = {}; porDia.forEach((x) => (pd[x.dia] = x));
+    const ult = Math.min(Math.max(c.dia_atual, 0), c.dias);
+    return `<div style="display:flex;align-items:flex-end;gap:2px;height:90px;border-bottom:1px solid rgba(248,233,183,.15)">${Array.from({ length: c.dias }, (_, i) => {
+      const x = pd[i + 1] || { orou: 0 }; const h = Math.round((100 * x.orou) / max);
+      return `<i title="${rot} ${i + 1}: ${x.orou} de ${total} oraram" style="flex:1;display:block;min-width:2px;height:${i + 1 > ult ? 2 : Math.max(2, h)}%;background:${i + 1 > ult ? 'rgba(248,233,183,.1)' : 'var(--cobre)'}"></i>`;
+    }).join('')}</div>`;
+  };
+  const filtro = sessionStorage.getItem('si-aut') || '';
+  const tes = r.testemunhos.filter((t) => !filtro || t.autorizacao === filtro);
+  app.innerHTML = `<div class="head"><div><h1>Spirit Immersion ${esc(e.id)}</h1><p class="muted">${esc(fase)} · preparação de 31 dias em dezembro (15, 30, 45 min e 1 h) e jornada de 100 dias, de 1º/01 a 10/04/2027. Página pública: <a href="/spirit-immersion.html" target="_blank" rel="noopener">/spirit-immersion.html ↗</a></p></div></div>
+  <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:16px">
+    <div class="card"><h3>Participantes</h3><p style="font-size:42px;margin:4px 0">${r.total_pessoas}</p><p class="small muted" style="margin:0">${r.participantes_prep} na preparação · ${r.participantes} aceitaram os 100 dias<br>${r.dias_orados_prep} dias marcados na preparação · ${r.dias_orados_total} dias (≈ ${r.dias_orados_total} h) na jornada</p></div>
+    <div class="card"><h3>Quantos oraram em cada dia</h3><p class="small muted" style="margin:0 0 6px">Preparação · 31 dias</p>${grafico(r.por_dia_prep, r.participantes_prep, pr, 'Preparação, dia')}<p class="small muted" style="margin:14px 0 6px">Jornada · 100 dias</p>${grafico(r.por_dia, r.participantes, e, 'Dia')}<p class="small muted" style="margin:8px 0 0">Passe o mouse sobre a barra para ver o dia. Cada participante vê só o próprio registro.</p></div>
+  </div>
+  <div class="card" style="margin-top:16px"><h3>Devocionais em PDF</h3>
+    <p class="small muted">O devocional aparece na conta dos participantes a partir da data de liberação${r.email_servico ? ' e, nesse dia, vai por e-mail a quem pediu' : '. Os e-mails automáticos ainda não estão ligados (aba E-mails): por enquanto, o PDF fica só na conta'}. Pode cadastrar a série inteira com antecedência.${r.na_fila ? ` · ${r.na_fila} e-mail(s) na fila.` : ''}</p>
+    <table class="tb"><thead><tr><th>Liberar em</th><th>Título</th><th>PDF</th><th>Situação</th><th class="num">E-mails</th><th></th></tr></thead><tbody>
+    ${r.devocionais.map((d) => `<tr data-dev="${d.id}"><td class="small" style="white-space:nowrap">${esc(d.liberar_em.split('-').reverse().join('/'))}</td><td>${esc(d.titulo)}${d.resumo ? `<div class="small muted">${esc(d.resumo)}</div>` : ''}</td>
+      <td class="small">${d.pdf_url ? `<a href="${esc(d.pdf_url)}" target="_blank" rel="noopener">abrir ↗</a>` : '—'} <label class="btn sm" style="cursor:pointer">${d.pdf_url ? 'Trocar' : 'Enviar PDF'}<input type="file" accept="application/pdf" data-pdf="${d.id}" hidden></label></td>
+      <td class="small">${d.status === 'publicado' ? (d.liberar_em <= e.hoje ? 'Publicado · visível' : 'Publicado · aguardando a data') : 'Rascunho'}</td>
+      <td class="num small">${d.total_envio ? `${d.enviados}/${d.total_envio}` : '—'}</td>
+      <td style="white-space:nowrap">${d.status === 'publicado' ? `<button class="btn sm" data-st="rascunho">Tirar do ar</button>` : `<button class="btn sm cob" data-st="publicado">Publicar</button>`} <button class="btn sm" data-edit>Editar</button> <button class="btn sm dng" data-del>Apagar</button></td></tr>`).join('') || '<tr><td colspan="6" class="muted">Nenhum devocional cadastrado.</td></tr>'}
+    </tbody></table>
+    <form id="fDev" class="stack" style="margin-top:16px"><h3 style="margin:0">Novo devocional</h3>
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:12px"><label class="f"><span>Título</span><input name="titulo" maxlength="200" required placeholder="Ex.: Semana 1 · O espírito de graça e de súplicas"></label>
+      <label class="f"><span>Liberar em</span><input name="liberar_em" type="date" required value="${esc(e.hoje)}"></label></div>
+      <label class="f"><span>Resumo (vai no e-mail; opcional)</span><textarea name="resumo" rows="2" maxlength="1000"></textarea></label>
+      <div><button class="btn pri" type="submit">Criar</button> <span class="small muted">Depois de criar, envie o PDF e publique.</span></div></form>
+  </div>
+  <div class="card" style="margin-top:16px"><h3>Testemunhos dos participantes · ${r.testemunhos.length}</h3>
+    <p class="small muted">Testemunhos escritos pelos participantes na área de Testemunhos da conta. O Diário de Oração deles é sempre privado e nunca aparece aqui. Só publique (aba Testemunhos) os que trazem autorização para isso, respeitando o nível escolhido; “só a equipe” fica restrito ao ministério.</p>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">${[['', 'Todos'], ['equipe', AUT_SI.equipe], ['anonimo', AUT_SI.anonimo], ['nome', AUT_SI.nome]].map(([k, v]) => `<button class="btn sm${filtro === k ? ' pri' : ''}" data-faut="${k}">${esc(v)} (${k ? r.testemunhos.filter((t) => t.autorizacao === k).length : r.testemunhos.length})</button>`).join('')}</div>
+    <div class="stack">${tes.map((t) => `<div style="border-top:1px solid rgba(248,233,183,.12);padding-top:12px"><div class="small muted">${t.data ? esc(t.data.split('-').reverse().join('/')) + ' · ' : ''}${esc(TIPO_SI[t.tipo] || 'Testemunho')}${t.referencia ? ' · ' + esc(t.referencia) : ''} · ${esc(t.nome)}${t.email ? ' · ' + esc(t.email) : ''} · <b>${esc(AUT_SI[t.autorizacao])}</b> · ${data(t.atualizado_em)}</div><p style="white-space:pre-wrap;margin:6px 0 0">${esc(t.testemunho)}</p></div>`).join('') || '<p class="muted" style="margin:0">Nenhum testemunho ainda.</p>'}</div>
+  </div>`;
+
+  $$('[data-faut]').forEach((b) => b.addEventListener('click', () => { sessionStorage.setItem('si-aut', b.dataset.faut); telaSpirit(); }));
+  $('#fDev').addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    try { await api('/spirit/devocionais', { method: 'POST', body: Object.fromEntries(new FormData(ev.target)) }); toast('Devocional criado. Agora envie o PDF.'); telaSpirit(); } catch (er) { toast(er.message, true); }
+  });
+  $$('[data-dev]').forEach((tr) => {
+    const id = tr.dataset.dev, d = r.devocionais.find((x) => String(x.id) === id);
+    const inp = $('[data-pdf]', tr);
+    inp.addEventListener('change', async () => {
+      const f = inp.files[0]; if (!f) return;
+      toast('Enviando o PDF…');
+      try { await api(`/spirit/devocionais/${id}/pdf`, { method: 'POST', body: f, headers: { 'Content-Type': 'application/pdf' } }); toast('PDF enviado.'); telaSpirit(); } catch (er) { toast(er.message, true); }
+    });
+    $('[data-st]', tr).addEventListener('click', async (ev) => {
+      try { await api(`/spirit/devocionais/${id}/status`, { method: 'POST', body: { status: ev.target.dataset.st } }); toast(ev.target.dataset.st === 'publicado' ? 'Publicado.' : 'Tirado do ar.'); telaSpirit(); } catch (er) { toast(er.message, true); }
+    });
+    $('[data-edit]', tr).addEventListener('click', async () => {
+      const titulo = prompt('Título', d.titulo); if (titulo === null) return;
+      const liberar = prompt('Liberar em (AAAA-MM-DD)', d.liberar_em); if (liberar === null) return;
+      const resumo = prompt('Resumo (opcional)', d.resumo || ''); if (resumo === null) return;
+      try { await api(`/spirit/devocionais/${id}`, { method: 'PUT', body: { titulo, liberar_em: liberar, resumo } }); toast('Alterado.'); telaSpirit(); } catch (er) { toast(er.message, true); }
+    });
+    $('[data-del]', tr).addEventListener('click', async () => {
+      if (!confirm(`Apagar o devocional “${d.titulo}” e o PDF dele?`)) return;
+      try { await api(`/spirit/devocionais/${id}`, { method: 'DELETE' }); toast('Apagado.'); telaSpirit(); } catch (er) { toast(er.message, true); }
+    });
+  });
+}
+
 async function carregarSessao() {
   const s = await api('/sessao', { publico: true });
   S = { usuario: s.usuario, permissoes: s.permissoes, papeis: s.papeis, papeis_loja: s.papeis_loja || {}, configurar: s.configurar, chave: s.chave_configurada };
@@ -725,6 +800,7 @@ async function rotear() {
     if (h === 'testemunhos') return await telaTestemunhos();
     if (h.startsWith('testemunhos/')) return await telaTestemunhos(h.slice(12));
     if (h === 'emails') return await telaEmails();
+    if (h === 'spirit') return await telaSpirit();
     if (h === 'estatisticas') return await telaEstatisticas('');
     if (h.startsWith('estatisticas/')) return await telaEstatisticas(h.slice(13));
     if (h === 'historico') return await telaHistorico();

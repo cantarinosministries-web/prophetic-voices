@@ -10,15 +10,14 @@ export const novidades = [
     id: 'spirit-immersion',
     destaque: true,
     tipo: { pt: 'Evento', en: 'Event' },
-    quando: { pt: 'Em breve', en: 'Coming soon' },
-    titulo: { pt: 'Spirit Immersion', en: 'Spirit Immersion' },
+    quando: { pt: 'Preparação em dezembro · 100 dias de 1º/01 a 10/04/2027', en: 'Preparation in December · 100 days, Jan 1 – Apr 10, 2027' },
+    titulo: { pt: 'Spirit Immersion 2027: 31 + 100 dias', en: 'Spirit Immersion 2027: 31 + 100 days' },
     texto: {
-      pt: 'O Spirit Immersion vai acontecer novamente. Em breve divulgaremos data, local e inscrições. Entre na nossa comunidade no WhatsApp e acompanhe o Instagram para receber as informações em primeira mão.',
-      en: 'Spirit Immersion is coming back. We will soon announce the date, venue and registration. Join our WhatsApp community and follow us on Instagram to be the first to know.',
+      pt: 'Oração em línguas: 31 dias de preparação em dezembro (15, 30, 45 minutos e 1 hora por dia) e, depois, 100 dias de 1 hora por dia. As inscrições estão abertas: entre com a sua conta e acompanhe tudo no site, com a contagem dos dias, o check diário, o diário de oração e os devocionais.',
+      en: 'Praying in tongues: 31 days of preparation in December (15, 30, 45 minutes and 1 hour a day), then 100 days of 1 hour a day. Enrollment is open: sign in with your account and follow everything on the site, with the day counter, daily check-in, prayer journal and devotionals.',
     },
     botoes: [
-      { pt: 'Quero ser avisado', en: 'Notify me', url: LINKS.grupo1 },
-      { pt: 'Acompanhar no Instagram', en: 'Follow on Instagram', url: LINKS.instagram },
+      { pt: 'Conhecer e participar', en: 'Learn more and join', url: '/spirit-immersion.html' },
     ],
   },
   {

@@ -35,7 +35,7 @@ export async function enviarEmail(env, { para, assunto, html, texto, cabecalhos:
 // ---------------------------------------------------------------- modelo do e-mail (cores oficiais)
 const linkSair = (i) => `${DOM}/newsletter.html?t=${i.token}`;
 
-function moldura({ previa, eyebrow, titulo, corpo, botao, link, rodape }) {
+export function moldura({ previa, eyebrow, titulo, corpo, botao, link, rodape }) {
   return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(titulo)}</title></head>
 <body style="margin:0;padding:0;background:#F8E9B7;font-family:Georgia,'Times New Roman',serif;color:#000">
 <div style="display:none;max-height:0;overflow:hidden;opacity:0">${esc(previa || '')}</div>

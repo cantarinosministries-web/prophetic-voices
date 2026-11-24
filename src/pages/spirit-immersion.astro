@@ -1,0 +1,588 @@
+---
+// Spirit Immersion — movimento de oração em línguas, 1 hora por dia. Números em src/data/spirit.js;
+// inscrição pela conta de leitor (worker/spirit.js); a jornada fica em /conta.html#spirit.
+import Base from '../layouts/Base.astro';
+import { destaques, frutos, constancia, ultimaEdicao, fonte, relatos, ufsParticipantes, paisesParticipantes, nomesPaises } from '../data/spirit.js';
+import { brasil, BR_VIEW, mundo, MUNDO_VIEW, pontos } from '../data/mapas.js';
+const ufOn = new Set(ufsParticipantes);
+const paisOn = new Set(paisesParticipantes);
+const brOrd = [...brasil].sort((a, b) => (ufOn.has(b.uf) - ufOn.has(a.uf)));
+const pct = (n) => Math.round((100 * n) / fonte.respostas);
+const fmt = (n) => n.toLocaleString('pt-BR');
+const ticks = Array.from({ length: 60 }, (_, i) => i);
+---
+<Base page="spirit" title="Spirit Immersion — The Prophetic Voices" description="Spirit Immersion: um movimento de oração em línguas, uma hora por dia. Edição 2027: 100 dias, de 1º de janeiro a 10 de abril.">
+  <Fragment slot="head">
+    <meta property="og:title" content="Spirit Immersion — uma hora por dia orando no Espírito" />
+    <meta property="og:description" content="100 dias de oração em línguas, de 1º de janeiro a 10 de abril de 2027. Inscreva-se." />
+    <meta property="og:image" content="https://thepropheticvoices.com.br/media/pv07-cobre.png" />
+  </Fragment>
+
+  <!-- HERO -->
+  <section class="si-hero">
+    <div class="si-grid" aria-hidden="true"></div>
+    <svg class="si-rings" viewBox="0 0 600 600" aria-hidden="true">
+      <circle cx="300" cy="300" r="290" class="r1" />
+      <g class="r-ticks">{ticks.map((i) => <line x1="300" y1="22" x2="300" y2={i % 5 === 0 ? 44 : 32} transform={`rotate(${i * 6} 300 300)`} />)}</g>
+      <circle cx="300" cy="300" r="230" class="r2" />
+      <circle cx="300" cy="300" r="170" class="r3" />
+      <circle cx="300" cy="300" r="230" class="r-arc" pathLength="100" />
+      <circle cx="300" cy="300" r="4" class="r-dot" />
+    </svg>
+    <div class="wrap si-hero-in">
+      <div class="si-meta"><span>SI · 2027</span><span data-en="PRAYER MOVEMENT">MOVIMENTO DE ORAÇÃO</span><span class="si-live"><i></i><span id="siHeroStatus" data-en="ENROLLMENT OPEN">INSCRIÇÕES ABERTAS</span></span></div>
+      <h1 class="disp si-h1">Spirit<br /><span>Immersion</span></h1>
+      <p class="si-lede" data-en="One hour a day praying in the Spirit. A movement born in a home in January 2024 that now gathers hundreds of people across Brazil and among the nations.">Uma hora por dia orando no Espírito. Um movimento que nasceu numa casa em janeiro de 2024 e hoje reúne centenas de pessoas pelo Brasil e nas nações.</p>
+      <div class="si-clock" aria-label="1 hora por dia"><b>01:00:00</b><span data-en="/ DAY · 31 DAYS OF PREPARATION IN DECEMBER + 100 DAYS · JAN 1 → APR 10, 2027">/ DIA · 31 DIAS DE PREPARAÇÃO EM DEZEMBRO + 100 DIAS · 01.01 → 10.04.2027</span></div>
+      <div class="si-ctas">
+        <a href="#inscricao" class="btn btn-creme" data-en="Join the 2027 edition">Participar da edição 2027</a>
+        <a href="#frutos" class="btn btn-ghost" data-en="See the fruit">Ver os frutos</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- VISÃO -->
+  <section class="pad si-visao">
+    <div class="wrap">
+      <div class="eyebrow" data-en="The vision">A visão</div>
+      <h2 class="si-h2 rv"><span data-en="Before a house of prayer,">Antes de uma casa de oração,</span> <em data-en="a life of prayer.">uma vida de oração.</em></h2>
+      <div class="si-pilares">
+        <article class="si-pilar rv">
+          <span class="si-n">01</span>
+          <h3 data-en="One hour a day">Uma hora por dia</h3>
+          <p data-en="A simple, daily, possible rhythm: one hour set apart before the Throne of Grace, inside ordinary life, at home, before the routine.">Um ritmo simples, diário e possível: uma hora separada diante do Trono da Graça, dentro da vida comum, em casa, antes da rotina.</p>
+        </article>
+        <article class="si-pilar rv" style="transition-delay:.12s">
+          <span class="si-n">02</span>
+          <h3 data-en="Praying in tongues">Oração em línguas</h3>
+          <p data-en="“Whoever speaks in a tongue speaks not to men but to God” (1 Cor 14:2). Praying in the Holy Spirit, the believer is built up in the faith (Jude 20).">“Quem fala em língua não fala aos homens, mas a Deus” (1Co 14.2). Orando no Espírito Santo, o crente é edificado na fé (Jd 20).</p>
+        </article>
+        <article class="si-pilar rv" style="transition-delay:.24s">
+          <span class="si-n">03</span>
+          <h3 data-en="Grace, not strength">Graça, não força</h3>
+          <p data-en="It is not a performance challenge. It is a response to the “spirit of grace and supplication” (Zech 12:10) that teaches us to come back, day after day.">Não é um desafio de desempenho. É resposta ao “espírito de graça e de súplicas” (Zc 12.10) que nos educa a voltar, dia após dia.</p>
+        </article>
+      </div>
+
+      <div class="si-origem rv">
+        <figure class="si-verso">
+          <span lang="grc">ἐν πνεύματι ἁγίῳ προσευχόμενοι</span>
+          <figcaption data-en="JUDE 20 · “PRAYING IN THE HOLY SPIRIT”">JD 20 · “ORANDO NO ESPÍRITO SANTO”</figcaption>
+        </figure>
+        <div>
+          <div class="eyebrow" data-en="How it began">Como nasceu</div>
+          <p data-en="In 2023, Gabriel Cantarino was struck by Obed-Edom (2 Sam 6:11): before David’s tent, God made a home a dwelling place for the Ark, and that family went on to minister day and night. A prayer was born: “Before the church becomes a house of prayer, I want my home to be one; and before my home, I want to be one.” On January 1, 2024, after an angelic visitation, he returned to the practice of setting apart hours of the day to pray in tongues and was inspired by the Spirit to establish one hour a day for it. Months later, the Spirit led him to open it to the Church, and the Spirit Immersion was born.">Em 2023, Gabriel Cantarino foi atravessado pela história de Obede-Edom (2Sm 6.11): antes da Tenda de Davi, Deus fez de uma casa a habitação da Arca, e aquela família passou a ministrar dia e noite. Nasceu uma oração: “Antes de a igreja ser uma casa de oração, quero que a minha casa seja; e, antes da minha casa, quero eu ser uma casa de oração.” Em 1º de janeiro de 2024, após uma visitação angelical, ele voltou à prática de separar horas do dia para orar em línguas e foi inspirado pelo Espírito a estabelecer uma hora por dia para isso. Meses depois, o Espírito o levou a abrir isso à Igreja, e nasceu o Spirit Immersion.</p>
+          <p class="si-sub" data-en="The goal is not to fill a 24/7 schedule, but to form inside each person an inner structure that sustains a real life of prayer, one that does not depend on a shift at church.">O alvo não é preencher uma escala 24/7, mas formar dentro de cada pessoa uma estrutura interior que sustente uma vida de oração de verdade, que não dependa de um turno na igreja.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FRUTOS / ESTATÍSTICAS -->
+  <section class="pad si-frutos" id="frutos">
+    <div class="si-grid si-grid-soft" aria-hidden="true"></div>
+    <div class="wrap" style="position:relative">
+      <div class="si-head">
+        <div>
+          <div class="eyebrow" data-en="The fruit · data">Os frutos · dados</div>
+          <h2 class="si-h2 rv"><span data-en="What happens when">O que acontece quando</span> <em data-en="people keep praying.">pessoas permanecem orando.</em></h2>
+        </div>
+        <p class="si-fonte mono" data-en={`SOURCE · ${fonte.respostas} CLOSING SURVEYS · JAN 2024 + DEC 2025–JAN 2026`}>FONTE · {fonte.respostas} FORMULÁRIOS DE ENCERRAMENTO · JAN 2024 + DEZ 2025–JAN 2026</p>
+      </div>
+
+      <p class="si-intro rv" data-en="Since 2024, thousands of people have joined this prayer journey with us, and among them, 382 chose to record the effects of this prayer movement.">Desde 2024, milhares de pessoas participaram dessa jornada de oração conosco, e dentre elas, 382 decidiram registrar os efeitos desse movimento de oração.</p>
+
+      <div class="si-kpis">
+        {destaques.map((d, i) => (
+          <div class="si-kpi rv" style={`transition-delay:${i * 90}ms`}>
+            <span class="si-c tl"></span><span class="si-c br"></span>
+            <span class="si-kpi-i mono">{String(i + 1).padStart(2, '0')} / 04</span>
+            <b class="si-num" data-alvo={d.valor} data-suf={d.sufixo}>{fmt(d.valor)}{d.sufixo}</b>
+            <p data-en={d.en}>{d.pt}</p>
+          </div>
+        ))}
+      </div>
+
+      <div class="si-painel">
+        <div class="si-barras rv">
+          <div class="si-ptit mono"><span data-en="REPORTED EFFECTS">EFEITOS RELATADOS</span><span>% · N={fonte.respostas}</span></div>
+          <ul>
+            {frutos.map((f, i) => (
+              <li style={`--p:${pct(f.n)}%;--d:${i * 60}ms`}>
+                <span class="si-bl" data-en={f.en}>{f.pt}</span>
+                <span class="si-bt"><i></i></span>
+                <b class="mono">{pct(f.n)}%</b>
+              </li>
+            ))}
+          </ul>
+          <p class="si-nota" data-en="Multiple choice: each participant marked the effects they perceived in themselves.">Múltipla escolha: cada participante marcou os efeitos que percebeu em si.</p>
+        </div>
+
+        <div class="si-lado">
+          <div class="si-box rv">
+            <div class="si-ptit mono"><span data-en="LAST EDITION">ÚLTIMA EDIÇÃO</span><span>N={ultimaEdicao.n}</span></div>
+            <div class="si-gauges">
+              {[
+                { v: ultimaEdicao.cemDias, pt: 'quiseram seguir para 100 dias de oração e consagração', en: 'wanted to go on to 100 days of prayer and consecration' },
+                { v: ultimaEdicao.consagracao, pt: 'sentiram um chamado a um tempo intencional de consagração', en: 'felt called to an intentional season of consecration' },
+                { v: ultimaEdicao.linguas, pt: 'já oravam com o dom de línguas ativo', en: 'already prayed with the gift of tongues active' },
+              ].map((g) => (
+                <div class="si-gauge">
+                  <div class="g-ring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="52" class="g-bg" pathLength="100" /><circle cx="60" cy="60" r="52" class="g-v" pathLength="100" style={`--v:${g.v}`} /></svg><b class="mono">{g.v}%</b></div>
+                  <p data-en={g.en}>{g.pt}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div class="si-box rv">
+            <div class="si-ptit mono"><span data-en="CONSTANCY · 31 DAYS">CONSTÂNCIA · 31 DIAS</span><span data-en="MEDIAN">MEDIANA</span></div>
+            <div class="si-cal31" aria-hidden="true">{Array.from({ length: constancia.de }, (_, i) => <i class={i < constancia.mediana ? 'on' : ''} style={`--d:${i * 30}ms`}></i>)}</div>
+            <p class="si-big"><b class="mono">{constancia.mediana}</b><span>/{constancia.de}</span></p>
+            <p data-en={`Half of the participants prayed ${constancia.mediana} days or more; ${constancia.vinteOuMais}% prayed 20 days or more. Constancy is not perfection: it is coming back.`}>Metade dos participantes orou {constancia.mediana} dias ou mais; {constancia.vinteOuMais}% oraram 20 dias ou mais. Constância não é perfeição: é voltar.</p>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ALCANCE: mapas -->
+      <div class="si-mapas rv">
+        <span class="si-c tl"></span><span class="si-c br"></span>
+        <div class="si-ptit mono"><span data-en="REACH · LAST EDITION">ALCANCE · ÚLTIMA EDIÇÃO</span><span id="siMapaInfo" aria-live="polite" data-pt="PASSE O MOUSE NO MAPA" data-en="HOVER OVER THE MAP">PASSE O MOUSE NO MAPA</span></div>
+        <div class="si-mapas-grade">
+          <div class="si-mapa-br">
+            <svg viewBox={BR_VIEW} role="img" aria-label={`Mapa do Brasil: ${ufsParticipantes.length - 1} estados e o Distrito Federal com participantes`}>
+              {brOrd.map((e, i) => (
+                <path d={e.d} class={ufOn.has(e.uf) ? 'on' : 'off'} data-nome={e.nome} data-uf={e.uf} style={`--d:${i * 45}ms`} />
+              ))}
+            </svg>
+          </div>
+          <div class="si-mapa-lado">
+            <div class="si-mapa-mundo">
+              <svg viewBox={MUNDO_VIEW} role="img" aria-label="Mapa-múndi: Brasil, Portugal e Japão com participantes">
+                {mundo.map((c) => (
+                  <path d={c.d} class={paisOn.has(c.nome) ? 'on' : 'off'} data-nome={paisOn.has(c.nome) ? nomesPaises[c.nome].pt : ''} data-nome-en={paisOn.has(c.nome) ? nomesPaises[c.nome].en : ''} />
+                ))}
+                {paisesParticipantes.map((k) => (
+                  <g class="si-pino" transform={`translate(${pontos[k][0]} ${pontos[k][1]})`}><circle r="14" class="p-anel" /><circle r="4.5" class="p-c" /></g>
+                ))}
+              </svg>
+            </div>
+            <div class="si-alcance">
+              <div><b class="mono">{ultimaEdicao.estados}</b><span data-en="states + the Federal District">estados + o DF</span></div>
+              <div><b class="mono">{ultimaEdicao.paises}</b><span data-en="nations · Brazil, Portugal, Japan">nações · Brasil, Portugal, Japão</span></div>
+              <div><b class="mono">{ultimaEdicao.idadeMin}–{ultimaEdicao.idadeMax}</b><span data-en="years old">anos de idade</span></div>
+            </div>
+            <div class="si-leg mono"><span><i class="on"></i><span data-en="with participants">com participantes</span></span><span><i></i><span data-en="no record yet">ainda sem registro</span></span></div>
+          </div>
+        </div>
+      </div>
+      <p class="si-metodo" data-en="Only aggregate numbers and five anonymous excerpts are published. Percentages of the effects are over all 382 answers; the “last edition” panel uses the 133 answers of the Dec 2025–Jan 2026 edition (location and age were asked only then).">Publicamos apenas números agregados e cinco trechos sem identificação. Os percentuais de efeitos são sobre as 382 respostas; o painel “última edição” usa as 133 respostas da edição de dez/2025–jan/2026 (localidade e idade só foram perguntadas nela).</p>
+    </div>
+  </section>
+
+  <!-- RELATOS -->
+  <section class="pad si-relatos">
+    <div class="wrap">
+      <div class="si-head">
+        <div>
+          <div class="eyebrow" data-en="In their own words">Na voz de quem orou</div>
+          <h2 class="si-h2 rv"><span data-en="Five">Cinco</span> <em data-en="testimonies.">testemunhos.</em></h2>
+        </div>
+        <p class="si-fonte mono" data-en="WITHOUT IDENTIFICATION · EXCERPTS EDITED FOR CLARITY, WITH NAMES, PLACES AND PERSONAL DETAILS REMOVED">SEM IDENTIFICAÇÃO · TRECHOS EDITADOS PARA CLAREZA, SEM NOMES, LUGARES OU DADOS PESSOAIS</p>
+      </div>
+      <div class="si-rel-grade">
+        {relatos.map((r, i) => (
+          <figure class={`si-rel rv${i === 0 ? ' si-rel-maior' : ''}`} style={`transition-delay:${i * 80}ms`}>
+            <span class="si-c tl"></span><span class="si-c br"></span>
+            <div class="si-rel-top mono"><span data-en={`ACCOUNT ${String(i + 1).padStart(2, '0')} / 05`}>RELATO {String(i + 1).padStart(2, '0')} / 05</span><span data-en={r.edicao.en}>{r.edicao.pt}</span></div>
+            <blockquote data-en={r.en}>{r.pt}</blockquote>
+            <figcaption class="mono" data-en={r.tema.en}>{r.tema.pt}</figcaption>
+          </figure>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- EDIÇÃO 2027 -->
+  <section class="pad si-edicao">
+    <div class="wrap si-ed-grid">
+      <div>
+        <div class="eyebrow" data-en="2027 edition">Edição 2027</div>
+        <h2 class="si-h2 rv">31 + 100 <em data-en="days.">dias.</em></h2>
+        <dl class="si-dl rv">
+          <div><dt class="mono" data-en="PREPARATION">PREPARAÇÃO</dt><dd data-en="December 1–31, 2026, in four journeys of increasing prayer: 15 minutes, 30, 45 and 1 hour a day">1 a 31 de dezembro de 2026, em quatro jornadas de oração crescente: 15 minutos, 30, 45 e 1 hora por dia</dd></div>
+          <div><dt class="mono" data-en="JOURNEY">JORNADA</dt><dd data-en="100 days, January 1 to April 10, 2027: 1 hour a day praying in tongues">100 dias, de 1º de janeiro a 10 de abril de 2027: 1 hora por dia orando em línguas</dd></div>
+          <div><dt class="mono" data-en="THE STEP">O PASSO</dt><dd data-en="At the end of the preparation you accept the 100 days and begin the new journey">Ao fim da preparação, você aceita os 100 dias e inicia a nova jornada</dd></div>
+          <div><dt class="mono" data-en="IN YOUR ACCOUNT">NA SUA CONTA</dt><dd data-en="Day counter, daily check-in, prayer journal and PDF devotionals, with the whole record of the preparation and the 100 days">Contagem dos dias, check diário, diário de oração e devocionais em PDF, com todo o histórico da preparação e dos 100 dias</dd></div>
+        </dl>
+        <p class="si-inscritos mono" id="siInscritos" hidden></p>
+      </div>
+      <div class="si-cal-col">
+      <div class="si-prep rv" aria-hidden="true">
+        {[[1, 8, '15 MIN'], [9, 16, '30 MIN'], [17, 24, '45 MIN'], [25, 31, '1 H']].map(([de, ate, rot], k) => (
+          <div class="si-prep-b"><span class="mono">{`${String(k + 1).padStart(2, '0')} · ${rot}`}</span><div class="si-cal100 si-calp">{Array.from({ length: ate - de + 1 }, (_, i) => <i style={`--d:${(de + i) * 25}ms`}><span>{de + i}</span></i>)}</div></div>
+        ))}
+        <p class="si-prep-leg mono" data-en="PREPARATION · DECEMBER">PREPARAÇÃO · DEZEMBRO</p>
+      </div>
+      <p class="si-prep-leg mono" data-en="JOURNEY · 100 DAYS · JANUARY → APRIL">JORNADA · 100 DIAS · JANEIRO → ABRIL</p>
+      <div class="si-cal100 rv" aria-hidden="true">{Array.from({ length: 100 }, (_, i) => <i style={`--d:${i * 18}ms`}><span>{i + 1}</span></i>)}</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- INSCRIÇÃO -->
+  <section class="pad si-insc" id="inscricao">
+    <div class="wrap">
+      <div class="si-insc-card rv">
+        <span class="si-c tl"></span><span class="si-c br"></span>
+        <div>
+          <div class="eyebrow" data-en="Enrollment">Inscrição</div>
+          <h2 class="si-h2"><span data-en="Enter the">Entre no</span> <em>Spirit Immersion.</em></h2>
+          <p class="si-insc-p" data-en="Sign up with an account you already have. You begin with the 31 days of preparation in December and, at the end, accept the 100 days. Everything stays in your account: you mark each day you prayed, keep your prayer journal and receive the devotionals.">Inscreva-se com uma conta que você já tem. Você começa pelos 31 dias de preparação em dezembro e, ao fim, aceita os 100 dias. Tudo fica na sua conta: você marca cada dia em que orou, mantém o seu diário de oração e recebe os devocionais.</p>
+        </div>
+        <div id="siInsc" class="si-insc-box"><p class="conta-carregando">…</p></div>
+      </div>
+    </div>
+  </section>
+
+  <Fragment slot="scripts">
+    <script is:inline src="/conta/botoes.js"></script>
+    <script is:inline>
+      (function () {
+        var L = window.PV_LOGIN, esc = L.esc;
+        var en = function () { return document.documentElement.lang === 'en'; };
+        // textos PT/EN: o elemento guarda o português e troca pelo data-en
+        function traduzir() {
+          document.querySelectorAll('[data-en]').forEach(function (el) {
+            if (!el.hasAttribute('data-pt')) el.setAttribute('data-pt', el.textContent);
+            el.textContent = en() ? el.getAttribute('data-en') : el.getAttribute('data-pt');
+          });
+          desenharInsc();
+        }
+        window.addEventListener('pv:lang', function () { setTimeout(traduzir, 0); });
+
+        // contadores e barras animam quando aparecem
+        var io = new IntersectionObserver(function (es) {
+          es.forEach(function (e) {
+            if (!e.isIntersecting) return;
+            var el = e.target; io.unobserve(el);
+            if (el.classList.contains('si-num')) {
+              var alvo = +el.getAttribute('data-alvo'), suf = el.getAttribute('data-suf') || '', t0 = performance.now(), dur = 1600;
+              (function passo(t) {
+                var k = Math.min(1, (t - t0) / dur), v = Math.round(alvo * (1 - Math.pow(1 - k, 3)));
+                el.textContent = v.toLocaleString(en() ? 'en-US' : 'pt-BR') + suf;
+                if (k < 1) requestAnimationFrame(passo);
+              })(t0);
+            } else el.classList.add('vivo');
+          });
+        }, { threshold: 0.3 });
+        document.querySelectorAll('.si-num, .si-barras, .si-gauges, .si-cal31, .si-cal100, .si-mapas').forEach(function (el) { io.observe(el); });
+
+        // mapas: o estado (ou país) sob o mouse acende e o nome aparece no painel
+        var info = document.getElementById('siMapaInfo');
+        if (window.matchMedia && matchMedia('(hover: none)').matches) { info.setAttribute('data-pt', 'TOQUE NO MAPA'); info.setAttribute('data-en', 'TAP THE MAP'); }
+        document.querySelectorAll('.si-mapas path').forEach(function (pth) {
+          var nome = function () { return en() && pth.getAttribute('data-nome-en') ? pth.getAttribute('data-nome-en') : pth.getAttribute('data-nome'); };
+          var mostrar = function () {
+            if (!nome()) return;
+            pth.classList.add('luz'); clearTimeout(pth._t);
+            var on = pth.classList.contains('on');
+            info.textContent = '▸ ' + nome().toUpperCase() + ' · ' + (on ? (en() ? 'PARTICIPATED' : 'PARTICIPOU') : (en() ? 'NO RECORD YET' : 'AINDA SEM REGISTRO'));
+          };
+          var apagar = function () { pth._t = setTimeout(function () { pth.classList.remove('luz'); }, 200); };
+          pth.addEventListener('pointerenter', mostrar);
+          pth.addEventListener('pointerleave', apagar);
+          pth.addEventListener('pointerdown', mostrar);
+        });
+
+        // grade dos 100 dias: cada número acende sob o mouse (ou o dedo) e apaga devagar, deixando um rastro
+        document.querySelectorAll('.si-cal100').forEach(function (g100) {
+          var acender = function (x, y) {
+            var c = document.elementFromPoint(x, y);
+            c = c && c.closest ? c.closest('.si-cal100 i') : null;
+            if (!c) return;
+            c.classList.add('luz');
+            clearTimeout(c._t);
+            c._t = setTimeout(function () { c.classList.remove('luz'); }, 260);
+          };
+          g100.addEventListener('pointermove', function (e) { acender(e.clientX, e.clientY); });
+          g100.addEventListener('pointerdown', function (e) { acender(e.clientX, e.clientY); });
+          g100.addEventListener('touchmove', function (e) { var t = e.touches[0]; if (t) acender(t.clientX, t.clientY); }, { passive: true });
+          // depois da entrada em cascata, a grade passa a reagir sem atraso
+          new IntersectionObserver(function (es, o) { if (es[0].isIntersecting) { o.disconnect(); setTimeout(function () { g100.classList.add('pronto'); }, 2600); } }).observe(g100);
+        });
+
+        // inscritos na edição
+        fetch('/api/publico/spirit').then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+          if (!d) return;
+          var box = document.getElementById('siInscritos');
+          var hs = document.getElementById('siHeroStatus'), et = d.edicao.etapa;
+          if (et === 'preparacao') { hs.setAttribute('data-pt', 'PREPARAÇÃO · DIA ' + d.edicao.prep.dia_atual + ' DE 31'); hs.setAttribute('data-en', 'PREPARATION · DAY ' + d.edicao.prep.dia_atual + ' OF 31'); }
+          if (et === 'jornada') { hs.setAttribute('data-pt', 'DIA ' + d.edicao.dia_atual + ' DE 100'); hs.setAttribute('data-en', 'DAY ' + d.edicao.dia_atual + ' OF 100'); }
+          if (et === 'fim') {
+            document.getElementById('siHeroStatus').setAttribute('data-pt', 'EDIÇÃO 2027 ENCERRADA');
+            document.getElementById('siHeroStatus').setAttribute('data-en', '2027 EDITION CLOSED');
+          }
+          if (d.inscritos >= 10) {
+            box.hidden = false;
+            box.setAttribute('data-pt', '● ' + d.inscritos.toLocaleString('pt-BR') + ' PESSOAS JÁ INSCRITAS');
+            box.setAttribute('data-en', '● ' + d.inscritos.toLocaleString('en-US') + ' PEOPLE ALREADY ENROLLED');
+            box.textContent = 'x';
+          }
+          traduzir();
+        }).catch(function () {});
+
+        // ------------------------------------------------ inscrição
+        var params = new URLSearchParams(location.search);
+        var S = null, msg = '', enviando = false;
+        var T = {
+          pt: { consent: 'Concordo que o site guarde o registro diário da minha oração e os testemunhos que eu escrever. São informações sobre a minha fé: só eu vejo o meu registro, e cada testemunho tem a autorização que eu escolher. Posso sair e apagar tudo quando quiser.', dev: 'Quero receber os devocionais em PDF no meu e-mail.', priv: 'Veja a <a href="/privacidade.html#spirit">Política de Privacidade</a>.', escolha: 'Escolha como entrar:', marque: 'Marque a caixa de concordância para continuar.', participar: 'Quero participar', ja: 'Você já está inscrito na edição 2027.', ir: 'Ir para a minha jornada →', ola: 'Olá, {n}.', breve: 'As inscrições abrem em breve.', fim: 'A edição 2027 já terminou. Fique de olho na próxima.', entrando: 'Inscrevendo…' },
+          en: { consent: 'I agree that the site keeps a daily record of my prayer and the testimonies I write. This is information about my faith: only I see my record, and each testimony carries the permission I choose. I can leave and erase everything at any time.', dev: 'I want to receive the PDF devotionals by e-mail.', priv: 'See our <a href="/privacidade.html#spirit">Privacy Policy</a>.', escolha: 'Choose how to sign in:', marque: 'Tick the consent box to continue.', participar: 'I want to join', ja: 'You are already enrolled in the 2027 edition.', ir: 'Go to my journey →', ola: 'Hello, {n}.', breve: 'Enrollment opens soon.', fim: 'The 2027 edition has ended. Stay tuned for the next one.', entrando: 'Enrolling…' }
+        };
+        var t = function (k) { return T[en() ? 'en' : 'pt'][k]; };
+        var box = document.getElementById('siInsc');
+        var consentido = true, devocionais = true, fase = 'antes';
+
+        function voltaUrl() { return '/spirit-immersion.html?inscrever=1&dev=' + (devocionais ? 1 : 0); }
+        function inscrever(dev) {
+          if (enviando) return; enviando = true; msg = t('entrando'); desenharInsc();
+          L.api('/conta/spirit/inscrever', 'POST', { consentimento: true, devocionais: dev }).then(function () {
+            location.replace('/conta.html#spirit');
+          }).catch(function (er) { enviando = false; msg = er.message; history.replaceState(null, '', location.pathname + '#inscricao'); desenharInsc(); });
+        }
+        function caixas() {
+          return '<label class="si-check"><input type="checkbox" id="siConsent"' + (consentido ? ' checked' : '') + '><span>' + esc(t('consent')) + '</span></label>' +
+            '<label class="si-check"><input type="checkbox" id="siDev"' + (devocionais ? ' checked' : '') + '><span>' + esc(t('dev')) + '</span></label>' +
+            '<p class="si-priv">' + t('priv') + '</p>';
+        }
+        function desenharInsc() {
+          if (!S) return;
+          var h = '';
+          if (S.leitor && S.leitor.spirit) {
+            h = '<p class="si-ok">' + esc(t('ja')) + '</p><a class="btn btn-creme" href="/conta.html#spirit">' + esc(t('ir')) + '</a>';
+          } else if (fase === 'depois') {
+            h = '<p>' + esc(t('fim')) + '</p>';
+          } else if (S.leitor) {
+            h = '<p class="si-ola">' + esc(t('ola').replace('{n}', String(S.leitor.nome || '').split(' ')[0])) + '</p>' + caixas() +
+              '<button type="button" class="btn btn-creme" id="siPart"' + (enviando ? ' disabled' : '') + '>' + esc(t('participar')) + '</button>';
+          } else if (S.provedores && S.provedores.length) {
+            h = caixas() + '<p class="si-escolha">' + esc(t('escolha')) + '</p><div id="siLogins" class="' + (consentido ? '' : 'si-trava') + '">' + L.botoes(S.provedores, { volta: voltaUrl() }) + '</div>';
+          } else {
+            h = '<p>' + esc(t('breve')) + '</p>';
+          }
+          if (msg) h += '<p class="si-msg" role="status">' + esc(msg) + '</p>';
+          box.innerHTML = h;
+          var c = document.getElementById('siConsent'), d = document.getElementById('siDev');
+          if (c) c.onchange = function () { consentido = c.checked; msg = ''; desenharInsc(); };
+          if (d) d.onchange = function () { devocionais = d.checked; desenharInsc(); };
+          var lg = document.getElementById('siLogins');
+          if (lg) lg.addEventListener('click', function (e) { if (!consentido && e.target.closest('a')) { e.preventDefault(); msg = t('marque'); desenharInsc(); } });
+          var p = document.getElementById('siPart');
+          if (p) p.onclick = function () { if (!consentido) { msg = t('marque'); desenharInsc(); return; } inscrever(devocionais); };
+        }
+
+        Promise.all([L.sessao(), fetch('/api/publico/spirit').then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })]).then(function (r) {
+          S = r[0]; if (r[1]) fase = r[1].edicao.etapa === 'fim' ? 'depois' : 'aberta';
+          // voltou do login com o aceite já marcado na página: inscreve na hora e leva à jornada
+          if (params.get('inscrever') === '1' && S.leitor) {
+            if (S.leitor.spirit) return location.replace('/conta.html#spirit');
+            consentido = true;
+            return inscrever(params.get('dev') !== '0');
+          }
+          desenharInsc();
+        });
+        traduzir();
+      })();
+    </script>
+  </Fragment>
+</Base>
+
+<style is:global>
+  .mono{font-family:var(--mono)}
+  .si-grid{position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(191,137,87,.09) 1px,transparent 1px),linear-gradient(90deg,rgba(191,137,87,.09) 1px,transparent 1px);background-size:64px 64px;
+    mask-image:radial-gradient(ellipse at 70% 40%,#000 0%,transparent 65%);-webkit-mask-image:radial-gradient(ellipse at 70% 40%,#000 0%,transparent 65%)}
+  .si-grid-soft{opacity:.5;mask-image:linear-gradient(180deg,transparent,#000 20%,#000 80%,transparent);-webkit-mask-image:linear-gradient(180deg,transparent,#000 20%,#000 80%,transparent)}
+  .si-h2{font-family:var(--disp);font-weight:200;text-transform:uppercase;font-size:clamp(40px,5.2vw,84px);line-height:.98;margin:18px 0 0;letter-spacing:.005em}
+  .si-h2 em{font-family:var(--serif);font-style:italic;text-transform:none;color:var(--cobre);font-weight:400}
+
+  /* hero */
+  .si-hero{position:relative;min-height:100vh;display:flex;align-items:center;overflow:hidden;border-top:none;padding:150px 0 90px}
+  .si-rings{position:absolute;right:-8vw;top:50%;width:min(78vw,860px);transform:translateY(-50%);opacity:.9}
+  .si-rings circle{fill:none}
+  .si-rings .r1{stroke:rgba(248,233,183,.14);stroke-width:1}
+  .si-rings .r2{stroke:rgba(191,137,87,.28);stroke-width:1;stroke-dasharray:2 7}
+  .si-rings .r3{stroke:rgba(248,233,183,.1);stroke-width:1}
+  .si-rings .r-ticks line{stroke:rgba(202,181,160,.35);stroke-width:1}
+  .si-rings .r-ticks{transform-origin:300px 300px;animation:si-gira 120s linear infinite}
+  .si-rings .r-arc{stroke:var(--cobre);stroke-width:2;stroke-dasharray:4.17 100;stroke-linecap:round;transform-origin:300px 300px;transform:rotate(-90deg);animation:si-hora 6s cubic-bezier(.6,0,.2,1) .6s forwards}
+  .si-rings .r-dot{fill:var(--creme)}
+  @keyframes si-gira{to{transform:rotate(360deg)}}
+  @keyframes si-hora{to{stroke-dasharray:100 100}}
+  .si-hero-in{position:relative;z-index:2;width:100%}
+  .si-meta{display:flex;flex-wrap:wrap;gap:22px;font-family:var(--mono);font-size:12px;letter-spacing:.24em;color:var(--areia)}
+  .si-meta>span:first-child{color:var(--cobre)}
+  .si-live{display:inline-flex;align-items:center;gap:10px;color:var(--creme)}
+  .si-live i{width:8px;height:8px;border-radius:50%;background:var(--cobre);box-shadow:0 0 0 0 rgba(191,137,87,.7);animation:si-pulso 2s infinite}
+  @keyframes si-pulso{70%{box-shadow:0 0 0 10px rgba(191,137,87,0)}100%{box-shadow:0 0 0 0 rgba(191,137,87,0)}}
+  .si-h1{font-size:clamp(64px,11vw,184px);margin:26px 0 0}
+  .si-h1 span{font-family:var(--serif);font-style:italic;text-transform:none;font-weight:400;color:var(--cobre);letter-spacing:-.01em}
+  .si-lede{max-width:600px;margin:30px 0 0;font-size:clamp(18px,1.5vw,21px);line-height:1.65;color:var(--areia);font-weight:300}
+  .si-clock{display:flex;align-items:baseline;flex-wrap:wrap;gap:14px;margin-top:34px;padding-top:22px;border-top:1px solid var(--line);max-width:600px}
+  .si-clock b{font-family:var(--mono);font-weight:400;font-size:clamp(30px,3.2vw,44px);color:var(--creme);letter-spacing:.04em}
+  .si-clock span{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--areia)}
+  .si-ctas{display:flex;flex-wrap:wrap;gap:12px;margin-top:34px}
+  @media(max-width:760px){.si-rings{right:-40vw;width:120vw;opacity:.5}}
+
+  /* visão */
+  .si-pilares{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:64px}
+  @media(max-width:900px){.si-pilares{grid-template-columns:1fr}}
+  .si-pilar{border:1px solid var(--line);border-radius:22px;padding:30px 28px 32px;background:linear-gradient(160deg,rgba(191,137,87,.08),transparent 60%)}
+  .si-n{font-family:var(--mono);font-size:12px;color:var(--cobre);letter-spacing:.2em}
+  .si-pilar h3{font-family:var(--serif);font-weight:400;font-size:32px;line-height:1.1;margin:18px 0 12px;color:var(--creme)}
+  .si-pilar p{margin:0;color:var(--areia);font-size:16.5px;line-height:1.7;font-weight:300}
+  .si-origem{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:56px;margin-top:90px;align-items:center}
+  @media(max-width:900px){.si-origem{grid-template-columns:1fr;gap:32px}}
+  .si-verso{margin:0;padding:44px 36px;border:1px solid var(--line);border-radius:26px;text-align:center;background:radial-gradient(ellipse at 50% 120%,rgba(191,137,87,.22),transparent 70%)}
+  .si-verso span{display:block;font-family:var(--serif);font-size:clamp(30px,3vw,44px);line-height:1.2;color:var(--creme)}
+  .si-verso figcaption{margin-top:18px;font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--cobre)}
+  .si-origem p{margin:18px 0 0;font-size:18px;line-height:1.75;color:var(--creme);font-weight:300}
+  .si-origem .si-sub{color:var(--areia);font-size:16.5px}
+
+  /* frutos */
+  .si-frutos{overflow:hidden}
+  .si-head{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap}
+  .si-fonte{font-size:11px;letter-spacing:.18em;color:var(--areia);max-width:380px;line-height:1.7;margin:0}
+  .si-intro{margin:34px 0 0;max-width:760px;font-family:var(--serif);font-size:clamp(22px,2vw,28px);line-height:1.4;color:var(--creme)}
+  .si-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:40px}
+  @media(max-width:1000px){.si-kpis{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:520px){.si-kpis{grid-template-columns:1fr}}
+  .si-kpi{position:relative;padding:26px 24px 28px;border:1px solid var(--line);background:rgba(10,9,7,.75);backdrop-filter:blur(4px)}
+  .si-kpi-i{font-size:10.5px;letter-spacing:.2em;color:var(--cobre)}
+  .si-num{display:block;margin:16px 0 10px;font-family:var(--disp);font-weight:200;font-size:clamp(52px,5vw,76px);line-height:1;color:var(--creme);font-variant-numeric:tabular-nums}
+  .si-kpi p{margin:0;color:var(--areia);font-size:15px;line-height:1.5}
+  .si-painel{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:16px;margin-top:16px;align-items:start}
+  @media(max-width:1000px){.si-painel{grid-template-columns:1fr}}
+  .si-barras,.si-box{border:1px solid var(--line);background:rgba(10,9,7,.75);padding:26px 26px 22px}
+  .si-ptit{display:flex;justify-content:space-between;gap:12px;font-size:10.5px;letter-spacing:.2em;color:var(--cobre);padding-bottom:16px;border-bottom:1px dashed rgba(191,137,87,.3);margin-bottom:18px}
+  .si-ptit span:last-child{color:var(--areia)}
+  .si-barras ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:13px}
+  .si-barras li{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr) 46px;gap:14px;align-items:center}
+  @media(max-width:560px){.si-barras li{grid-template-columns:1fr 46px}.si-bt{grid-column:1/-1;grid-row:2}}
+  .si-bl{font-size:14.5px;color:var(--creme);line-height:1.3}
+  .si-bt{position:relative;height:6px;background:rgba(248,233,183,.07);overflow:hidden}
+  .si-bt i{position:absolute;inset:0 auto 0 0;width:0;background:linear-gradient(90deg,rgba(191,137,87,.5),var(--cobre));transition:width 1.4s cubic-bezier(.2,.8,.2,1) var(--d)}
+  .si-bt i::after{content:'';position:absolute;right:0;top:-3px;width:2px;height:12px;background:var(--creme)}
+  .si-barras.vivo .si-bt i{width:var(--p)}
+  .si-barras li b{font-weight:400;font-size:14px;color:var(--creme);text-align:right}
+  .si-nota{margin:18px 0 0;font-size:12.5px;color:#8C7D6E}
+  .si-lado{display:flex;flex-direction:column;gap:16px}
+  .si-gauges{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  @media(max-width:520px){.si-gauges{grid-template-columns:1fr}}
+  .si-gauge{position:relative;text-align:center}
+  .si-gauge svg{width:100%;max-width:120px;display:block;margin:0 auto;transform:rotate(-90deg)}
+  .si-gauge circle{fill:none;stroke-width:5}
+  .si-gauge .g-bg{stroke:rgba(248,233,183,.08)}
+  .si-gauge .g-v{stroke:var(--cobre);stroke-dasharray:0 100;transition:stroke-dasharray 1.6s cubic-bezier(.2,.8,.2,1)}
+  .si-gauges.vivo .g-v{stroke-dasharray:var(--v) 100}
+  .g-ring{position:relative;max-width:120px;margin:0 auto}
+  .si-gauge b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:400;font-size:22px;color:var(--creme)}
+  .si-gauge p{margin:12px 0 0;font-size:13px;line-height:1.45;color:var(--areia)}
+  .si-cal31{display:grid;grid-template-columns:repeat(16,1fr);gap:4px}
+  .si-cal31 i{aspect-ratio:1;background:rgba(248,233,183,.06)}
+  .si-cal31 i.on{transition:background .4s var(--d)}
+  .si-cal31.vivo i.on{background:var(--cobre)}
+  .si-big{margin:18px 0 6px}
+  .si-big b{font-weight:400;font-size:46px;color:var(--creme)}
+  .si-big span{font-family:var(--mono);font-size:18px;color:var(--areia)}
+  .si-box>p{margin:0;font-size:14.5px;line-height:1.6;color:var(--areia)}
+  .si-metodo{margin:22px 0 0;max-width:860px;font-size:13px;line-height:1.6;color:#8C7D6E}
+
+  /* edição 2027 */
+  .si-ed-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:64px;align-items:center}
+  @media(max-width:900px){.si-ed-grid{grid-template-columns:1fr}}
+  .si-dl{margin:36px 0 0;display:flex;flex-direction:column}
+  .si-dl div{display:grid;grid-template-columns:150px 1fr;gap:16px;padding:16px 0;border-top:1px solid var(--line)}
+  .si-dl dt{font-size:11px;letter-spacing:.2em;color:var(--cobre);padding-top:4px}
+  .si-dl dd{margin:0;font-size:17px;color:var(--creme);line-height:1.5}
+  @media(max-width:560px){.si-dl div{grid-template-columns:96px 1fr}.si-alcance b{font-size:24px;white-space:nowrap}}
+  .si-cal-col{display:flex;flex-direction:column;gap:12px}
+  .si-prep{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:10px}
+  .si-prep .si-prep-leg{grid-column:1/-1}
+  .si-prep-b{display:flex;flex-direction:column;gap:8px}
+  .si-prep-b>span{font-size:10.5px;letter-spacing:.16em;color:var(--cobre)}
+  .si-calp{grid-template-columns:repeat(4,1fr)!important;gap:4px!important}
+  .si-prep-leg{margin:0;font-size:10.5px;letter-spacing:.2em;color:var(--areia)}
+  @media(max-width:560px){.si-prep{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  .si-inscritos{margin:24px 0 0;font-size:12px;letter-spacing:.2em;color:var(--cobre)}
+  .si-cal100{display:grid;grid-template-columns:repeat(10,1fr);gap:6px}
+  .si-cal100 i{position:relative;aspect-ratio:1;border:1px solid rgba(248,233,183,.1);display:flex;align-items:center;justify-content:center;font-style:normal;transition:background .5s var(--d),border-color .5s var(--d)}
+  .si-cal100 span{font-family:var(--mono);font-size:10px;color:rgba(202,181,160,.5)}
+  .si-cal100.vivo i{border-color:rgba(191,137,87,.45);background:rgba(191,137,87,.08)}
+
+  .si-cal100.pronto i{--d:0s;transition:background 1.1s ease,border-color 1.1s ease,box-shadow 1.1s ease}
+  .si-cal100.pronto i span{transition:color 1.1s ease}
+  .si-cal100 i.luz{background:var(--cobre);border-color:var(--creme);box-shadow:0 0 22px rgba(191,137,87,.65);transition:background 0s,border-color 0s,box-shadow 0s}
+  .si-cal100 i.luz span{color:#000;transition:color 0s}
+  .si-cal100{touch-action:pan-y;cursor:crosshair}
+
+  /* mapas */
+  .si-mapas{position:relative;margin-top:16px;border:1px solid var(--line);background:rgba(10,9,7,.75);padding:26px 26px 24px}
+  .si-mapas-grade{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:40px;align-items:center}
+  @media(max-width:900px){.si-mapas-grade{grid-template-columns:1fr;gap:28px}}
+  .si-mapa-br svg,.si-mapa-mundo svg{display:block;width:100%;height:auto;overflow:visible}
+  .si-mapa-mundo svg{overflow:hidden}
+  .si-mapa-br{max-width:520px;margin:0 auto;width:100%}
+  .si-mapas path{stroke-linejoin:round;transition:fill .5s ease,stroke .5s ease,filter .5s ease}
+  .si-mapa-br path{stroke-width:1.1}
+  .si-mapa-mundo path{stroke-width:.6}
+  .si-mapas path.off{fill:rgba(248,233,183,.035);stroke:rgba(248,233,183,.16)}
+  .si-mapas path.on{fill:rgba(248,233,183,.035);stroke:rgba(191,137,87,.35)}
+  .si-mapas.vivo path.on{fill:rgba(191,137,87,.78);stroke:var(--creme);transition-delay:var(--d,0s)}
+  .si-mapas.vivo path.on{filter:drop-shadow(0 0 6px rgba(191,137,87,.45))}
+  .si-mapas path.luz{transition-delay:0s!important;transition-duration:0s}
+  .si-mapas path.on.luz{fill:var(--creme);stroke:var(--creme);filter:drop-shadow(0 0 14px rgba(248,233,183,.7))}
+  .si-mapas path.off.luz{fill:rgba(202,181,160,.16);stroke:rgba(248,233,183,.5)}
+  .si-mapa-mundo path.off{pointer-events:none}
+  .si-pino .p-c{fill:var(--creme)}
+  .si-pino .p-anel{fill:none;stroke:var(--cobre);stroke-width:1.5;transform-origin:center;transform-box:fill-box;animation:si-pino 2.4s ease-out infinite}
+  .si-pino:nth-of-type(2) .p-anel{animation-delay:.8s}.si-pino:nth-of-type(3) .p-anel{animation-delay:1.6s}
+  @keyframes si-pino{0%{transform:scale(.3);opacity:1}100%{transform:scale(1.6);opacity:0}}
+  .si-mapa-lado{display:flex;flex-direction:column;gap:26px}
+  .si-alcance{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding-top:20px;border-top:1px dashed rgba(191,137,87,.3)}
+  .si-alcance b{display:block;font-weight:400;font-size:34px;color:var(--creme)}
+  .si-alcance span{font-size:13px;color:var(--areia);line-height:1.4}
+  .si-leg{display:flex;flex-wrap:wrap;gap:18px;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--areia)}
+  .si-leg>span{display:inline-flex;align-items:center;gap:8px}
+  .si-leg i{width:14px;height:10px;border:1px solid rgba(248,233,183,.25);background:rgba(248,233,183,.04)}
+  .si-leg i.on{background:var(--cobre);border-color:var(--creme)}
+  #siMapaInfo{color:var(--creme)}
+
+  /* relatos */
+  .si-rel-grade{display:grid;grid-template-columns:repeat(6,1fr);gap:16px;margin-top:56px}
+  .si-rel{position:relative;margin:0;grid-column:span 2;display:flex;flex-direction:column;gap:18px;padding:28px 26px 26px;border:1px solid var(--line);background:rgba(10,9,7,.75)}
+  .si-rel-maior{grid-column:span 4}
+  @media(max-width:1000px){.si-rel-grade{grid-template-columns:1fr 1fr}.si-rel{grid-column:span 1}.si-rel-maior{grid-column:1/-1}}
+  @media(max-width:640px){.si-rel-grade{grid-template-columns:1fr}.si-rel-maior{grid-column:auto}}
+  .si-rel-top{display:flex;justify-content:space-between;gap:12px;font-size:10.5px;letter-spacing:.2em;color:var(--cobre);padding-bottom:14px;border-bottom:1px dashed rgba(191,137,87,.3)}
+  .si-rel-top span:last-child{color:var(--areia)}
+  .si-rel blockquote{margin:0;font-family:var(--serif);font-size:21px;line-height:1.45;color:var(--creme);flex:1}
+  .si-rel blockquote::before{content:'“';display:block;font-size:56px;line-height:.6;color:var(--cobre);margin-bottom:6px}
+  .si-rel-maior blockquote{font-size:clamp(22px,2vw,27px)}
+  .si-rel figcaption{font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--areia)}
+
+  /* inscrição */
+  .si-insc-card{position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:56px;padding:56px;border:1px solid var(--line);background:linear-gradient(150deg,rgba(191,137,87,.12),transparent 60%)}
+  @media(max-width:900px){.si-insc-card{grid-template-columns:1fr;padding:34px 24px;gap:30px}}
+  .si-insc-p{margin:24px 0 0;font-size:18px;line-height:1.7;color:var(--areia);font-weight:300}
+  .si-insc-box{display:flex;flex-direction:column;gap:14px;align-items:flex-start}
+  .si-check{display:flex;gap:12px;align-items:flex-start;font-size:14.5px;line-height:1.55;color:var(--creme);cursor:pointer}
+  .si-check input{margin-top:4px;width:18px;height:18px;accent-color:var(--cobre);flex:none}
+  .si-priv{margin:0;font-size:13px;color:var(--areia)}
+  .si-priv a{border-bottom:1px solid rgba(191,137,87,.6)}
+  .si-escolha{margin:8px 0 0;font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--cobre)}
+  #siLogins{width:100%}
+  .si-trava .pv-login{opacity:.4;filter:grayscale(1)}
+  .si-msg{margin:0;font-size:14px;color:var(--cobre)}
+  .si-ok,.si-ola{margin:0;font-family:var(--serif);font-size:26px;color:var(--creme)}
+</style>
