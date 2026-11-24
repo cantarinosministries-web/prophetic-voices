@@ -27,7 +27,14 @@ const deB64url = (s) => {
   return decodeURIComponent(escape(atob(t + '='.repeat((4 - (t.length % 4)) % 4))));
 };
 const lerJwt = (jwt) => { try { return JSON.parse(deB64url(String(jwt).split('.')[1])); } catch (e) { return null; } };
-const origemDe = (req) => (new URL(req.url).hostname === 'localhost' ? new URL(req.url).origin : DOM);
+// Endereço público usado nos retornos de login. Em produção é o domínio oficial;
+// num ambiente de homologação, a variável SITE_URL (ex.: https://pv-homologacao.<conta>.workers.dev)
+// aponta o retorno para o próprio ambiente. Em localhost, usa a origem do pedido.
+const siteDe = (env) => {
+  const v = String(env?.SITE_URL || '').trim().replace(/\/+$/, '');
+  return /^https:\/\/[a-z0-9.-]+$/i.test(v) ? v : DOM;
+};
+const origemDe = (req, env) => (new URL(req.url).hostname === 'localhost' ? new URL(req.url).origin : siteDe(env));
 const voltaSegura = (v) => (typeof v === 'string' && /^\/(?!\/)[\w\-./?=&#%]*$/.test(v) ? v.slice(0, 300) : '/conta.html');
 
 // ---------------------------------------------------------------- provedores
@@ -199,7 +206,7 @@ export async function rotaAuth(req, env, url) {
   const nome = seg[1];
   const prov = PROVEDORES[nome];
   if (!prov) return redirecionar('/entrar.html');
-  const retorno = `${origemDe(req)}/auth/${nome}/retorno`;
+  const retorno = `${origemDe(req, env)}/auth/${nome}/retorno`;
 
   // ---- início
   if (seg.length === 2 && req.method === 'GET') {
@@ -369,7 +376,7 @@ export async function apiModeracao(req, env, url, seg, u, { registrar }) {
     const leitores = (await env.DB.prepare('SELECT COUNT(*) n FROM leitores').first()).n;
     return json({
       comentarios: lista, contagem: Object.fromEntries(cont.map((x) => [x.status, x.n])), leitores,
-      provedores: Object.entries(PROVEDORES).map(([k, v]) => ({ id: k, nome: v.nome, configurado: v.configurado(env), retorno: `${DOM}/auth/${k}/retorno` })),
+      provedores: Object.entries(PROVEDORES).map(([k, v]) => ({ id: k, nome: v.nome, configurado: v.configurado(env), retorno: `${siteDe(env)}/auth/${k}/retorno` })),
     });
   }
   if (seg[0] === 'pendentes' && m === 'GET') {
