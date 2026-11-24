@@ -10,5 +10,10 @@
   X-Robots-Tag: noindex, nofollow
   Cache-Control: no-cache
 
-/artigos/*.pdf
-  Cache-Control: public, max-age=86400
+/pedido
+  Referrer-Policy: no-referrer
+  Cache-Control: private, no-store
+
+/pedido.html
+  Referrer-Policy: no-referrer
+  Cache-Control: private, no-store

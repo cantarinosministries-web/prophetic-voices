@@ -25,7 +25,7 @@ async function modelo(env, req, caminho) {
   for (let i = 0; i < 3; i++) {
     const r = await env.ASSETS.fetch(new Request(url.toString(), { method: 'GET' }));
     if (r.status >= 300 && r.status < 400 && r.headers.get('Location')) { url = new URL(r.headers.get('Location'), url); continue; }
-    if (!r.ok) throw new Error('modelo não encontrado: ' + caminho);
+    if (!r.ok) throw new Error(`modelo não encontrado: ${caminho} (${r.status} em ${url.pathname})`);
     return r.text();
   }
   throw new Error('redirecionamentos demais: ' + caminho);
@@ -33,11 +33,11 @@ async function modelo(env, req, caminho) {
 
 function preencher(t, { titulo, descricao, head = '', main = '', scripts = '' }) {
   return t
-    .replace(/__PV_TITLE__/g, esc(titulo))
-    .replace(/__PV_DESC__/g, esc(descricao))
-    .replace(/<pv-slot data-k="?head"?><\/pv-slot>/, head)
-    .replace(/<pv-slot data-k="?main"?><\/pv-slot>/, main)
-    .replace(/<pv-slot data-k="?scripts"?><\/pv-slot>/, scripts);
+    .replace(/__PV_TITLE__/g, () => esc(titulo))
+    .replace(/__PV_DESC__/g, () => esc(descricao))
+    .replace(/<pv-slot data-k="?head"?><\/pv-slot>/, () => head)
+    .replace(/<pv-slot data-k="?main"?><\/pv-slot>/, () => main)
+    .replace(/<pv-slot data-k="?scripts"?><\/pv-slot>/, () => scripts);
 }
 
 const ogTags = (t, d, u) =>
@@ -122,21 +122,26 @@ export async function paginaArtigo(env, req, a, relacionados, previa, numeros, c
   const dataPt = pub ? pub.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'America/Fortaleza' }) : '—';
   const dataEn = pub ? pub.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'America/Fortaleza' }) : '—';
   const pdf = a.pdf_url;
+  const pdfCanonico = pdf?.startsWith('/arquivos/artigos/')
+    ? pdf.replace('/arquivos/artigos/', '/artigos/arquivo-') : pdf;
   const urlPag = `${DOM}/artigos/${a.slug}.html`;
-  const pg = (a.paginas_original || '').split(/[–-]/);
+  const dataPublicacao = (a.publicado_em || '').slice(0, 10).replace(/-/g, '/');
   const meta = [
-    ['citation_title', a.titulo], ['citation_author', a.autor], ['citation_publication_date', a.ano],
-    ['citation_online_date', (a.publicado_em || '').slice(0, 10).replace(/-/g, '/')], ['citation_journal_title', 'Revista The Prophetic Voices'],
-    ['citation_publisher', 'The Prophetic Voices'], ['citation_language', 'pt'], ['citation_pdf_url', pdf ? DOM + pdf : ''],
+    ['citation_title', a.titulo], ['citation_author', a.autor], ['citation_publication_date', dataPublicacao],
+    ['citation_online_date', dataPublicacao], ['citation_journal_title', 'Revista The Prophetic Voices'],
+    ['citation_publisher', 'The Prophetic Voices'], ['citation_language', 'pt'], ['citation_pdf_url', livre && pdfCanonico ? DOM + pdfCanonico : ''],
     ['citation_abstract_html_url', urlPag], ['citation_keywords', p.palavrasChave.join('; ')],
-    ['citation_firstpage', pg[0] || ''], ['citation_lastpage', pg[1] || ''], ['DC.contributor', trad ? a.tradutor : ''],
+    ['DC.source', a.periodico ? [a.periodico, a.ano, a.paginas_original].filter(Boolean).join(', ') : ''],
+    ['DC.contributor', trad ? a.tradutor : ''],
   ].filter((m) => m[1]).map((m) => `<meta name="${m[0]}" content="${esc(m[1])}">`).join('');
   const ld = { '@context': 'https://schema.org', '@type': 'ScholarlyArticle', headline: a.titulo, alternativeHeadline: a.titulo_original || undefined,
     author: { '@type': 'Person', name: a.autor, affiliation: a.afiliacao || undefined }, translator: trad ? { '@type': 'Person', name: a.tradutor } : undefined,
     inLanguage: 'pt-BR', abstract: a.resumo, keywords: p.palavrasChave, datePublished: (a.publicado_em || '').slice(0, 10), url: urlPag,
     publisher: { '@type': 'Organization', name: 'The Prophetic Voices' },
     isBasedOn: a.periodico ? { '@type': 'ScholarlyArticle', name: a.titulo_original || a.titulo, datePublished: a.ano, isPartOf: { '@type': 'Periodical', name: a.periodico }, sameAs: a.url_original || undefined } : undefined,
-    encoding: pdf ? { '@type': 'MediaObject', contentUrl: DOM + pdf, encodingFormat: 'application/pdf' } : undefined };
+    isAccessibleForFree: livre,
+    hasPart: livre ? undefined : { '@type': 'WebPageElement', isAccessibleForFree: false, cssSelector: '.gate' },
+    encoding: livre && pdfCanonico ? { '@type': 'MediaObject', contentUrl: DOM + pdfCanonico, encodingFormat: 'application/pdf' } : undefined };
   const faixa = previa ? `<div style="position:sticky;top:76px;z-index:30;background:var(--cobre);color:#000;text-align:center;font:500 13px var(--sans);padding:10px">PRÉVIA · este artigo está como “${esc(a.status)}” e não aparece para o público · <a href="/admin.html#artigo/${a.id}" style="text-decoration:underline">voltar ao painel</a></div>` : '';
   const linhas = [
     ['m_author', 'Autor', `<a href="${autorLink}">${esc(a.autor)}</a>`],

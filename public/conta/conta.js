@@ -43,8 +43,8 @@
       copiar: 'Copiar', copiado: 'Copiado ✓', apagar: 'Apagar', pag_abrev: 'p.',
       com_h: 'Comentários enviados', st_pendente: 'Aguardando a equipe', st_aprovado: 'Publicado', st_rejeitado: 'Não publicado',
       rec_h: 'Publicados recentemente', livre: 'Acesso livre',
-      esc_h: 'Escreva para a revista', esc_p: 'A revista The Prophetic Voices vai receber artigos acadêmicos (com avaliação por pares) e ensaios teológicos (com avaliação editorial). As normas e a chamada estão em preparação: marque o seu interesse e avisaremos quando abrir.',
-      esc_ac: 'Artigo acadêmico', esc_en: 'Ensaio teológico', esc_am: 'Os dois', esc_ok: 'Anotado! Avisaremos você quando a chamada abrir.', esc_sair: 'Retirar interesse', esc_mais: 'Saiba mais'
+      esc_h: 'Escreva para a revista', esc_p: 'A revista vai receber artigos acadêmicos e ensaios teológicos. Registre seu interesse e acompanhe a abertura na página Proponha um artigo.',
+      esc_ac: 'Artigo acadêmico', esc_en: 'Ensaio teológico', esc_am: 'Os dois', esc_ok: 'Interesse registrado. A abertura será anunciada na página Proponha um artigo.', esc_sair: 'Retirar interesse', esc_mais: 'Saiba mais'
     },
     en: {
       e_eyebrow: 'Sign up', e_h: 'Sign in', e_em: 'or create your account',
@@ -80,8 +80,8 @@
       copiar: 'Copy', copiado: 'Copied ✓', apagar: 'Delete', pag_abrev: 'p.',
       com_h: 'Comments you sent', st_pendente: 'Awaiting the team', st_aprovado: 'Published', st_rejeitado: 'Not published',
       rec_h: 'Recently published', livre: 'Open access',
-      esc_h: 'Write for the journal', esc_p: 'The Prophetic Voices journal will receive academic articles (peer-reviewed) and theological essays (editorially reviewed). The guidelines and the call are being prepared: mark your interest and we will let you know when it opens.',
-      esc_ac: 'Academic article', esc_en: 'Theological essay', esc_am: 'Both', esc_ok: 'Noted! We will let you know when the call opens.', esc_sair: 'Withdraw interest', esc_mais: 'Learn more'
+      esc_h: 'Write for the journal', esc_p: 'The journal will receive academic articles and theological essays. Register your interest and check the Propose an article page for the opening announcement.',
+      esc_ac: 'Academic article', esc_en: 'Theological essay', esc_am: 'Both', esc_ok: 'Interest registered. The call will be announced on the Propose an article page.', esc_sair: 'Withdraw interest', esc_mais: 'Learn more'
     }
   };
   var t = function (k) { var l = L.lingua(); return (T[l] && T[l][k]) || T.pt[k] || k; };

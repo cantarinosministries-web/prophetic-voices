@@ -8,7 +8,7 @@
     "directory": "./dist",
     "binding": "ASSETS",
     // estas rotas passam primeiro pelo Worker; o resto sai direto dos arquivos
-    "run_worker_first": ["/api/*", "/arquivos/*", "/artigos.html", "/artigos", "/artigos/*", "/auth/*", "/email/*"]
+    "run_worker_first": ["/sitemap.xml", "/api/*", "/arquivos/*", "/artigos.html", "/artigos", "/artigos/*", "/auth/*", "/email/*"]
   },
   // banco de dados: usuários, artigos, comentários e histórico
   "d1_databases": [
@@ -23,5 +23,25 @@
   "r2_buckets": [{ "binding": "ARQUIVOS", "bucket_name": "pv-arquivos" }],
   // envia a fila de e-mails (novos artigos e testemunhos) a cada 10 minutos
   "triggers": { "crons": ["*/10 * * * *"] },
-  "observability": { "enabled": true }
+  "observability": { "enabled": true },
+  // Homologação: Worker separado (pv-homologacao), com banco D1 e R2 próprios e dados de teste.
+  // Nunca usa o banco nem os arquivos de produção. Publicado com `npm run deploy:homologacao`.
+  // Os logins de teste voltam para SITE_URL (cadastrar esse retorno no provedor, ex.: Google).
+  "env": {
+    "homologacao": {
+      "name": "pv-homologacao",
+      "vars": { "SITE_URL": "https://pv-homologacao.cantarinosministries.workers.dev" },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "pv-db-homologacao",
+          "database_id": "0a980460-7a64-4c5b-b014-7052800e5980",
+          "migrations_dir": "migrations"
+        }
+      ],
+      "r2_buckets": [{ "binding": "ARQUIVOS", "bucket_name": "pv-arquivos-homologacao" }],
+      // sem cron: a homologação não envia e-mails
+      "triggers": { "crons": [] }
+    }
+  }
 }

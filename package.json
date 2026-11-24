@@ -9,7 +9,8 @@
     "preview": "astro preview",
     "banco:local": "wrangler d1 migrations apply pv-db --local",
     "servidor:local": "astro build && wrangler dev",
-    "deploy": "wrangler d1 migrations apply pv-db --remote && wrangler deploy"
+    "deploy": "wrangler d1 migrations apply pv-db --remote && wrangler deploy",
+    "deploy:homologacao": "wrangler d1 migrations apply pv-db-homologacao --env homologacao --remote && wrangler deploy --env homologacao"
   },
   "dependencies": {
     "astro": "^5.0.0",

@@ -84,7 +84,6 @@ só vem no primeiro login (depois o leitor pode mudar em "Minha conta").
   Os leitores **não** têm acesso ao painel; são separados da tabela `usuarios`.
 - Fluxo OAuth 2.0 / OpenID Connect com código de autorização, `state` ligado a um cookie, PKCE (Google e Microsoft) e `nonce`.
   O `id_token` vem direto do provedor em troca do segredo; o servidor confere emissor, destinatário, validade e nonce.
-- Contas unidas pelo e-mail só quando o provedor confirma o e-mail (Google e Apple). Nos outros casos, o leitor vincula
-  logins manualmente em "Minha conta".
+- O leitor vincula um novo provedor em "Minha conta", com a sessão existente aberta. Os vínculos já registrados continuam válidos.
 - Guardamos só nome, e-mail e o identificador de cada login. Nenhuma foto. Excluir a conta apaga tudo, inclusive os comentários.
 - Comentários: até 2.000 caracteres, no máximo 5 por hora por leitor, sempre **pendentes** até alguém aprovar. Sem respostas em sequência.

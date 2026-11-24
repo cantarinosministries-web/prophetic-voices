@@ -27,7 +27,14 @@ const deB64url = (s) => {
   return decodeURIComponent(escape(atob(t + '='.repeat((4 - (t.length % 4)) % 4))));
 };
 const lerJwt = (jwt) => { try { return JSON.parse(deB64url(String(jwt).split('.')[1])); } catch (e) { return null; } };
-const origemDe = (req) => (new URL(req.url).hostname === 'localhost' ? new URL(req.url).origin : DOM);
+// Endereço público usado nos retornos de login. Em produção é o domínio oficial;
+// num ambiente de homologação, a variável SITE_URL (ex.: https://pv-homologacao.<conta>.workers.dev)
+// aponta o retorno para o próprio ambiente. Em localhost, usa a origem do pedido.
+const siteDe = (env) => {
+  const v = String(env?.SITE_URL || '').trim().replace(/\/+$/, '');
+  return /^https:\/\/[a-z0-9.-]+$/i.test(v) ? v : DOM;
+};
+const origemDe = (req, env) => (new URL(req.url).hostname === 'localhost' ? new URL(req.url).origin : siteDe(env));
 const voltaSegura = (v) => (typeof v === 'string' && /^\/(?!\/)[\w\-./?=&#%]*$/.test(v) ? v.slice(0, 300) : '/conta.html');
 
 // ---------------------------------------------------------------- provedores
@@ -199,7 +206,7 @@ export async function rotaAuth(req, env, url) {
   const nome = seg[1];
   const prov = PROVEDORES[nome];
   if (!prov) return redirecionar('/entrar.html');
-  const retorno = `${origemDe(req)}/auth/${nome}/retorno`;
+  const retorno = `${origemDe(req, env)}/auth/${nome}/retorno`;
 
   // ---- início
   if (seg.length === 2 && req.method === 'GET') {
@@ -270,14 +277,7 @@ async function vincularOuCriar(env, provedor, id, vincularA) {
     if (id.email) await env.DB.prepare('UPDATE leitor_contas SET email = ? WHERE provedor = ? AND sub = ?').bind(id.email, provedor, id.sub).run();
     return { leitor: ja.leitor_id, bloqueado: ja.bloqueado };
   }
-  // mesma pessoa entrando por outro provedor: só junta as contas quando o e-mail foi confirmado pelo provedor (Google e Apple)
-  if (id.email && id.verificado) {
-    const outro = await env.DB.prepare('SELECT id, bloqueado FROM leitores WHERE email = ? ORDER BY id LIMIT 1').bind(id.email).first();
-    if (outro) {
-      await env.DB.prepare('INSERT INTO leitor_contas (provedor, sub, leitor_id, email) VALUES (?,?,?,?)').bind(provedor, id.sub, outro.id, id.email).run();
-      return { leitor: outro.id, bloqueado: outro.bloqueado };
-    }
-  }
+  // Vínculos novos exigem uma sessão na conta existente e autorização explícita.
   const nome = (id.nome || (id.email ? id.email.split('@')[0] : '') || 'Leitor').trim().slice(0, 80);
   const novo = await env.DB.prepare('INSERT INTO leitores (nome, email) VALUES (?,?) RETURNING id').bind(nome, id.email).first();
   await env.DB.prepare('INSERT INTO leitor_contas (provedor, sub, leitor_id, email) VALUES (?,?,?,?)').bind(provedor, id.sub, novo.id, id.email).run();
@@ -376,7 +376,7 @@ export async function apiModeracao(req, env, url, seg, u, { registrar }) {
     const leitores = (await env.DB.prepare('SELECT COUNT(*) n FROM leitores').first()).n;
     return json({
       comentarios: lista, contagem: Object.fromEntries(cont.map((x) => [x.status, x.n])), leitores,
-      provedores: Object.entries(PROVEDORES).map(([k, v]) => ({ id: k, nome: v.nome, configurado: v.configurado(env), retorno: `${DOM}/auth/${k}/retorno` })),
+      provedores: Object.entries(PROVEDORES).map(([k, v]) => ({ id: k, nome: v.nome, configurado: v.configurado(env), retorno: `${siteDe(env)}/auth/${k}/retorno` })),
     });
   }
   if (seg[0] === 'pendentes' && m === 'GET') {

@@ -40,6 +40,7 @@
     },
   };
   var STATUS_EN = { aguardando: 'Awaiting payment', pago: 'Paid', separacao: 'Being packed', enviado: 'Shipped', entregue: 'Delivered', cancelado: 'Cancelled', reembolsado: 'Refunded' };
+  var ultimaTentativa, ultimoCheckout;
   function lang() { if (window.__pvLang) return window.__pvLang; try { return localStorage.getItem('pv-lang') || 'pt'; } catch (e) { return 'pt'; } }
   function t(k) { return (D[lang()] || D.pt)[k] || D.pt[k] || k; }
 
@@ -80,7 +81,7 @@
       var cats = []; prods.forEach(function (p) { if (p.categoria && cats.indexOf(p.categoria) < 0) cats.push(p.categoria); });
       var lista = prods.filter(function (p) { return !filtro || p.categoria === filtro; });
       var h = faixaTeste(j);
-      if (!j.loja_aberta) h += '<div class="lj-aviso">' + esc(t('fechada')) + '</div>';
+      if (!j.loja_aberta && prods.length) h += '<div class="lj-aviso">' + esc(t('fechada')) + '</div>';
       if (j.aviso) h += '<div class="lj-aviso">' + esc(j.aviso) + '</div>';
       if (cats.length > 1) {
         h += '<div class="lj-cats">' + [''].concat(cats).map(function (c) {
@@ -215,11 +216,18 @@
         guardarForm(); var msg = document.getElementById('ljMsg'); var b = this;
         if (!cot || !servico) { msg.textContent = t('aviso_cep'); return; }
         b.disabled = true; b.textContent = t('pagando'); msg.textContent = '';
-        api('POST', '/pedido', {
+        var dados = {
           itens: itensApi(j), frete_servico: servico, observacao: form.observacao,
           cliente: { nome: form.nome, email: form.email, telefone: form.telefone, cpf: form.cpf },
           endereco: { cep: form.cep, rua: form.rua, numero: form.numero, complemento: form.complemento, bairro: form.bairro, cidade: form.cidade, uf: form.uf },
-        }).then(function (r) {
+        };
+        var checkout = JSON.stringify(dados);
+        if (checkout !== ultimoCheckout) {
+          ultimoCheckout = checkout;
+          ultimaTentativa = crypto.randomUUID();
+        }
+        dados.tentativa = ultimaTentativa;
+        api('POST', '/pedido', dados).then(function (r) {
           try { var hist = JSON.parse(localStorage.getItem('pv-pedidos') || '[]'); hist.unshift({ codigo: r.codigo, chave: r.chave }); localStorage.setItem('pv-pedidos', JSON.stringify(hist.slice(0, 10))); } catch (e) {}
           salvar([]);
           location.href = r.ir;

@@ -5,6 +5,7 @@
 
 export const T = {
   pt: {
+    news_pending: 'As inscrições por e-mail abrem em breve.',
     nav_home: 'Home', nav_about: 'Quem Somos', nav_school: 'Escola de Profetas', nav_articles: 'Artigos', nav_courses: 'Cursos', nav_news: 'Novidades', nav_testimonies: 'Testemunhos', nav_store: 'Loja',
     scroll: 'ROLE',
     about_eyebrow: 'Quem somos',
@@ -56,6 +57,7 @@ export const T = {
     prods: [['LIVRO', 'Igreja do Fim · Gabriel Cantarino'], ['CAMISETA', 'Anti-False Prophet Club']],
   },
   en: {
+    news_pending: 'Email subscriptions will open soon.',
     nav_home: 'Home', nav_about: 'About Us', nav_school: 'School of Prophets', nav_articles: 'Articles', nav_courses: 'Courses', nav_news: 'News', nav_testimonies: 'Testimonies', nav_store: 'Store',
     scroll: 'SCROLL',
     about_eyebrow: 'About us',

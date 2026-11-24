@@ -37,3 +37,4 @@ desse período ficam registradas como "não enviado" (não são disparadas depoi
   10 minutos (cron `*/10 * * * *` no `wrangler.jsonc`). Até 3 tentativas por destinatário. Quem cancela no meio sai da fila.
 - Conteúdo retirado do site antes do envio terminar não é mais enviado. Republicar não reenvia.
 - Sem pixel de abertura nem rastreamento de cliques (compromisso da Política de Privacidade, seção 6).
+Divulgue a abertura da chamada na página "Proponha um artigo". O registro de interesse na Biblioteca ajuda a equipe editorial a planejar a chamada. Ele não ativa os e-mails de novidades.
