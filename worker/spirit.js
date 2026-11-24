@@ -142,7 +142,8 @@ export async function apiSpiritLeitor(req, env, url, seg, l) {
       const data = /^\d{4}-\d{2}-\d{2}$/.test(b.data || '') ? b.data : s.hoje;
       if (data > s.hoje) return erro('Esta data ainda não chegou.');
       const tipo = TIPOS.includes(b.tipo) ? b.tipo : 'testemunho';
-      const aut = AUT_DIARIO.includes(b.autorizacao) ? b.autorizacao : 'privado';
+      // Diário de Oração é sempre privado; só o testemunho tem autorização (padrão: só a equipe).
+      const aut = tipo === 'testemunho' ? (AUT_DIARIO.includes(b.autorizacao) && b.autorizacao !== 'privado' ? b.autorizacao : 'equipe') : 'privado';
       const ref = String(b.referencia || '').trim().slice(0, 200) || null;
       if (id) {
         const r = await env.DB.prepare("UPDATE si_diario SET data = ?, tipo = ?, referencia = ?, texto = ?, autorizacao = ?, atualizado_em = datetime('now') WHERE id = ? AND leitor_id = ?")
@@ -197,7 +198,7 @@ export async function apiSpiritPainel(req, env, url, seg, u, { registrar }) {
          FROM si_devocionais d WHERE edicao = ? ORDER BY liberar_em, id`, s.id),
       q(`SELECT x.* FROM (
            SELECT d.data, d.tipo, d.referencia, d.texto AS testemunho, d.autorizacao, d.atualizado_em, l.nome, l.email FROM si_diario d JOIN leitores l ON l.id = d.leitor_id
-             WHERE d.edicao = ? AND d.autorizacao <> 'privado'
+             WHERE d.edicao = ? AND d.tipo = 'testemunho' AND d.autorizacao <> 'privado'
            UNION ALL
            SELECT NULL, 'testemunho', NULL, d.testemunho, d.autorizacao, d.atualizado_em, l.nome, l.email FROM si_dias d JOIN leitores l ON l.id = d.leitor_id
              WHERE d.edicao = ? AND d.testemunho IS NOT NULL) x ORDER BY x.atualizado_em DESC LIMIT 500`, s.id, s.id),

@@ -23,15 +23,16 @@
       leg_orou: 'orou', leg_tes: 'com registro no diário', leg_hoje: 'hoje', leg_vazio: 'não marcado',
       dia_prep: 'Preparação · dia {d}', dia_jor: 'Dia {d}', orei_prep: 'Completei os {m} de oração neste dia', orei_jor: 'Completei 1 hora de oração neste dia',
       salvar_dia: 'Salvar', salvo_dia: 'Dia salvo.', fechar: 'Fechar',
-      dia_reg: 'Registros deste dia', dia_escrever: 'Escrever no diário deste dia', dia_vazio: 'Nenhum registro no diário neste dia.',
-      di_h: 'Diário', di_p: 'Registre como estão sendo os seus dias de oração: testemunhos, impressões proféticas, o que você ouviu de Deus, o texto que leu, orações. Volte aqui sempre que quiser reler a sua caminhada.',
+      dia_reg: 'Diário de Oração deste dia', dia_escrever: 'Escrever no Diário de Oração deste dia', dia_vazio: 'Nenhum registro no Diário de Oração neste dia.', dia_tes: 'Testemunhos deste dia', dia_tes_escrever: 'Escrever um testemunho deste dia',
+      di_h: 'Diário de Oração', di_p: 'Registre como estão sendo os seus dias de oração: as impressões proféticas, o que você ouviu de Deus, a leitura diária, as suas orações. Volte aqui sempre que quiser reler a sua caminhada.', di_priv: 'O Diário de Oração é só seu: ninguém mais tem acesso a ele, nem a equipe do ministério.',
       di_novo: 'Novo registro', di_editando: 'Editando registro', di_data: 'Data', di_tipo: 'Tipo', di_ref: 'Texto bíblico ou referência (opcional)', di_ref_ph: 'Ex.: Salmo 27; Zacarias 12.10',
       di_texto: 'O que você quer registrar?', di_ph: 'O que Deus falou, fez ou mostrou? Uma palavra, uma impressão, um versículo, uma mudança…',
-      di_aut: 'Quem pode ler?', aut_privado: 'Só eu', aut_equipe: 'A equipe do ministério', aut_anonimo: 'Pode ser publicado sem me identificar', aut_nome: 'Pode ser publicado com o meu nome',
+      di_aut: 'Quem pode ler?', aut_privado: 'Só eu', aut_equipe: 'Só a equipe do ministério', aut_anonimo: 'Pode ser publicado sem me identificar', aut_nome: 'Pode ser publicado com o meu nome',
       di_aut_nota: 'O diário é seu: “só eu” é o padrão. Se você liberar um registro, a equipe lê com cuidado e oração, e nada é publicado fora da autorização marcada. Você pode mudar quando quiser.',
       di_salvar: 'Salvar no diário', di_salvo: 'Registro salvo no diário.', di_cancelar: 'Cancelar edição', di_editar: 'Editar', di_apagar: 'Apagar', di_apagar_conf: 'Apagar este registro do diário?',
       di_todos: 'Todos', di_busca: 'Buscar no diário', di_vazio: 'Seu diário ainda está em branco. O primeiro registro pode ser hoje.', di_nada: 'Nenhum registro encontrado.',
-      t_testemunho: 'Testemunho', t_profetica: 'Impressão profética', t_ouvi: 'O que ouvi de Deus', t_texto: 'Texto que li', t_oracao: 'Oração', t_outro: 'Outro',
+      t_testemunho: 'Testemunho', t_profetica: 'Impressão profética', t_ouvi: 'O que ouvi de Deus', t_texto: 'Leitura diária', t_oracao: 'Oração', t_outro: 'Outra anotação',
+      te_h: 'Testemunhos', te_p: 'Conte o que Deus tem feito durante esta jornada. Diferente do Diário de Oração, o testemunho é para ser compartilhado: você escolhe quem pode lê-lo.', te_novo: 'Novo testemunho', te_editando: 'Editando testemunho', te_texto: 'Seu testemunho', te_ph: 'O que Deus fez? Uma cura, uma resposta, uma mudança, um encontro…', te_salvar: 'Salvar testemunho', te_salvo: 'Testemunho salvo.', te_vazio: 'Você ainda não escreveu nenhum testemunho.', te_apagar_conf: 'Apagar este testemunho?', te_aut_nota: 'A equipe lê os testemunhos com cuidado e oração. Nada é publicado fora da autorização marcada, e você pode mudá-la ou apagar o testemunho quando quiser.',
       dev_h: 'Devocionais', dev_vazio: 'Os devocionais aparecem aqui assim que forem liberados.', dev_abrir: 'Abrir PDF', dev_de: 'Liberado em {d}',
       cfg_h: 'Preferências', dev_email_on: 'Você recebe os devocionais também no e-mail', dev_email_off: 'Você não recebe os devocionais por e-mail (eles continuam aqui)', dev_email_srv: 'Os e-mails ainda estão sendo ligados; enquanto isso, os devocionais ficam aqui.',
       ligar: 'Receber por e-mail', desligar: 'Parar de receber', sair_p: 'Sair do Spirit Immersion apaga a sua inscrição, os dias marcados (preparação e 100 dias) e todo o seu diário desta edição.', sair: 'Sair e apagar meu registro', sair_conf: 'Confirmar: sair e apagar',
@@ -55,27 +56,30 @@
       leg_orou: 'prayed', leg_tes: 'with journal entry', leg_hoje: 'today', leg_vazio: 'not marked',
       dia_prep: 'Preparation · day {d}', dia_jor: 'Day {d}', orei_prep: 'I completed {m} of prayer on this day', orei_jor: 'I completed 1 hour of prayer on this day',
       salvar_dia: 'Save', salvo_dia: 'Day saved.', fechar: 'Close',
-      dia_reg: 'Entries for this day', dia_escrever: 'Write in the journal for this day', dia_vazio: 'No journal entries on this day.',
-      di_h: 'Journal', di_p: 'Record how your days of prayer are going: testimonies, prophetic impressions, what you heard from God, the passage you read, prayers. Come back whenever you want to reread your journey.',
+      dia_reg: 'Prayer Journal for this day', dia_escrever: 'Write in the Prayer Journal for this day', dia_vazio: 'No Prayer Journal entries on this day.', dia_tes: 'Testimonies for this day', dia_tes_escrever: 'Write a testimony for this day',
+      di_h: 'Prayer Journal', di_p: 'Record how your days of prayer are going: prophetic impressions, what you heard from God, your daily reading, your prayers. Come back whenever you want to reread your journey.', di_priv: 'The Prayer Journal is yours alone: nobody else can see it, not even the ministry team.',
       di_novo: 'New entry', di_editando: 'Editing entry', di_data: 'Date', di_tipo: 'Type', di_ref: 'Bible passage or reference (optional)', di_ref_ph: 'E.g.: Psalm 27; Zechariah 12:10',
       di_texto: 'What do you want to record?', di_ph: 'What did God say, do or show you? A word, an impression, a verse, a change…',
-      di_aut: 'Who may read it?', aut_privado: 'Only me', aut_equipe: 'The ministry team', aut_anonimo: 'It may be published without identifying me', aut_nome: 'It may be published with my name',
+      di_aut: 'Who may read it?', aut_privado: 'Only me', aut_equipe: 'Only the ministry team', aut_anonimo: 'It may be published without identifying me', aut_nome: 'It may be published with my name',
       di_aut_nota: 'The journal is yours: “only me” is the default. If you share an entry, the team reads it with care and prayer, and nothing is published beyond the permission you choose. You can change it anytime.',
       di_salvar: 'Save to journal', di_salvo: 'Entry saved to your journal.', di_cancelar: 'Cancel editing', di_editar: 'Edit', di_apagar: 'Delete', di_apagar_conf: 'Delete this journal entry?',
       di_todos: 'All', di_busca: 'Search the journal', di_vazio: 'Your journal is still blank. The first entry can be today.', di_nada: 'No entries found.',
-      t_testemunho: 'Testimony', t_profetica: 'Prophetic impression', t_ouvi: 'What I heard from God', t_texto: 'Passage I read', t_oracao: 'Prayer', t_outro: 'Other',
+      t_testemunho: 'Testimony', t_profetica: 'Prophetic impression', t_ouvi: 'What I heard from God', t_texto: 'Daily reading', t_oracao: 'Prayer', t_outro: 'Other note',
+      te_h: 'Testimonies', te_p: 'Tell what God has been doing during this journey. Unlike the Prayer Journal, a testimony is meant to be shared: you choose who may read it.', te_novo: 'New testimony', te_editando: 'Editing testimony', te_texto: 'Your testimony', te_ph: 'What did God do? A healing, an answer, a change, an encounter…', te_salvar: 'Save testimony', te_salvo: 'Testimony saved.', te_vazio: 'You have not written any testimony yet.', te_apagar_conf: 'Delete this testimony?', te_aut_nota: 'The team reads testimonies with care and prayer. Nothing is published beyond the permission you choose, and you can change it or delete the testimony anytime.',
       dev_h: 'Devotionals', dev_vazio: 'Devotionals appear here as soon as they are released.', dev_abrir: 'Open PDF', dev_de: 'Released on {d}',
       cfg_h: 'Preferences', dev_email_on: 'You also receive the devotionals by e-mail', dev_email_off: 'You do not receive the devotionals by e-mail (they stay here)', dev_email_srv: 'E-mails are still being set up; meanwhile, the devotionals stay here.',
       ligar: 'Receive by e-mail', desligar: 'Stop receiving', sair_p: 'Leaving the Spirit Immersion erases your enrollment, the days you marked (preparation and 100 days) and your whole journal for this edition.', sair: 'Leave and erase my record', sair_conf: 'Confirm: leave and erase',
       priv: 'Your record is personal: only you see the days you marked and the journal entries you do not share. <a href="/privacidade.html#spirit">How we care for your data</a>.', sobre: 'About the movement'
     }
   };
-  var TIPOS = ['testemunho', 'profetica', 'ouvi', 'texto', 'oracao', 'outro'];
-  var AUTS = ['privado', 'equipe', 'anonimo', 'nome'];
-  var vazio = function (data) { return { id: 0, data: data || '', tipo: 'testemunho', referencia: '', texto: '', autorizacao: 'privado' }; };
+  // Diário de Oração: sempre privado (só a pessoa vê). Testemunhos: área à parte, com autorização.
+  var TIPOS = ['profetica', 'ouvi', 'texto', 'oracao', 'outro'];
+  var AUTS = ['equipe', 'anonimo', 'nome'];
+  var vazio = function (data) { return { id: 0, data: data || '', tipo: 'profetica', referencia: '', texto: '' }; };
+  var vazioT = function (data) { return { id: 0, data: data || '', texto: '', autorizacao: 'equipe' }; };
 
   // rascunho do diário sobrevive às re-renderizações (troca de idioma, salvar um dia etc.)
-  var rasc = vazio(), filtro = '', busca = '';
+  var rasc = vazio(), rascT = vazioT(), filtro = '', busca = '';
 
   function tela(alvo, opcoes) {
     var L = window.PV_LOGIN, esc = L.esc;
@@ -90,6 +94,8 @@
     var fmtData = function (d, longo) { return d.toLocaleDateString(en() ? 'en-US' : 'pt-BR', longo ? { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' } : { day: 'numeric', month: 'short' }); };
     var fmtIso = function (iso, longo) { return fmtData(new Date(iso + 'T12:00:00Z'), longo); };
     var mapa = function (lista) { var m = {}; lista.forEach(function (x) { m[x.dia] = x; }); return m; };
+    var diario = function () { return D.diario.filter(function (x) { return x.tipo !== 'testemunho'; }); };
+    var testemunhos = function () { return D.diario.filter(function (x) { return x.tipo === 'testemunho'; }); };
     var porData = function () { var m = {}; D.diario.forEach(function (x) { (m[x.data] = m[x.data] || []).push(x); }); return m; };
     var ult = function (c) { return Math.min(Math.max(c.dia_atual, 0), c.dias); };
     var blocoDe = function (n) { return D.edicao.prep.blocos.filter(function (b) { return n >= b.de && n <= b.ate; })[0]; };
@@ -102,7 +108,7 @@
     };
     var seqDe = function (m, u) { var s = 0; for (var k = (m[u] && m[u].orou) ? u : u - 1; k >= 1 && m[k] && m[k].orou; k--) s++; return s; };
 
-    function carregar() { return L.api('/conta/spirit').then(function (d) { D = d; if (!rasc.data) rasc.data = d.edicao.hoje; desenhar(); }).catch(function (er) { alvo.innerHTML = '<p class="conta-erro">' + esc(er.message) + '</p>'; }); }
+    function carregar() { return L.api('/conta/spirit').then(function (d) { D = d; if (!rasc.data) rasc.data = d.edicao.hoje; if (!rascT.data) rascT.data = d.edicao.hoje; desenhar(); }).catch(function (er) { alvo.innerHTML = '<p class="conta-erro">' + esc(er.message) + '</p>'; }); }
 
     function salvarDia(c, n, orou) {
       return L.api('/conta/spirit/dia', 'POST', { ciclo: c === 'prep' ? 'prep' : 'jornada', dia: n, orou: orou }).then(function () { msg = t('salvo_dia'); return carregar(); });
@@ -112,7 +118,12 @@
       return '<li class="sj-reg"><div class="sj-reg-top"><span class="sj-tipo sj-t-' + esc(x.tipo) + '">' + esc(t('t_' + x.tipo)) + '</span>' +
         (x.referencia ? '<span class="sj-ref">' + esc(x.referencia) + '</span>' : '') + '</div>' +
         '<p class="sj-reg-txt">' + esc(x.texto) + '</p>' +
-        '<div class="sj-reg-pe"><small>' + esc(t('aut_' + x.autorizacao)) + '</small><span><button type="button" class="lnk-x" data-editreg="' + x.id + '">' + esc(t('di_editar')) + '</button> <button type="button" class="lnk-x" data-delreg="' + x.id + '">' + esc(t('di_apagar')) + '</button></span></div></li>';
+        '<div class="sj-reg-pe"><small></small><span><button type="button" class="lnk-x" data-editreg="' + x.id + '">' + esc(t('di_editar')) + '</button> <button type="button" class="lnk-x" data-delreg="' + x.id + '">' + esc(t('di_apagar')) + '</button></span></div></li>';
+    }
+    function itemTes(x, comData) {
+      return '<li class="sj-reg"><div class="sj-reg-top"><span class="sj-tipo sj-t-testemunho">' + esc(t('t_testemunho')) + '</span>' + (comData ? '<span class="sj-ref">' + esc(fmtIso(x.data, true)) + (rotIso(x.data) ? ' · ' + esc(rotIso(x.data)) : '') + '</span>' : '') + '</div>' +
+        '<p class="sj-reg-txt">' + esc(x.texto) + '</p>' +
+        '<div class="sj-reg-pe"><small>' + esc(t('aut_' + (x.autorizacao === 'privado' ? 'equipe' : x.autorizacao))) + '</small><span><button type="button" class="lnk-x" data-edittes="' + x.id + '">' + esc(t('di_editar')) + '</button> <button type="button" class="lnk-x" data-deltes="' + x.id + '">' + esc(t('di_apagar')) + '</button></span></div></li>';
     }
 
     // uma célula da grade
@@ -128,14 +139,17 @@
     // editor do dia aberto (dentro do cartão do ciclo)
     function editor(c, m, pd) {
       if (!aberto || aberto.c !== c) return '';
-      var n = aberto.n, y = m[n] || { orou: 0 }, regs = pd[isoDia(c, n)] || [];
+      var n = aberto.n, y = m[n] || { orou: 0 }, todos = pd[isoDia(c, n)] || [];
+      var regs = todos.filter(function (x) { return x.tipo !== 'testemunho'; }), tes = todos.filter(function (x) { return x.tipo === 'testemunho'; });
       var tit = (c === 'prep' ? t('dia_prep') : t('dia_jor')).replace('{d}', n) + ' · ' + fmtData(dataDia(c, n), true);
       var orei = c === 'prep' ? t('orei_prep').replace('{m}', tempo(blocoDe(n).minutos)) : t('orei_jor');
       return '<form class="sj-ed" id="sjEd"><h4>' + esc(tit) + '</h4>' +
         '<label class="si-check"><input type="checkbox" name="orou"' + (y.orou ? ' checked' : '') + '><span>' + esc(orei) + '</span></label>' +
         '<div class="conta-perigo"><button class="btn btn-creme sm" type="submit">' + esc(t('salvar_dia')) + '</button><button type="button" class="lnk-x" id="sjFechar">' + esc(t('fechar')) + '</button></div>' +
         '<h5>' + esc(t('dia_reg')) + '</h5>' + (regs.length ? '<ul class="sj-regs">' + regs.map(itemDiario).join('') + '</ul>' : '<p class="sj-mudo">' + esc(t('dia_vazio')) + '</p>') +
-        '<a class="btn btn-ghost sm" href="#sjDiario" data-irdiario="' + isoDia(c, n) + '">' + esc(t('dia_escrever')) + '</a></form>';
+        '<a class="btn btn-ghost sm" href="#sjDiario" data-irdiario="' + isoDia(c, n) + '">' + esc(t('dia_escrever')) + '</a>' +
+        (tes.length ? '<h5>' + esc(t('dia_tes')) + '</h5><ul class="sj-regs">' + tes.map(function (x) { return itemTes(x); }).join('') + '</ul>' : '') +
+        '<a class="btn btn-ghost sm" href="#sjTes" data-irtes="' + isoDia(c, n) + '">' + esc(t('dia_tes_escrever')) + '</a></form>';
     }
 
     var legenda = function () { return '<div class="sj-leg"><span><i class="orou"></i>' + esc(t('leg_orou')) + '</span><span><i class="tes"></i>' + esc(t('leg_tes')) + '</span><span><i class="hoje"></i>' + esc(t('leg_hoje')) + '</span><span><i></i>' + esc(t('leg_vazio')) + '</span></div>'; };
@@ -197,7 +211,7 @@
         '<div class="sj-anel"><svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="52" class="g-bg" pathLength="100"/><circle cx="60" cy="60" r="52" class="g-v" pathLength="100" style="stroke-dasharray:' + anelPct + ' 100"/></svg>' +
         '<div><small>SI · ' + esc(e.id) + '</small><b>' + anelN + '</b><small>/ ' + anelT + '</small></div></div>' +
         '<div class="sj-hud-txt">' + (sub ? '<div class="sj-sub">' + esc(sub) + '</div>' : '') + '<h2>' + titulo + '</h2>' +
-        '<div class="sj-kpis"><div><b>' + (oradosP.length + oradosJ) + '</b><span>' + esc(t('orados')) + '</span></div><div><b>' + horas + 'h</b><span>' + esc(t('horas')) + '</span></div><div><b>' + seq + '</b><span>' + esc(t('seq')) + '</span></div><div><b>' + D.diario.length + '</b><span>' + esc(t('reg')) + '</span></div></div>' +
+        '<div class="sj-kpis"><div><b>' + (oradosP.length + oradosJ) + '</b><span>' + esc(t('orados')) + '</span></div><div><b>' + horas + 'h</b><span>' + esc(t('horas')) + '</span></div><div><b>' + seq + '</b><span>' + esc(t('seq')) + '</span></div><div><b>' + diario().length + '</b><span>' + esc(t('reg')) + '</span></div></div>' +
         corpo;
       if (e.etapa !== 'antes' && u) {
         var marcados = cicloAtual === 'jor' ? oradosJ : oradosP.length, pct = Math.round(100 * marcados / u);
@@ -217,10 +231,11 @@
       if (D.na_preparacao) h += cartaoPrep(mp, pd);
 
       // diário
-      var cont = {}; D.diario.forEach(function (r) { cont[r.tipo] = (cont[r.tipo] || 0) + 1; });
+      var DI = diario(), TE = testemunhos();
+      var cont = {}; DI.forEach(function (r) { cont[r.tipo] = (cont[r.tipo] || 0) + 1; });
       var q = busca.trim().toLowerCase();
-      var lista = D.diario.filter(function (r) { return (!filtro || r.tipo === filtro) && (!q || (r.texto + ' ' + (r.referencia || '')).toLowerCase().indexOf(q) >= 0); });
-      h += '<section class="conta-card sj-diario" id="sjDiario"><h3>' + esc(t('di_h')) + (D.diario.length ? ' · ' + D.diario.length : '') + '</h3><p>' + esc(t('di_p')) + '</p>' +
+      var lista = DI.filter(function (r) { return (!filtro || r.tipo === filtro) && (!q || (r.texto + ' ' + (r.referencia || '')).toLowerCase().indexOf(q) >= 0); });
+      h += '<section class="conta-card sj-diario" id="sjDiario"><h3>' + esc(t('di_h')) + (DI.length ? ' · ' + DI.length : '') + '</h3><p>' + esc(t('di_p')) + '</p><p class="sj-priv">🔒 ' + esc(t('di_priv')) + '</p>' +
         '<form id="sjDi" class="sj-di-form"><h4>' + esc(rasc.id ? t('di_editando') : t('di_novo')) + '</h4>' +
         '<div class="sj-tipos" role="radiogroup" aria-label="' + esc(t('di_tipo')) + '">' + TIPOS.map(function (k) {
           return '<label class="sj-chip"><input type="radio" name="tipo" value="' + k + '"' + (rasc.tipo === k ? ' checked' : '') + '><span>' + esc(t('t_' + k)) + '</span></label>';
@@ -228,11 +243,9 @@
         '<div class="sj-di-linha"><label class="sj-campo sj-c-data"><span>' + esc(t('di_data')) + '</span><input type="date" name="data" required max="' + esc(e.hoje) + '" value="' + esc(rasc.data || e.hoje) + '"></label>' +
         '<label class="sj-campo"><span>' + esc(t('di_ref')) + '</span><input name="referencia" maxlength="200" placeholder="' + esc(t('di_ref_ph')) + '" value="' + esc(rasc.referencia) + '"></label></div>' +
         '<label class="sj-campo"><span>' + esc(t('di_texto')) + '</span><textarea name="texto" rows="6" maxlength="10000" required placeholder="' + esc(t('di_ph')) + '">' + esc(rasc.texto) + '</textarea></label>' +
-        '<label class="sj-campo"><span>' + esc(t('di_aut')) + '</span><select name="autorizacao">' + AUTS.map(function (a) { return '<option value="' + a + '"' + (rasc.autorizacao === a ? ' selected' : '') + '>' + esc(t('aut_' + a)) + '</option>'; }).join('') + '</select></label>' +
-        '<small class="sj-nota">' + esc(t('di_aut_nota')) + '</small>' +
         '<div class="conta-perigo"><button class="btn btn-creme sm" type="submit">' + esc(t('di_salvar')) + '</button>' + (rasc.id ? '<button type="button" class="lnk-x" id="sjDiCanc">' + esc(t('di_cancelar')) + '</button>' : '') + '</div></form>';
-      if (D.diario.length) {
-        h += '<div class="sj-di-filtros"><div class="bib-chips"><button type="button" class="chip" data-ftipo="" aria-pressed="' + (!filtro) + '">' + esc(t('di_todos')) + ' <small>' + D.diario.length + '</small></button>' +
+      if (DI.length) {
+        h += '<div class="sj-di-filtros"><div class="bib-chips"><button type="button" class="chip" data-ftipo="" aria-pressed="' + (!filtro) + '">' + esc(t('di_todos')) + ' <small>' + DI.length + '</small></button>' +
           TIPOS.filter(function (k) { return cont[k]; }).map(function (k) { return '<button type="button" class="chip" data-ftipo="' + k + '" aria-pressed="' + (filtro === k) + '">' + esc(t('t_' + k)) + ' <small>' + cont[k] + '</small></button>'; }).join('') +
           '</div><input type="search" id="sjBusca" class="sj-busca" placeholder="' + esc(t('di_busca')) + '" value="' + esc(busca) + '" aria-label="' + esc(t('di_busca')) + '"></div>';
         if (!lista.length) h += '<p class="sj-mudo">' + esc(t('di_nada')) + '</p>';
@@ -251,6 +264,16 @@
         h += '</div>';
       } else h += '<p class="sj-mudo">' + esc(t('di_vazio')) + '</p>';
       h += '</section>';
+
+      // testemunhos (área separada, com autorização)
+      h += '<section class="conta-card sj-diario sj-tes" id="sjTes"><h3>' + esc(t('te_h')) + (TE.length ? ' · ' + TE.length : '') + '</h3><p>' + esc(t('te_p')) + '</p>' +
+        '<form id="sjTeF" class="sj-di-form"><h4>' + esc(rascT.id ? t('te_editando') : t('te_novo')) + '</h4>' +
+        '<label class="sj-campo sj-c-data"><span>' + esc(t('di_data')) + '</span><input type="date" name="data" required max="' + esc(e.hoje) + '" value="' + esc(rascT.data || e.hoje) + '"></label>' +
+        '<label class="sj-campo"><span>' + esc(t('te_texto')) + '</span><textarea name="texto" rows="5" maxlength="10000" required placeholder="' + esc(t('te_ph')) + '">' + esc(rascT.texto) + '</textarea></label>' +
+        '<label class="sj-campo"><span>' + esc(t('di_aut')) + '</span><select name="autorizacao">' + AUTS.map(function (a) { return '<option value="' + a + '"' + (rascT.autorizacao === a ? ' selected' : '') + '>' + esc(t('aut_' + a)) + '</option>'; }).join('') + '</select></label>' +
+        '<small class="sj-nota">' + esc(t('te_aut_nota')) + '</small>' +
+        '<div class="conta-perigo"><button class="btn btn-creme sm" type="submit">' + esc(t('te_salvar')) + '</button>' + (rascT.id ? '<button type="button" class="lnk-x" id="sjTeCanc">' + esc(t('di_cancelar')) + '</button>' : '') + '</div></form>' +
+        (TE.length ? '<ul class="sj-regs">' + TE.map(function (x) { return itemTes(x, true); }).join('') + '</ul>' : '<p class="sj-mudo">' + esc(t('te_vazio')) + '</p>') + '</section>';
 
       // devocionais + preferências
       h += '<div class="sj-cols"><section class="conta-card"><h3>' + esc(t('dev_h')) + '</h3>' + (D.devocionais.length ? '<ul class="sj-devs">' + D.devocionais.map(function (d) {
@@ -298,14 +321,14 @@
       var fd = document.getElementById('sjDi');
       if (fd) {
         var guardar = function () {
-          rasc.data = fd.data.value; rasc.referencia = fd.referencia.value; rasc.texto = fd.texto.value; rasc.autorizacao = fd.autorizacao.value;
-          var tp = fd.querySelector('input[name="tipo"]:checked'); rasc.tipo = tp ? tp.value : 'testemunho';
+          rasc.data = fd.data.value; rasc.referencia = fd.referencia.value; rasc.texto = fd.texto.value;
+          var tp = fd.querySelector('input[name="tipo"]:checked'); rasc.tipo = tp ? tp.value : 'profetica';
         };
         fd.addEventListener('input', guardar); fd.addEventListener('change', guardar);
         fd.onsubmit = function (ev) {
           ev.preventDefault(); guardar();
           var btn = fd.querySelector('button[type="submit"]'); btn.disabled = true;
-          L.api('/conta/spirit/diario' + (rasc.id ? '/' + rasc.id : ''), 'POST', { data: rasc.data, tipo: rasc.tipo, referencia: rasc.referencia, texto: rasc.texto, autorizacao: rasc.autorizacao }).then(function () {
+          L.api('/conta/spirit/diario' + (rasc.id ? '/' + rasc.id : ''), 'POST', { data: rasc.data, tipo: rasc.tipo, referencia: rasc.referencia, texto: rasc.texto }).then(function () {
             msg = t('di_salvo'); var tp = rasc.tipo; rasc = vazio(D.edicao.hoje); rasc.tipo = tp;
             return carregar();
           }).then(function () { var s = document.getElementById('sjDiario'); if (s) s.scrollIntoView({ block: 'start' }); }).catch(function (er) { alert(er.message); btn.disabled = false; });
@@ -317,7 +340,7 @@
         b.onclick = function () {
           var r = D.diario.filter(function (x) { return x.id === +b.getAttribute('data-editreg'); })[0];
           if (!r) return;
-          rasc = { id: r.id, data: r.data, tipo: r.tipo, referencia: r.referencia || '', texto: r.texto, autorizacao: r.autorizacao };
+          rasc = { id: r.id, data: r.data, tipo: r.tipo, referencia: r.referencia || '', texto: r.texto };
           aberto = null; irDiario();
         };
       });
@@ -326,6 +349,43 @@
           if (!confirm(t('di_apagar_conf'))) return;
           var id = +b.getAttribute('data-delreg');
           L.api('/conta/spirit/diario/' + id, 'DELETE').then(function () { if (rasc.id === id) rasc = vazio(D.edicao.hoje); return carregar(); }).catch(function (er) { alert(er.message); });
+        };
+      });
+      // testemunhos
+      var ft = document.getElementById('sjTeF');
+      if (ft) {
+        var guardarT = function () { rascT.data = ft.data.value; rascT.texto = ft.texto.value; rascT.autorizacao = ft.autorizacao.value; };
+        ft.addEventListener('input', guardarT); ft.addEventListener('change', guardarT);
+        ft.onsubmit = function (ev) {
+          ev.preventDefault(); guardarT();
+          var btn = ft.querySelector('button[type="submit"]'); btn.disabled = true;
+          L.api('/conta/spirit/diario' + (rascT.id ? '/' + rascT.id : ''), 'POST', { data: rascT.data, tipo: 'testemunho', texto: rascT.texto, autorizacao: rascT.autorizacao }).then(function () {
+            msg = t('te_salvo'); rascT = vazioT(D.edicao.hoje); return carregar();
+          }).then(function () { var s = document.getElementById('sjTes'); if (s) s.scrollIntoView({ block: 'start' }); }).catch(function (er) { alert(er.message); btn.disabled = false; });
+        };
+      }
+      var tc = document.getElementById('sjTeCanc');
+      if (tc) tc.onclick = function () { rascT = vazioT(D.edicao.hoje); desenhar(); };
+      alvo.querySelectorAll('[data-irtes]').forEach(function (a) {
+        a.onclick = function (ev) {
+          ev.preventDefault(); rascT.data = a.getAttribute('data-irtes'); aberto = null; desenhar();
+          var s = document.getElementById('sjTes'); if (s) { s.scrollIntoView({ behavior: 'smooth', block: 'start' }); var ta = s.querySelector('textarea'); if (ta) setTimeout(function () { ta.focus({ preventScroll: true }); }, 400); }
+        };
+      });
+      alvo.querySelectorAll('[data-edittes]').forEach(function (b) {
+        b.onclick = function () {
+          var x = D.diario.filter(function (y) { return y.id === +b.getAttribute('data-edittes'); })[0];
+          if (!x) return;
+          rascT = { id: x.id, data: x.data, texto: x.texto, autorizacao: x.autorizacao === 'privado' ? 'equipe' : x.autorizacao };
+          aberto = null; desenhar();
+          var s = document.getElementById('sjTes'); if (s) s.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        };
+      });
+      alvo.querySelectorAll('[data-deltes]').forEach(function (b) {
+        b.onclick = function () {
+          if (!confirm(t('te_apagar_conf'))) return;
+          var id = +b.getAttribute('data-deltes');
+          L.api('/conta/spirit/diario/' + id, 'DELETE').then(function () { if (rascT.id === id) rascT = vazioT(D.edicao.hoje); return carregar(); }).catch(function (er) { alert(er.message); });
         };
       });
       alvo.querySelectorAll('[data-ftipo]').forEach(function (b) { b.onclick = function () { filtro = b.getAttribute('data-ftipo'); desenhar(); }; });

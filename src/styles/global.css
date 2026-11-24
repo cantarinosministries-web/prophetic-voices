@@ -514,6 +514,8 @@ html[lang="en"] .so-en{display:block}
 .sj-campo input,.sj-campo select{width:100%;height:46px;background:#000;color:var(--creme);border:1px solid var(--line);border-radius:12px;padding:0 14px;font:inherit;font-size:15px;color-scheme:dark}
 .sj-campo input:focus,.sj-campo select:focus{outline:none;border-color:var(--cobre)}
 .sj-nota{color:#8C7D6E;font-size:12.5px;line-height:1.5}
+.sj-priv{margin:-4px 0 14px;font-size:13px;color:#CAB5A0;letter-spacing:.01em}
+.sj-tes{border-top:1px solid rgba(191,137,87,.45)}
 .sj-di-filtros{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:8px}
 .sj-busca{height:40px;min-width:220px;flex:0 1 280px;background:#000;color:var(--creme);border:1px solid var(--line);border-radius:999px;padding:0 16px;font:inherit;font-size:14px}
 .sj-busca:focus{outline:none;border-color:var(--cobre)}
