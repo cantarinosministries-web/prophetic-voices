@@ -189,7 +189,7 @@ export default {
 
       return env.ASSETS.fetch(req);
     } catch (e) {
-      console.error(e);
+      console.error(`erro: ${e?.message || e}`, e?.stack || "");
       return path.startsWith('/api/') ? erro('Erro interno. Tente novamente.', 500) : html('<h1>Erro interno</h1><p>Tente novamente em instantes.</p>', 500);
     }
   },
