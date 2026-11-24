@@ -25,7 +25,7 @@ async function modelo(env, req, caminho) {
   for (let i = 0; i < 3; i++) {
     const r = await env.ASSETS.fetch(new Request(url.toString(), { method: 'GET' }));
     if (r.status >= 300 && r.status < 400 && r.headers.get('Location')) { url = new URL(r.headers.get('Location'), url); continue; }
-    if (!r.ok) throw new Error('modelo não encontrado: ' + caminho);
+    if (!r.ok) throw new Error(`modelo não encontrado: ${caminho} (${r.status} em ${url.pathname})`);
     return r.text();
   }
   throw new Error('redirecionamentos demais: ' + caminho);
