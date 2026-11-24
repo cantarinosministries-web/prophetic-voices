@@ -2,7 +2,7 @@
 // Spirit Immersion — movimento de oração em línguas, 1 hora por dia. Números em src/data/spirit.js;
 // inscrição pela conta de leitor (worker/spirit.js); a jornada fica em /conta.html#spirit.
 import Base from '../layouts/Base.astro';
-import { destaques, frutos, constancia, ultimaEdicao, fonte } from '../data/spirit.js';
+import { destaques, frutos, constancia, ultimaEdicao, fonte, relatos } from '../data/spirit.js';
 const pct = (n) => Math.round((100 * n) / fonte.respostas);
 const fmt = (n) => n.toLocaleString('pt-BR');
 const ticks = Array.from({ length: 60 }, (_, i) => i);
@@ -28,7 +28,7 @@ const ticks = Array.from({ length: 60 }, (_, i) => i);
     <div class="wrap si-hero-in">
       <div class="si-meta"><span>SI · 2027</span><span data-en="PRAYER MOVEMENT">MOVIMENTO DE ORAÇÃO</span><span class="si-live"><i></i><span id="siHeroStatus" data-en="ENROLLMENT OPEN">INSCRIÇÕES ABERTAS</span></span></div>
       <h1 class="disp si-h1">Spirit<br /><span>Immersion</span></h1>
-      <p class="si-lede" data-en="One hour a day praying in the Spirit. A movement born in a home in January 2024 that now gathers hundreds of people across Brazil and other nations.">Uma hora por dia orando no Espírito. Um movimento que nasceu numa casa em janeiro de 2024 e hoje reúne centenas de pessoas pelo Brasil e por outras nações.</p>
+      <p class="si-lede" data-en="One hour a day praying in the Spirit. A movement born in a home in January 2024 that now gathers hundreds of people across Brazil and among the nations.">Uma hora por dia orando no Espírito. Um movimento que nasceu numa casa em janeiro de 2024 e hoje reúne centenas de pessoas pelo Brasil e nas nações.</p>
       <div class="si-clock" aria-label="1 hora por dia"><b>01:00:00</b><span data-en="/ DAY · 100 DAYS · JAN 1 → APR 10, 2027">/ DIA · 100 DIAS · 01.01 → 10.04.2027</span></div>
       <div class="si-ctas">
         <a href="#inscricao" class="btn btn-creme" data-en="Join the 2027 edition">Participar da edição 2027</a>
@@ -67,7 +67,7 @@ const ticks = Array.from({ length: 60 }, (_, i) => i);
         </figure>
         <div>
           <div class="eyebrow" data-en="How it began">Como nasceu</div>
-          <p data-en="In 2023, Gabriel Cantarino was struck by Obed-Edom (2 Sam 6:11): before David’s tent, God made a home a dwelling place for the Ark, and that family went on to minister day and night. A prayer was born: “Before the church becomes a house of prayer, I want my home to be one; and before my home, I want to be one.” On January 1, 2024, he began praying in tongues one hour a day. Months later, the Spirit led him to open it to the Church, and the Spirit Immersion was born.">Em 2023, Gabriel Cantarino foi atravessado pela história de Obede-Edom (2Sm 6.11): antes da Tenda de Davi, Deus fez de uma casa a habitação da Arca, e aquela família passou a ministrar dia e noite. Nasceu uma oração: “Antes de a igreja ser uma casa de oração, quero que a minha casa seja; e, antes da minha casa, quero eu ser uma casa de oração.” Em 1º de janeiro de 2024, ele começou a orar em línguas uma hora por dia. Meses depois, o Espírito o levou a abrir isso à Igreja, e nasceu o Spirit Immersion.</p>
+          <p data-en="In 2023, Gabriel Cantarino was struck by Obed-Edom (2 Sam 6:11): before David’s tent, God made a home a dwelling place for the Ark, and that family went on to minister day and night. A prayer was born: “Before the church becomes a house of prayer, I want my home to be one; and before my home, I want to be one.” On January 1, 2024, he returned to the practice of setting apart hours of the day to pray in tongues and was inspired by the Spirit to establish one hour a day for it. Months later, the Spirit led him to open it to the Church, and the Spirit Immersion was born.">Em 2023, Gabriel Cantarino foi atravessado pela história de Obede-Edom (2Sm 6.11): antes da Tenda de Davi, Deus fez de uma casa a habitação da Arca, e aquela família passou a ministrar dia e noite. Nasceu uma oração: “Antes de a igreja ser uma casa de oração, quero que a minha casa seja; e, antes da minha casa, quero eu ser uma casa de oração.” Em 1º de janeiro de 2024, ele voltou à prática de separar horas do dia para orar em línguas e foi inspirado pelo Espírito a estabelecer uma hora por dia para isso. Meses depois, o Espírito o levou a abrir isso à Igreja, e nasceu o Spirit Immersion.</p>
           <p class="si-sub" data-en="The goal is not to fill a 24/7 schedule, but to form inside each person an inner structure that sustains a real life of prayer, one that does not depend on a shift at church.">O alvo não é preencher uma escala 24/7, mas formar dentro de cada pessoa uma estrutura interior que sustente uma vida de oração de verdade, que não dependa de um turno na igreja.</p>
         </div>
       </div>
@@ -143,7 +143,30 @@ const ticks = Array.from({ length: 60 }, (_, i) => i);
           </div>
         </div>
       </div>
-      <p class="si-metodo" data-en="Only aggregate numbers are published. No individual answer appears on this page. Percentages of the effects are over all 382 answers; the “last edition” panel uses the 133 answers of the Dec 2025–Jan 2026 edition (location and age were asked only then).">Publicamos apenas números agregados; nenhuma resposta individual aparece nesta página. Os percentuais de efeitos são sobre as 382 respostas; o painel “última edição” usa as 133 respostas da edição de dez/2025–jan/2026 (localidade e idade só foram perguntadas nela).</p>
+      <p class="si-metodo" data-en="Only aggregate numbers and five anonymous excerpts are published. Percentages of the effects are over all 382 answers; the “last edition” panel uses the 133 answers of the Dec 2025–Jan 2026 edition (location and age were asked only then).">Publicamos apenas números agregados e cinco trechos sem identificação. Os percentuais de efeitos são sobre as 382 respostas; o painel “última edição” usa as 133 respostas da edição de dez/2025–jan/2026 (localidade e idade só foram perguntadas nela).</p>
+    </div>
+  </section>
+
+  <!-- RELATOS -->
+  <section class="pad si-relatos">
+    <div class="wrap">
+      <div class="si-head">
+        <div>
+          <div class="eyebrow" data-en="In their own words">Na voz de quem orou</div>
+          <h2 class="si-h2 rv"><span data-en="Five">Cinco</span> <em data-en="testimonies.">testemunhos.</em></h2>
+        </div>
+        <p class="si-fonte mono" data-en="WITHOUT IDENTIFICATION · EXCERPTS EDITED FOR CLARITY, WITH NAMES, PLACES AND PERSONAL DETAILS REMOVED">SEM IDENTIFICAÇÃO · TRECHOS EDITADOS PARA CLAREZA, SEM NOMES, LUGARES OU DADOS PESSOAIS</p>
+      </div>
+      <div class="si-rel-grade">
+        {relatos.map((r, i) => (
+          <figure class={`si-rel rv${i === 0 ? ' si-rel-maior' : ''}`} style={`transition-delay:${i * 80}ms`}>
+            <span class="si-c tl"></span><span class="si-c br"></span>
+            <div class="si-rel-top mono"><span data-en={`ACCOUNT ${String(i + 1).padStart(2, '0')} / 05`}>RELATO {String(i + 1).padStart(2, '0')} / 05</span><span data-en={r.edicao.en}>{r.edicao.pt}</span></div>
+            <blockquote data-en={r.en}>{r.pt}</blockquote>
+            <figcaption class="mono" data-en={r.tema.en}>{r.tema.pt}</figcaption>
+          </figure>
+        ))}
+      </div>
     </div>
   </section>
 
@@ -212,6 +235,24 @@ const ticks = Array.from({ length: 60 }, (_, i) => i);
           });
         }, { threshold: 0.3 });
         document.querySelectorAll('.si-num, .si-barras, .si-gauges, .si-cal31, .si-cal100').forEach(function (el) { io.observe(el); });
+
+        // grade dos 100 dias: cada número acende sob o mouse (ou o dedo) e apaga devagar, deixando um rastro
+        var g100 = document.querySelector('.si-cal100');
+        if (g100) {
+          var acender = function (x, y) {
+            var c = document.elementFromPoint(x, y);
+            c = c && c.closest ? c.closest('.si-cal100 i') : null;
+            if (!c) return;
+            c.classList.add('luz');
+            clearTimeout(c._t);
+            c._t = setTimeout(function () { c.classList.remove('luz'); }, 260);
+          };
+          g100.addEventListener('pointermove', function (e) { acender(e.clientX, e.clientY); });
+          g100.addEventListener('pointerdown', function (e) { acender(e.clientX, e.clientY); });
+          g100.addEventListener('touchmove', function (e) { var t = e.touches[0]; if (t) acender(t.clientX, t.clientY); }, { passive: true });
+          // depois da entrada em cascata, a grade passa a reagir sem atraso
+          new IntersectionObserver(function (es, o) { if (es[0].isIntersecting) { o.disconnect(); setTimeout(function () { g100.classList.add('pronto'); }, 2600); } }).observe(g100);
+        }
 
         // inscritos na edição
         fetch('/api/publico/spirit').then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
@@ -414,6 +455,25 @@ const ticks = Array.from({ length: 60 }, (_, i) => i);
   .si-cal100 i{position:relative;aspect-ratio:1;border:1px solid rgba(248,233,183,.1);display:flex;align-items:center;justify-content:center;font-style:normal;transition:background .5s var(--d),border-color .5s var(--d)}
   .si-cal100 span{font-family:var(--mono);font-size:10px;color:rgba(202,181,160,.5)}
   .si-cal100.vivo i{border-color:rgba(191,137,87,.45);background:rgba(191,137,87,.08)}
+
+  .si-cal100.pronto i{--d:0s;transition:background 1.1s ease,border-color 1.1s ease,box-shadow 1.1s ease}
+  .si-cal100.pronto i span{transition:color 1.1s ease}
+  .si-cal100 i.luz{background:var(--cobre);border-color:var(--creme);box-shadow:0 0 22px rgba(191,137,87,.65);transition:background 0s,border-color 0s,box-shadow 0s}
+  .si-cal100 i.luz span{color:#000;transition:color 0s}
+  .si-cal100{touch-action:pan-y;cursor:crosshair}
+
+  /* relatos */
+  .si-rel-grade{display:grid;grid-template-columns:repeat(6,1fr);gap:16px;margin-top:56px}
+  .si-rel{position:relative;margin:0;grid-column:span 2;display:flex;flex-direction:column;gap:18px;padding:28px 26px 26px;border:1px solid var(--line);background:rgba(10,9,7,.75)}
+  .si-rel-maior{grid-column:span 4}
+  @media(max-width:1000px){.si-rel-grade{grid-template-columns:1fr 1fr}.si-rel{grid-column:span 1}.si-rel-maior{grid-column:1/-1}}
+  @media(max-width:640px){.si-rel-grade{grid-template-columns:1fr}.si-rel-maior{grid-column:auto}}
+  .si-rel-top{display:flex;justify-content:space-between;gap:12px;font-size:10.5px;letter-spacing:.2em;color:var(--cobre);padding-bottom:14px;border-bottom:1px dashed rgba(191,137,87,.3)}
+  .si-rel-top span:last-child{color:var(--areia)}
+  .si-rel blockquote{margin:0;font-family:var(--serif);font-size:21px;line-height:1.45;color:var(--creme);flex:1}
+  .si-rel blockquote::before{content:'“';display:block;font-size:56px;line-height:.6;color:var(--cobre);margin-bottom:6px}
+  .si-rel-maior blockquote{font-size:clamp(22px,2vw,27px)}
+  .si-rel figcaption{font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--areia)}
 
   /* inscrição */
   .si-insc-card{position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:56px;padding:56px;border:1px solid var(--line);background:linear-gradient(150deg,rgba(191,137,87,.12),transparent 60%)}
