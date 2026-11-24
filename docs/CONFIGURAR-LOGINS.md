@@ -47,6 +47,8 @@ Segredos: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`.
 
 Segredos: `FACEBOOK_APP_ID`, `FACEBOOK_APP_SECRET`. (Opcional: `FACEBOOK_API_VERSION`, padrão `v23.0`; a Meta encerra cada versão uns dois anos depois do lançamento.)
 
+**Atenção (24/11/2026):** o botão do Facebook só aparece com `"FACEBOOK_PUBLICADO": "1"` em `"vars"` no `wrangler.jsonc`. Enquanto o app da Meta não estiver publicado (a publicação exige a verificação da empresa), só os administradores do app conseguem entrar; por isso o botão fica escondido. Depois de publicar na Meta, ligar por PR.
+
 ## 3. Microsoft (grátis)
 
 1. https://entra.microsoft.com (ou portal.azure.com) → **Registros de aplicativo** → Novo registro.

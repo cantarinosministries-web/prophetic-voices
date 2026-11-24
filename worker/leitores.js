@@ -79,7 +79,9 @@ export const PROVEDORES = {
 
   facebook: {
     nome: 'Facebook',
-    configurado: (env) => !!(env.FACEBOOK_APP_ID && env.FACEBOOK_APP_SECRET),
+    // Só aparece depois que o app da Meta for publicado (exige verificação da empresa).
+    // Para ligar: "FACEBOOK_PUBLICADO": "1" em "vars" no wrangler.jsonc (via PR). Os segredos continuam no Cloudflare.
+    configurado: (env) => env.FACEBOOK_PUBLICADO === '1' && !!(env.FACEBOOK_APP_ID && env.FACEBOOK_APP_SECRET),
     autorizar: (env, p) => `https://www.facebook.com/${FB(env)}/dialog/oauth?` + new URLSearchParams({
       client_id: env.FACEBOOK_APP_ID, redirect_uri: p.retorno, response_type: 'code', scope: 'public_profile,email', state: p.estado,
     }),
