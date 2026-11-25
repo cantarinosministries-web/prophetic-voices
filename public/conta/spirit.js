@@ -214,7 +214,7 @@
 
     function cartaoDevocional(mp, mj) {
       var e = D.edicao, L2 = textos();
-      var cicloNav = e.etapa === 'jornada' || e.etapa === 'fim' ? (L2.some(function (d) { var x = cicloDoIso(d.liberar_em); return x && x.c === 'jor'; }) ? 'jor' : null) : (D.na_preparacao ? 'prep' : null);
+      var cicloNav = e.etapa === 'jornada' || e.etapa === 'fim' ? (L2.some(function (d) { var x = cicloDoIso(d.liberar_em); return x && x.c === 'jor'; }) ? 'jor' : null) : 'prep'; // em dezembro, todo inscrito vê os devocionais da preparação (inclusive quem já entrou só nos 100 dias)
       if (!L2.length && !(cicloNav === 'prep' && e.etapa === 'antes')) return '';
       var d = L2.filter(function (x) { return x.id === lendo; })[0] || L2[L2.length - 1];
       var h = '<section class="conta-card sj-dv" id="sjDev"><span class="si-c tl"></span><span class="si-c br"></span>';
