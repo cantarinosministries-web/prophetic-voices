@@ -1,0 +1,22 @@
+name: Spirit Immersion dry-run
+on:
+  push:
+    branches: [feature/spirit-immersion-whatsapp]
+  pull_request:
+    paths:
+      - 'automation/spirit-immersion/**'
+      - 'tests/spirit-whatsapp.test.js'
+      - '.github/workflows/spirit-whatsapp.yml'
+permissions:
+  contents: read
+jobs:
+  dry-run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test tests/spirit-whatsapp.test.js
+      - run: node automation/spirit-immersion/local.js tick 2027-01-01T23:00:00Z
+      - run: node automation/spirit-immersion/local.js tick 2027-01-01T23:00:00Z

@@ -1,0 +1,21 @@
+{
+  // Separate service and database: never uses pv-db or changes the site's cron.
+  "name": "spirit-immersion-2027-dry-run",
+  "main": "worker.js",
+  "compatibility_date": "2026-11-01",
+  "workers_dev": false,
+  "preview_urls": false,
+  "vars": {
+    "SI_MODE": "dry-run",
+    "SI_TIME": "20:00",
+    "SI_DIARY_URL": "https://thepropheticvoices.com.br"
+  },
+  "triggers": { "crons": ["* * * * *"] },
+  "d1_databases": [{
+    "binding": "SI_DB",
+    "database_name": "spirit-immersion-test-only",
+    "database_id": "00000000-0000-0000-0000-000000000000",
+    "migrations_dir": "migrations"
+  }],
+  "observability": { "enabled": true }
+}
