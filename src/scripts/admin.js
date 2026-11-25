@@ -727,11 +727,11 @@ async function telaSpirit() {
     <div class="card"><h3>Participantes</h3><p style="font-size:42px;margin:4px 0">${r.total_pessoas}</p><p class="small muted" style="margin:0">${r.participantes_prep} na preparação · ${r.participantes} aceitaram os 100 dias<br>${r.dias_orados_prep} dias marcados na preparação · ${r.dias_orados_total} dias (≈ ${r.dias_orados_total} h) na jornada</p></div>
     <div class="card"><h3>Quantos oraram em cada dia</h3><p class="small muted" style="margin:0 0 6px">Preparação · 31 dias</p>${grafico(r.por_dia_prep, r.participantes_prep, pr, 'Preparação, dia')}<p class="small muted" style="margin:14px 0 6px">Jornada · 100 dias</p>${grafico(r.por_dia, r.participantes, e, 'Dia')}<p class="small muted" style="margin:8px 0 0">Passe o mouse sobre a barra para ver o dia. Cada participante vê só o próprio registro.</p></div>
   </div>
-  <div class="card" style="margin-top:16px"><h3>Devocionais em PDF</h3>
-    <p class="small muted">O devocional aparece na conta dos participantes a partir da data de liberação${r.email_servico ? ' e, nesse dia, vai por e-mail a quem pediu' : '. Os e-mails automáticos ainda não estão ligados (aba E-mails): por enquanto, o PDF fica só na conta'}. Pode cadastrar a série inteira com antecedência.${r.na_fila ? ` · ${r.na_fila} e-mail(s) na fila.` : ''}</p>
-    <table class="tb"><thead><tr><th>Liberar em</th><th>Título</th><th>PDF</th><th>Situação</th><th class="num">E-mails</th><th></th></tr></thead><tbody>
+  <div class="card" style="margin-top:16px"><h3>Devocionais · ${r.devocionais.length}</h3>
+    <p class="small muted">O devocional aparece como texto na conta dos participantes a partir da data de liberação (0h de Brasília); antes disso o servidor não entrega o conteúdo a ninguém, só à equipe aqui${r.email_servico ? '. Nesse dia, vai um aviso por e-mail a quem pediu' : '. Os e-mails automáticos ainda não estão ligados (aba E-mails): por enquanto, o devocional fica só na conta'}. O PDF é opcional. Pode cadastrar a série inteira com antecedência.${r.na_fila ? ` · ${r.na_fila} e-mail(s) na fila.` : ''}</p>
+    <table class="tb"><thead><tr><th>Liberar em</th><th>Título</th><th>Texto / PDF</th><th>Situação</th><th class="num">E-mails</th><th></th></tr></thead><tbody>
     ${r.devocionais.map((d) => `<tr data-dev="${d.id}"><td class="small" style="white-space:nowrap">${esc(d.liberar_em.split('-').reverse().join('/'))}</td><td>${esc(d.titulo)}${d.resumo ? `<div class="small muted">${esc(d.resumo)}</div>` : ''}</td>
-      <td class="small">${d.pdf_url ? `<a href="${esc(d.pdf_url)}" target="_blank" rel="noopener">abrir ↗</a>` : '—'} <label class="btn sm" style="cursor:pointer">${d.pdf_url ? 'Trocar' : 'Enviar PDF'}<input type="file" accept="application/pdf" data-pdf="${d.id}" hidden></label></td>
+      <td class="small">${d.texto ? `texto ✓ <span class="muted">(${d.texto.length.toLocaleString('pt-BR')} car.)</span><br>` : ''}${d.pdf_url ? `<a href="${esc(d.pdf_url)}" target="_blank" rel="noopener">PDF ↗</a>` : ''} <label class="btn sm" style="cursor:pointer">${d.pdf_url ? 'Trocar' : 'Enviar PDF'}<input type="file" accept="application/pdf" data-pdf="${d.id}" hidden></label></td>
       <td class="small">${d.status === 'publicado' ? (d.liberar_em <= e.hoje ? 'Publicado · visível' : 'Publicado · aguardando a data') : 'Rascunho'}</td>
       <td class="num small">${d.total_envio ? `${d.enviados}/${d.total_envio}` : '—'}</td>
       <td style="white-space:nowrap">${d.status === 'publicado' ? `<button class="btn sm" data-st="rascunho">Tirar do ar</button>` : `<button class="btn sm cob" data-st="publicado">Publicar</button>`} <button class="btn sm" data-edit>Editar</button> <button class="btn sm dng" data-del>Apagar</button></td></tr>`).join('') || '<tr><td colspan="6" class="muted">Nenhum devocional cadastrado.</td></tr>'}
@@ -740,7 +740,9 @@ async function telaSpirit() {
       <div style="display:grid;grid-template-columns:2fr 1fr;gap:12px"><label class="f"><span>Título</span><input name="titulo" maxlength="200" required placeholder="Ex.: Semana 1 · O espírito de graça e de súplicas"></label>
       <label class="f"><span>Liberar em</span><input name="liberar_em" type="date" required value="${esc(e.hoje)}"></label></div>
       <label class="f"><span>Resumo (vai no e-mail; opcional)</span><textarea name="resumo" rows="2" maxlength="1000"></textarea></label>
-      <div><button class="btn pri" type="submit">Criar</button> <span class="small muted">Depois de criar, envie o PDF e publique.</span></div></form>
+      <label class="f"><span>Texto do devocional (aparece na conta do participante)</span><textarea name="texto" rows="16" maxlength="30000" style="font-family:var(--mono,monospace);font-size:13px;line-height:1.5"></textarea></label>
+      <p class="small muted" style="margin:0">Parágrafos separados por uma linha em branco. Marcações no começo da linha: <code>&gt; </code> citação de abertura e <code>&gt;&gt; </code> autor dela; <code>» </code> versículo e <code>»» </code> referência; <code>- </code> item de lista; <code>Oração: </code> oração final.</p>
+      <div><button class="btn pri" type="submit">Criar</button> <button class="btn" type="button" id="fDevCanc" hidden>Cancelar edição</button> <span class="small muted">Depois de criar, publique (o PDF é opcional).</span></div></form>
   </div>
   <div class="card" style="margin-top:16px"><h3>Testemunhos dos participantes · ${r.testemunhos.length}</h3>
     <p class="small muted">Testemunhos escritos pelos participantes na área de Testemunhos da conta. O Diário de Oração deles é sempre privado e nunca aparece aqui. Só publique (aba Testemunhos) os que trazem autorização para isso, respeitando o nível escolhido; “só a equipe” fica restrito ao ministério.</p>
@@ -749,10 +751,17 @@ async function telaSpirit() {
   </div>`;
 
   $$('[data-faut]').forEach((b) => b.addEventListener('click', () => { sessionStorage.setItem('si-aut', b.dataset.faut); telaSpirit(); }));
-  $('#fDev').addEventListener('submit', async (ev) => {
+  const fDev = $('#fDev');
+  fDev.addEventListener('submit', async (ev) => {
     ev.preventDefault();
-    try { await api('/spirit/devocionais', { method: 'POST', body: Object.fromEntries(new FormData(ev.target)) }); toast('Devocional criado. Agora envie o PDF.'); telaSpirit(); } catch (er) { toast(er.message, true); }
+    const corpo = Object.fromEntries(new FormData(ev.target)), id = fDev.dataset.id;
+    try {
+      if (id) { await api(`/spirit/devocionais/${id}`, { method: 'PUT', body: corpo }); toast('Devocional alterado.'); }
+      else { await api('/spirit/devocionais', { method: 'POST', body: corpo }); toast('Devocional criado. Confira e publique.'); }
+      telaSpirit();
+    } catch (er) { toast(er.message, true); }
   });
+  $('#fDevCanc').addEventListener('click', () => telaSpirit());
   $$('[data-dev]').forEach((tr) => {
     const id = tr.dataset.dev, d = r.devocionais.find((x) => String(x.id) === id);
     const inp = $('[data-pdf]', tr);
@@ -764,14 +773,17 @@ async function telaSpirit() {
     $('[data-st]', tr).addEventListener('click', async (ev) => {
       try { await api(`/spirit/devocionais/${id}/status`, { method: 'POST', body: { status: ev.target.dataset.st } }); toast(ev.target.dataset.st === 'publicado' ? 'Publicado.' : 'Tirado do ar.'); telaSpirit(); } catch (er) { toast(er.message, true); }
     });
-    $('[data-edit]', tr).addEventListener('click', async () => {
-      const titulo = prompt('Título', d.titulo); if (titulo === null) return;
-      const liberar = prompt('Liberar em (AAAA-MM-DD)', d.liberar_em); if (liberar === null) return;
-      const resumo = prompt('Resumo (opcional)', d.resumo || ''); if (resumo === null) return;
-      try { await api(`/spirit/devocionais/${id}`, { method: 'PUT', body: { titulo, liberar_em: liberar, resumo } }); toast('Alterado.'); telaSpirit(); } catch (er) { toast(er.message, true); }
+    $('[data-edit]', tr).addEventListener('click', () => {
+      // edição no próprio formulário (o texto é longo demais para caixas de diálogo)
+      fDev.dataset.id = id;
+      fDev.titulo.value = d.titulo; fDev.liberar_em.value = d.liberar_em; fDev.resumo.value = d.resumo || ''; fDev.texto.value = d.texto || '';
+      $('h3', fDev).textContent = `Editando: ${d.titulo}`;
+      $('button[type=submit]', fDev).textContent = 'Salvar alterações';
+      $('#fDevCanc').hidden = false;
+      fDev.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
     $('[data-del]', tr).addEventListener('click', async () => {
-      if (!confirm(`Apagar o devocional “${d.titulo}” e o PDF dele?`)) return;
+      if (!confirm(`Apagar o devocional “${d.titulo}”${d.pdf_url ? ' e o PDF dele' : ''}?`)) return;
       try { await api(`/spirit/devocionais/${id}`, { method: 'DELETE' }); toast('Apagado.'); telaSpirit(); } catch (er) { toast(er.message, true); }
     });
   });

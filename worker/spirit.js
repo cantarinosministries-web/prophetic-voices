@@ -3,7 +3,8 @@
 //   /api/conta/spirit...        área do participante (já com o leitor logado; chamado por apiLeitores)
 //   /api/publico/spirit         número de inscritos (para a página pública)
 //   /api/spirit...              painel da equipe (editor e acima)
-//   /arquivos/spirit/...        PDFs dos devocionais: só participantes inscritos e a equipe logada
+//   /arquivos/spirit/...        PDFs dos devocionais (quando houver): só participantes inscritos e a equipe logada
+// Devocionais em texto (desde 25/11/2026): lidos na própria conta; a API só entrega os já liberados (hoje e anteriores).
 // Registro de oração e testemunhos são dados sobre a fé (sensíveis, LGPD art. 11): exigem aceite destacado
 // e cada testemunho tem a própria autorização (só equipe / publicar sem identificar / publicar com o nome).
 import { json, erro, aleatorio } from './seguranca.js';
@@ -27,6 +28,10 @@ const AUT_DIARIO = ['privado', 'equipe', 'anonimo', 'nome'];
 const TIPOS = ['testemunho', 'profetica', 'ouvi', 'texto', 'oracao', 'outro'];
 const MAX_DIARIO = 10000;
 const LOTE = 150, PARALELO = 6, MAX_TENTATIVAS = 3;
+const MAX_DEVOCIONAL = 30000;
+// texto do devocional (lido na conta): marcações simples — '> ' epígrafe, '>> ' autor, '» ' versículo, '»» ' referência,
+// '- ' item de lista, 'Oração: ' oração final; parágrafos separados por linha em branco
+const textoDev = (v) => String(v || '').replace(/\r\n?/g, '\n').trim().slice(0, MAX_DEVOCIONAL) || null;
 
 async function corpo(req) { try { return await req.json(); } catch (e) { return {}; } }
 
@@ -73,7 +78,8 @@ export async function apiSpiritLeitor(req, env, url, seg, l) {
     const [dias, diasPrep, devs, diario] = await Promise.all([
       env.DB.prepare('SELECT dia, orou, testemunho, autorizacao, atualizado_em FROM si_dias WHERE leitor_id = ? AND edicao = ? ORDER BY dia').bind(l.id, s.id).all(),
       env.DB.prepare('SELECT dia, orou, atualizado_em FROM si_dias WHERE leitor_id = ? AND edicao = ? ORDER BY dia').bind(l.id, s.prep.id).all(),
-      env.DB.prepare("SELECT id, titulo, resumo, liberar_em, pdf_url FROM si_devocionais WHERE edicao = ? AND status = 'publicado' AND pdf_url IS NOT NULL AND liberar_em <= ? ORDER BY liberar_em DESC, id DESC").bind(s.id, s.hoje).all(),
+      // só os já liberados (hoje e dias anteriores): o texto dos próximos dias nunca sai do servidor
+      env.DB.prepare("SELECT id, titulo, resumo, liberar_em, pdf_url, texto FROM si_devocionais WHERE edicao = ? AND status = 'publicado' AND (pdf_url IS NOT NULL OR texto IS NOT NULL) AND liberar_em <= ? ORDER BY liberar_em DESC, id DESC").bind(s.id, s.hoje).all(),
       env.DB.prepare('SELECT id, data, tipo, referencia, texto, autorizacao, criado_em, atualizado_em FROM si_diario WHERE leitor_id = ? AND edicao = ? ORDER BY data DESC, id DESC').bind(l.id, s.id).all(),
     ]);
     const podeAceitar = !naJornada && ((s.etapa === 'preparacao' && s.prep.dia_atual >= ACEITE_A_PARTIR) || s.etapa === 'jornada');
@@ -221,8 +227,8 @@ export async function apiSpiritPainel(req, env, url, seg, u, { registrar }) {
       const titulo = String(b.titulo || '').trim();
       if (!titulo) return erro('Dê um título ao devocional.');
       const data = /^\d{4}-\d{2}-\d{2}$/.test(b.liberar_em || '') ? b.liberar_em : s.hoje;
-      const r = await env.DB.prepare('INSERT INTO si_devocionais (edicao, titulo, resumo, liberar_em, criado_por) VALUES (?,?,?,?,?) RETURNING id')
-        .bind(s.id, titulo.slice(0, 200), String(b.resumo || '').trim().slice(0, 1000) || null, data, u.id).first();
+      const r = await env.DB.prepare('INSERT INTO si_devocionais (edicao, titulo, resumo, liberar_em, texto, criado_por) VALUES (?,?,?,?,?,?) RETURNING id')
+        .bind(s.id, titulo.slice(0, 200), String(b.resumo || '').trim().slice(0, 1000) || null, data, textoDev(b.texto), u.id).first();
       await registrar(env, u, 'criou o devocional', titulo, 'Spirit Immersion');
       return json({ id: r.id }, 201);
     }
@@ -232,13 +238,13 @@ export async function apiSpiritPainel(req, env, url, seg, u, { registrar }) {
       const b = await corpo(req);
       const titulo = String(b.titulo || '').trim() || d.titulo;
       const data = /^\d{4}-\d{2}-\d{2}$/.test(b.liberar_em || '') ? b.liberar_em : d.liberar_em;
-      await env.DB.prepare("UPDATE si_devocionais SET titulo = ?, resumo = ?, liberar_em = ?, atualizado_em = datetime('now') WHERE id = ?")
-        .bind(titulo.slice(0, 200), String(b.resumo ?? d.resumo ?? '').trim().slice(0, 1000) || null, data, id).run();
+      await env.DB.prepare("UPDATE si_devocionais SET titulo = ?, resumo = ?, liberar_em = ?, texto = ?, atualizado_em = datetime('now') WHERE id = ?")
+        .bind(titulo.slice(0, 200), String(b.resumo ?? d.resumo ?? '').trim().slice(0, 1000) || null, data, b.texto === undefined ? d.texto : textoDev(b.texto), id).run();
       return json({ ok: true });
     }
     if (seg[2] === 'status' && m === 'POST') {
       const st = (await corpo(req)).status === 'publicado' ? 'publicado' : 'rascunho';
-      if (st === 'publicado' && !d.pdf_url) return erro('Envie o PDF antes de publicar.');
+      if (st === 'publicado' && !d.pdf_url && !d.texto) return erro('Escreva o texto do devocional (ou envie um PDF) antes de publicar.');
       await env.DB.prepare("UPDATE si_devocionais SET status = ?, atualizado_em = datetime('now') WHERE id = ?").bind(st, id).run();
       await registrar(env, u, st === 'publicado' ? 'publicou o devocional' : 'tirou do ar o devocional', d.titulo, 'Spirit Immersion');
       if (st === 'publicado') await enfileirarDevocionais(env);
@@ -280,7 +286,7 @@ export async function pdfDevocional(env, req, chave, { leitor, equipe }) {
 export async function enfileirarDevocionais(env) {
   if (!emailConfigurado(env)) return;
   const hoje = hojeBrasilia();
-  const prontos = (await env.DB.prepare("SELECT * FROM si_devocionais WHERE status = 'publicado' AND pdf_url IS NOT NULL AND enfileirado_em IS NULL AND liberar_em <= ?").bind(hoje).all()).results;
+  const prontos = (await env.DB.prepare("SELECT * FROM si_devocionais WHERE status = 'publicado' AND (pdf_url IS NOT NULL OR texto IS NOT NULL) AND enfileirado_em IS NULL AND liberar_em <= ?").bind(hoje).all()).results;
   for (const d of prontos) {
     await env.DB.batch([
       env.DB.prepare("INSERT OR IGNORE INTO si_envios (devocional_id, leitor_id) SELECT DISTINCT ?, p.leitor_id FROM si_participantes p JOIN leitores l ON l.id = p.leitor_id WHERE p.edicao IN (?,?) AND p.devocionais_email = 1 AND l.email IS NOT NULL AND l.bloqueado = 0").bind(d.id, ...EDICOES),
@@ -295,8 +301,8 @@ function emailDevocional(d, l) {
   return {
     assunto: `Spirit Immersion · ${d.titulo}`,
     html: moldura({
-      previa: (d.resumo || 'Um novo devocional está disponível na sua jornada.').slice(0, 140), eyebrow: 'Spirit Immersion · Devocional', titulo: d.titulo, link, botao: 'Abrir o devocional (PDF)',
-      corpo: `<p style="margin:0 0 14px">Olá, ${esc(String(l.nome || '').split(' ')[0])}. Um novo devocional da sua jornada de oração está disponível.</p>${resumo}<p style="margin:0">O PDF fica na sua conta, na aba Spirit Immersion, onde você também marca os dias de oração.</p>`,
+      previa: (d.resumo || 'Um novo devocional está disponível na sua jornada.').slice(0, 140), eyebrow: 'Spirit Immersion · Devocional', titulo: d.titulo, link, botao: d.texto ? 'Ler o devocional' : 'Abrir o devocional (PDF)',
+      corpo: `<p style="margin:0 0 14px">Olá, ${esc(String(l.nome || '').split(' ')[0])}. Um novo devocional da sua jornada de oração está disponível.</p>${resumo}<p style="margin:0">${d.texto ? 'O devocional' : 'O PDF'} fica na sua conta, na aba Spirit Immersion, onde você também marca os dias de oração.</p>`,
       rodape: `Você recebe este e-mail porque se inscreveu no Spirit Immersion e pediu os devocionais por e-mail. <a href="${link}" style="color:#F8E9B7">Parar de receber</a> · <a href="${DOM}/privacidade.html" style="color:#F8E9B7">Política de Privacidade</a>`,
     }),
     texto: `SPIRIT IMMERSION · DEVOCIONAL\n\n${d.titulo}\n\n${d.resumo || ''}\n\nAbrir na sua conta: ${link}\n\n--\nPara parar de receber os devocionais por e-mail, desmarque a opção na aba Spirit Immersion da sua conta.`,
