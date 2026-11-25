@@ -10,9 +10,9 @@ Independent Worker; does not modify the website Worker, production database, roo
 
 Confirm the Workers plan is Free, inspect shared account usage for Workers, D1 and Queues. Stop rather than upgrade. Create a NEW D1 `pv-instagram`, queues `pv-instagram-events` and `pv-instagram-dead`; replace the placeholder database ID here. Apply this directory's migration only to that new database. Publish with this directory's config, never the root deploy script. Do not attach domain routes. Keep MODE=simulation and SEND_ENABLED=false.
 
-Create secrets with `wrangler secret put META_APP_SECRET` and `META_VERIFY_TOKEN`. Never put values in repository, URLs, logs or chat. Use dedicated `IG_OCANTARINO_TOKEN` and `IG_TPV_TOKEN` secrets for authorized accounts. Tokens must use Instagram Login for the graph.instagram.com adapter. Other login types need their own validated adapter. GRAPH_VERSION must be a currently supported version verified at setup time.
+Create secrets with `wrangler secret put META_APP_SECRET` and `META_VERIFY_TOKEN`. Never put values in repository, URLs, logs or chat. Use dedicated `IG_OCANTARINO_TOKEN` and `IG_TPV_TOKEN` secrets for authorized accounts. Default adapter uses Unified Login and graph.facebook.com, as recommended for new Meta apps. Set META_API_HOST=graph.instagram.com only for an authorized legacy Instagram Login token. Hosts are restricted to those two official domains. Never mix tokens/login types. The Unified Login flow requires a business portfolio and an approved login configuration in Meta. GRAPH_VERSION must be a currently supported version verified at setup time.
 
-Authorize the Meta app and both professional accounts. Validate permissions and app access/review requirements against the current official private replies guide. Subscribe to comments for both accounts and set callback `/webhook`. Obtain actual account and selected campaign media IDs through Meta. Enable only explicit per-account/per-post rules after checking ownership and approving final reply text/link. No rule matches every post. No campaign data is seeded remotely until IDs are verified.
+Authorize the Meta app and both professional accounts. Validate permissions and app access/review requirements against the current official private replies guide. Subscribe to comments for both accounts and set callback `/webhook`. Obtain actual account and selected campaign media IDs through Meta. Enable only explicit per-account/per-post rules after checking ownership and approving final reply text/link. No rule matches every post. No real campaign data is seeded remotely until IDs are verified.
 
 ## Campaign
 
@@ -37,3 +37,7 @@ Run signed test webhook through deployed queue/D1 with a test account and confir
 - https://developers.cloudflare.com/queues/platform/limits/
 
 No official public Broadcast Channels publishing API was found in the checked documentation. Channel sending is unsupported here. No browser automation or unofficial Instagram endpoints are used to bypass restrictions.
+
+## Deployment evidence — 2026-11-25
+
+Published https://pv-instagram-simulation.cantarinosministries.workers.dev with MODE=simulation and SEND_ENABLED=false. Dedicated D1 and both queues created on Free. Eight local tests and SQLite simulation passed. Remote signed synthetic events returned 200, forged signature 401, duplicate webhook generated only two simulated deliveries for two synthetic accounts. Synthetic rules/accounts subsequently disabled; temporary signing secret removed. Official Meta secret and verification token still need setup. New Meta app TPV Spirit Automations (1124482013517132) created by user; Unified Login awaits business portfolio connection and account permissions.

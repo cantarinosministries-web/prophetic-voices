@@ -3,7 +3,7 @@
   "main": "worker.js",
   "compatibility_date": "2026-11-01",
   "workers_dev": true,
-  "vars": {"MODE":"simulation", "SEND_ENABLED":"false", "DAILY_EVENTS":"500", "GRAPH_VERSION":"", "AI_ENABLED":"false"},
+  "vars": {"MODE":"simulation", "SEND_ENABLED":"false", "DAILY_EVENTS":"500", "GRAPH_VERSION":"", "AI_ENABLED":"false", "META_API_HOST":"graph.facebook.com"},
   "d1_databases": [{"binding":"DB", "database_name":"pv-instagram", "database_id":"5c50fbb2-cf18-48c3-8777-52ba2cbafedc", "migrations_dir":"migrations"}],
   "queues": {"producers":[{"binding":"EVENTS","queue":"pv-instagram-events"}],"consumers":[{"queue":"pv-instagram-events","max_batch_size":1,"max_retries":3,"dead_letter_queue":"pv-instagram-dead"}]},
   "observability": {"enabled":false}

@@ -25,10 +25,12 @@ export async function processEvent(e, env, fetcher=fetch) {
   const rule = await env.DB.prepare(`SELECT r.*, a.token_binding FROM rules r JOIN accounts a ON a.id=r.account_id WHERE a.id=? AND a.enabled=1 AND r.enabled=1 AND r.media_id=? ORDER BY r.id`).bind(e.account,e.media).all();
   const r = rule.results.find(r => matches(e.text,r.keyword));
   if (!r) return;
+  const host = env.META_API_HOST || 'graph.facebook.com';
+  if (!['graph.facebook.com','graph.instagram.com'].includes(host)) throw new Error('api_host');
   const live = env.MODE === 'live' && env.SEND_ENABLED === 'true';
   if (live && (!/^v\d+\.\d+$/.test(env.GRAPH_VERSION) || !env[r.token_binding])) throw new Error('configuration');
   if (live) {
-    const check = await fetcher(`https://graph.instagram.com/${env.GRAPH_VERSION}/${encodeURIComponent(e.comment)}?fields=timestamp`, {headers:{Authorization:`Bearer ${env[r.token_binding]}`},signal:AbortSignal.timeout(10000)});
+    const check = await fetcher(`https://${host}/${env.GRAPH_VERSION}/${encodeURIComponent(e.comment)}?fields=timestamp`, {headers:{Authorization:`Bearer ${env[r.token_binding]}`},signal:AbortSignal.timeout(10000)});
     if (!check.ok) throw new Error('comment_validation');
     const created = Date.parse((await check.json()).timestamp)/1000;
     if (!Number.isFinite(created) || now-created > 7*86400 || created > now+60) return;
@@ -38,7 +40,7 @@ export async function processEvent(e, env, fetcher=fetch) {
   if (!claim.meta.changes) return;
   if (!live) return;
   try {
-    const res = await fetcher(`https://graph.instagram.com/${env.GRAPH_VERSION}/${encodeURIComponent(e.account)}/messages`, {
+    const res = await fetcher(`https://${host}/${env.GRAPH_VERSION}/${encodeURIComponent(e.account)}/messages`, {
       method:'POST', headers:{Authorization:`Bearer ${env[r.token_binding]}`,'Content-Type':'application/json'},
       body:JSON.stringify({recipient:{comment_id:e.comment},message:{text:r.reply}}),signal:AbortSignal.timeout(10000)
     });
