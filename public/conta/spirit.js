@@ -35,7 +35,7 @@
       te_h: 'Testemunhos', te_p: 'Conte o que Deus tem feito durante esta jornada. Diferente do Diário de Oração, o testemunho é para ser compartilhado: você escolhe quem pode lê-lo.', te_novo: 'Novo testemunho', te_editando: 'Editando testemunho', te_texto: 'Seu testemunho', te_ph: 'O que Deus fez? Uma cura, uma resposta, uma mudança, um encontro…', te_salvar: 'Salvar testemunho', te_salvo: 'Testemunho salvo.', te_vazio: 'Você ainda não escreveu nenhum testemunho.', te_apagar_conf: 'Apagar este testemunho?', te_aut_nota: 'A equipe lê os testemunhos com cuidado e oração. Nada é publicado fora da autorização marcada, e você pode mudá-la ou apagar o testemunho quando quiser.',
       dv_h: 'Devocional', dv_hoje: 'Devocional de hoje', dv_ler: 'Ler o devocional de hoje', dv_dia: 'Ler o devocional deste dia', dv_ant: '‹ Dia anterior', dv_prox: 'Próximo dia ›',
       dv_tranc: 'Libera em {d}', dv_antes: 'O primeiro devocional chega em 1º de dezembro. Cada dia libera um novo, à meia-noite; os anteriores continuam aqui para reler.', dv_nav: 'Devocionais da preparação',
-      dv_check: 'Sim, orei {m} neste dia ✓', dv_check_j: 'Sim, orei 1 hora neste dia ✓', dv_ok: 'Você marcou a oração deste dia ✓', dv_fonte: 'Adaptado de Mike Bickle, “Crescendo em Oração”.',
+      dv_check: 'Sim, orei {m} neste dia ✓', dv_check_j: 'Sim, orei 1 hora neste dia ✓', dv_ok: 'Você marcou a oração deste dia ✓', dv_idx: 'Índice · os 31 devocionais da preparação', dv_idx_j: 'Índice dos devocionais', dv_libera: 'libera em {d}',
       dev_h: 'Devocionais', dev_vazio: 'Os devocionais aparecem aqui assim que forem liberados.', dev_abrir: 'Abrir PDF', dev_de: 'Liberado em {d}',
       cfg_h: 'Preferências', dev_email_on: 'Você recebe os devocionais também no e-mail', dev_email_off: 'Você não recebe os devocionais por e-mail (eles continuam aqui)', dev_email_srv: 'Os e-mails ainda estão sendo ligados; enquanto isso, os devocionais ficam aqui.',
       ligar: 'Receber por e-mail', desligar: 'Parar de receber', sair_p: 'Sair do Spirit Immersion apaga a sua inscrição, os dias marcados (preparação e 100 dias) e todo o seu diário desta edição.', sair: 'Sair e apagar meu registro', sair_conf: 'Confirmar: sair e apagar',
@@ -71,7 +71,7 @@
       te_h: 'Testimonies', te_p: 'Tell what God has been doing during this journey. Unlike the Prayer Journal, a testimony is meant to be shared: you choose who may read it.', te_novo: 'New testimony', te_editando: 'Editing testimony', te_texto: 'Your testimony', te_ph: 'What did God do? A healing, an answer, a change, an encounter…', te_salvar: 'Save testimony', te_salvo: 'Testimony saved.', te_vazio: 'You have not written any testimony yet.', te_apagar_conf: 'Delete this testimony?', te_aut_nota: 'The team reads testimonies with care and prayer. Nothing is published beyond the permission you choose, and you can change it or delete the testimony anytime.',
       dv_h: 'Devotional', dv_hoje: 'Today’s devotional', dv_ler: 'Read today’s devotional', dv_dia: 'Read this day’s devotional', dv_ant: '‹ Previous day', dv_prox: 'Next day ›',
       dv_tranc: 'Opens on {d}', dv_antes: 'The first devotional arrives on December 1. A new one opens each day at midnight; earlier ones stay here to reread.', dv_nav: 'Preparation devotionals',
-      dv_check: 'Yes, I prayed {m} on this day ✓', dv_check_j: 'Yes, I prayed 1 hour on this day ✓', dv_ok: 'You marked your prayer for this day ✓', dv_fonte: 'Adapted from Mike Bickle, “Growing in Prayer”.',
+      dv_check: 'Yes, I prayed {m} on this day ✓', dv_check_j: 'Yes, I prayed 1 hour on this day ✓', dv_ok: 'You marked your prayer for this day ✓', dv_idx: 'Index · the 31 preparation devotionals', dv_idx_j: 'Devotionals index', dv_libera: 'opens on {d}',
       dev_h: 'Devotionals', dev_vazio: 'Devotionals appear here as soon as they are released.', dev_abrir: 'Open PDF', dev_de: 'Released on {d}',
       cfg_h: 'Preferences', dev_email_on: 'You also receive the devotionals by e-mail', dev_email_off: 'You do not receive the devotionals by e-mail (they stay here)', dev_email_srv: 'E-mails are still being set up; meanwhile, the devotionals stay here.',
       ligar: 'Receive by e-mail', desligar: 'Stop receiving', sair_p: 'Leaving the Spirit Immersion erases your enrollment, the days you marked (preparation and 100 days) and your whole journal for this edition.', sair: 'Leave and erase my record', sair_conf: 'Confirm: leave and erase',
@@ -230,18 +230,22 @@
             : '<button type="button" class="btn btn-creme" data-dvcheck="' + x.c + ':' + x.n + '">' + esc(x.c === 'prep' ? t('dv_check').replace('{m}', tempo(blocoDe(x.n).minutos)) : t('dv_check_j')) + '</button>') + '</div>';
         }
         h += '<div class="sj-dv-pe"><button type="button" class="btn btn-ghost sm" data-dvir="' + (i > 0 ? L2[i - 1].id : '') + '"' + (i > 0 ? '' : ' disabled') + '>' + esc(t('dv_ant')) + '</button>' +
-          '<small class="sj-dv-fonte">' + esc(t('dv_fonte')) + '</small>' +
+
           '<button type="button" class="btn btn-ghost sm" data-dvir="' + (i < L2.length - 1 ? L2[i + 1].id : '') + '"' + (i < L2.length - 1 ? '' : ' disabled') + '>' + esc(t('dv_prox')) + '</button></div>';
       } else h += '<div class="eyebrow">' + esc(t('dv_h')) + '</div><p class="sj-q" style="margin-top:12px">' + esc(t('dv_antes')) + '</p>';
       if (cicloNav) {
-        var cc = C(cicloNav);
-        h += '<div class="sj-dv-nav" aria-label="' + esc(t('dv_nav')) + '">';
-        for (var n = 1; n <= cc.dias; n++) {
-          var dd = devDoDia(cicloNav, n);
-          if (dd) h += '<button type="button" class="sj-dvd' + (d && dd.id === d.id ? ' sel' : '') + (n === cc.dia_atual ? ' hoje' : '') + '" data-dvir="' + dd.id + '" title="' + esc(semPrefixo(dd.titulo)) + '">' + n + '</button>';
-          else h += '<span class="sj-dvd tranc" title="' + esc(t('dv_tranc').replace('{d}', fmtData(dataDia(cicloNav, n)))) + '">' + (n > ult(cc) ? '🔒' : n) + '</span>';
+        // índice: todos os títulos do ciclo (o servidor manda só data e título dos próximos); liberados abrem, os demais ficam trancados
+        var cc = C(cicloNav), idx = (D.indice || []).map(function (y) { return { iso: y.liberar_em, titulo: y.titulo, x: cicloDoIso(y.liberar_em) }; }).filter(function (y) { return y.x && y.x.c === cicloNav; });
+        if (idx.length) {
+          h += '<div class="sj-dv-idx"><h4>' + esc(cicloNav === 'prep' ? t('dv_idx') : t('dv_idx_j')) + '</h4><ol>';
+          idx.forEach(function (y) {
+            var dd = devDoDia(cicloNav, y.x.n), cls = (d && dd && dd.id === d.id ? ' sel' : '') + (y.x.n === cc.dia_atual ? ' hoje' : '');
+            var miolo = '<b>' + y.x.n + '</b><span>' + esc(semPrefixo(y.titulo)) + '</span>';
+            h += dd ? '<li><button type="button" class="sj-dv-it' + cls + '" data-dvir="' + dd.id + '">' + miolo + '</button></li>'
+              : '<li><div class="sj-dv-it tranc' + cls + '">' + miolo + '<small>🔒 ' + esc(t('dv_libera').replace('{d}', fmtIso(y.iso))) + '</small></div></li>';
+          });
+          h += '</ol></div>';
         }
-        h += '</div>';
       }
       return h + '</section>';
     }

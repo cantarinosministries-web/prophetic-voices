@@ -75,17 +75,19 @@ export async function apiSpiritLeitor(req, env, url, seg, l) {
 
   if (!acao && m === 'GET') {
     if (!p) return json({ edicao: s, inscrito: false });
-    const [dias, diasPrep, devs, diario] = await Promise.all([
+    const [dias, diasPrep, devs, diario, indice] = await Promise.all([
       env.DB.prepare('SELECT dia, orou, testemunho, autorizacao, atualizado_em FROM si_dias WHERE leitor_id = ? AND edicao = ? ORDER BY dia').bind(l.id, s.id).all(),
       env.DB.prepare('SELECT dia, orou, atualizado_em FROM si_dias WHERE leitor_id = ? AND edicao = ? ORDER BY dia').bind(l.id, s.prep.id).all(),
       // só os já liberados (hoje e dias anteriores): o texto dos próximos dias nunca sai do servidor
       env.DB.prepare("SELECT id, titulo, resumo, liberar_em, pdf_url, texto FROM si_devocionais WHERE edicao = ? AND status = 'publicado' AND (pdf_url IS NOT NULL OR texto IS NOT NULL) AND liberar_em <= ? ORDER BY liberar_em DESC, id DESC").bind(s.id, s.hoje).all(),
       env.DB.prepare('SELECT id, data, tipo, referencia, texto, autorizacao, criado_em, atualizado_em FROM si_diario WHERE leitor_id = ? AND edicao = ? ORDER BY data DESC, id DESC').bind(l.id, s.id).all(),
+      // índice: só data e título de todos os publicados (inclusive os próximos), nunca o texto
+      env.DB.prepare("SELECT liberar_em, titulo FROM si_devocionais WHERE edicao = ? AND status = 'publicado' AND (pdf_url IS NOT NULL OR texto IS NOT NULL) ORDER BY liberar_em, id").bind(s.id).all(),
     ]);
     const podeAceitar = !naJornada && ((s.etapa === 'preparacao' && s.prep.dia_atual >= ACEITE_A_PARTIR) || s.etapa === 'jornada');
     return json({ edicao: s, inscrito: true, na_preparacao: naPrep, na_jornada: naJornada, pode_aceitar: podeAceitar,
       inscrito_em: p.inscrito_em, aceitou_jornada_em: naJornada ? ps[s.id].inscrito_em : null, devocionais_email: !!p.devocionais_email, email: l.email || null,
-      email_servico: emailConfigurado(env), dias: dias.results, dias_prep: diasPrep.results, devocionais: devs.results, diario: diario.results });
+      email_servico: emailConfigurado(env), dias: dias.results, dias_prep: diasPrep.results, devocionais: devs.results, indice: indice.results, diario: diario.results });
   }
 
   if (acao === 'inscrever' && m === 'POST') {
