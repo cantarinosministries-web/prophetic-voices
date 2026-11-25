@@ -41,3 +41,7 @@ No official public Broadcast Channels publishing API was found in the checked do
 ## Deployment evidence — 2026-11-25
 
 Published https://pv-instagram-simulation.cantarinosministries.workers.dev with MODE=simulation and SEND_ENABLED=false. Dedicated D1 and both queues created on Free. Nine local tests and SQLite simulation passed. Remote signed synthetic events returned 200, forged signature 401, duplicate webhook generated only two simulated deliveries for two synthetic accounts. Synthetic rules/accounts subsequently disabled; temporary signing secret removed. Official Meta secret and verification token still need setup. New Meta app TPV Spirit Automations (1124482013517132) created by user; User connected the business portfolio. The three authorized permissions instagram_basic, instagram_manage_comments and instagram_manage_messages are ready for testing in Meta. Account consent, official secrets and webhook registration remain pending.
+
+## Meta webhook verification — 2026-11-25
+
+META_APP_SECRET was saved directly by the user in Cloudflare. META_VERIFY_TOKEN was generated and saved as an encrypted secret without exposing its value. Meta verified the callback successfully, comments v27.0 subscription is enabled, and the Meta dashboard sample webhook test reported success. GRAPH_VERSION is now v27.0, matching the dashboard and official Unified Login getting-started guide. Tester invitations sent with explicit user authorization to @ocantarino and @thepropheticvoices. Consent/token setup and real post rules remain pending. No sends enabled.
