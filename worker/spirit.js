@@ -29,6 +29,7 @@ const TIPOS = ['testemunho', 'profetica', 'ouvi', 'texto', 'oracao', 'outro'];
 const MAX_DIARIO = 10000;
 const LOTE = 150, PARALELO = 6, MAX_TENTATIVAS = 3;
 const MAX_DEVOCIONAL = 30000;
+const MAX_COMENTARIO = 2000, COMENTARIOS_POR_HORA = 5;
 // texto do devocional (lido na conta): marcações simples — '> ' epígrafe, '>> ' autor, '» ' versículo, '»» ' referência,
 // '- ' item de lista, 'Oração: ' oração final; parágrafos separados por linha em branco
 const textoDev = (v) => String(v || '').replace(/\r\n?/g, '\n').trim().slice(0, MAX_DEVOCIONAL) || null;
@@ -75,7 +76,7 @@ export async function apiSpiritLeitor(req, env, url, seg, l) {
 
   if (!acao && m === 'GET') {
     if (!p) return json({ edicao: s, inscrito: false });
-    const [dias, diasPrep, devs, diario, indice] = await Promise.all([
+    const [dias, diasPrep, devs, diario, indice, ncom] = await Promise.all([
       env.DB.prepare('SELECT dia, orou, testemunho, autorizacao, atualizado_em FROM si_dias WHERE leitor_id = ? AND edicao = ? ORDER BY dia').bind(l.id, s.id).all(),
       env.DB.prepare('SELECT dia, orou, atualizado_em FROM si_dias WHERE leitor_id = ? AND edicao = ? ORDER BY dia').bind(l.id, s.prep.id).all(),
       // só os já liberados (hoje e dias anteriores): o texto dos próximos dias nunca sai do servidor
@@ -83,7 +84,10 @@ export async function apiSpiritLeitor(req, env, url, seg, l) {
       env.DB.prepare('SELECT id, data, tipo, referencia, texto, autorizacao, criado_em, atualizado_em FROM si_diario WHERE leitor_id = ? AND edicao = ? ORDER BY data DESC, id DESC').bind(l.id, s.id).all(),
       // índice: só data e título de todos os publicados (inclusive os próximos), nunca o texto
       env.DB.prepare("SELECT liberar_em, titulo FROM si_devocionais WHERE edicao = ? AND status = 'publicado' AND (pdf_url IS NOT NULL OR texto IS NOT NULL) ORDER BY liberar_em, id").bind(s.id).all(),
+      env.DB.prepare("SELECT c.devocional_id id, COUNT(*) n FROM si_comentarios c JOIN si_devocionais d ON d.id = c.devocional_id WHERE d.edicao = ? AND d.liberar_em <= ? AND c.status = 'publicado' GROUP BY c.devocional_id").bind(s.id, s.hoje).all(),
     ]);
+    const nc = Object.fromEntries(ncom.results.map((x) => [x.id, x.n]));
+    devs.results.forEach((d) => { d.comentarios = nc[d.id] || 0; });
     const podeAceitar = !naJornada && ((s.etapa === 'preparacao' && s.prep.dia_atual >= ACEITE_A_PARTIR) || s.etapa === 'jornada');
     return json({ edicao: s, inscrito: true, na_preparacao: naPrep, na_jornada: naJornada, pode_aceitar: podeAceitar,
       inscrito_em: p.inscrito_em, aceitou_jornada_em: naJornada ? ps[s.id].inscrito_em : null, devocionais_email: !!p.devocionais_email, email: l.email || null,
@@ -171,12 +175,41 @@ export async function apiSpiritLeitor(req, env, url, seg, l) {
     }
   }
 
+  // ---- comentários nos devocionais: abertos (sem aprovação), visíveis só para inscritos, só em devocional já liberado
+  if (acao === 'comentarios') {
+    if (!p) return erro('Inscreva-se no Spirit Immersion para ver e escrever comentários.', 403);
+    const id = parseInt(seg[3], 10);
+    if (!id) return erro('Não encontrado.', 404);
+    if (m === 'DELETE') {
+      // o próprio leitor apaga o que escreveu (aqui o id é do comentário)
+      const r = await env.DB.prepare('DELETE FROM si_comentarios WHERE id = ? AND leitor_id = ?').bind(id, l.id).run();
+      return r.meta.changes ? json({ ok: true }) : erro('Comentário não encontrado.', 404);
+    }
+    const dev = await env.DB.prepare("SELECT id FROM si_devocionais WHERE id = ? AND edicao = ? AND status = 'publicado' AND liberar_em <= ?").bind(id, s.id, s.hoje).first();
+    if (!dev) return erro('Este devocional ainda não foi liberado.', 404);
+    const lista = async () => (await env.DB.prepare(
+      "SELECT c.id, c.texto, c.criado_em, l.nome, c.leitor_id = ? AS meu FROM si_comentarios c JOIN leitores l ON l.id = c.leitor_id WHERE c.devocional_id = ? AND c.status = 'publicado' ORDER BY c.criado_em, c.id",
+    ).bind(l.id, id).all()).results.map((c) => ({ ...c, meu: !!c.meu }));
+    if (m === 'GET') return json({ comentarios: await lista() });
+    if (m === 'POST') {
+      if (l.bloqueado) return erro('Sua conta não pode comentar.', 403);
+      const texto = String((await corpo(req)).texto || '').replace(/\r\n?/g, '\n').trim();
+      if (!texto) return erro('Escreva o comentário.');
+      if (texto.length > MAX_COMENTARIO) return erro(`O comentário pode ter até ${MAX_COMENTARIO} caracteres.`);
+      const n = (await env.DB.prepare("SELECT COUNT(*) n FROM si_comentarios WHERE leitor_id = ? AND criado_em > datetime('now','-1 hour')").bind(l.id).first()).n;
+      if (n >= COMENTARIOS_POR_HORA) return erro('Você já escreveu vários comentários na última hora. Tente de novo mais tarde.', 429);
+      await env.DB.prepare('INSERT INTO si_comentarios (devocional_id, leitor_id, texto) VALUES (?,?,?)').bind(id, l.id, texto).run();
+      return json({ comentarios: await lista() });
+    }
+  }
+
   if (acao === 'sair' && m === 'POST') {
     // sair do movimento apaga a inscrição e todo o registro desta edição (dias e testemunhos)
     await env.DB.batch([
       env.DB.prepare('DELETE FROM si_dias WHERE leitor_id = ? AND edicao IN (?,?)').bind(l.id, ...EDICOES),
       env.DB.prepare('DELETE FROM si_diario WHERE leitor_id = ? AND edicao = ?').bind(l.id, s.id),
       env.DB.prepare('DELETE FROM si_envios WHERE leitor_id = ?').bind(l.id),
+      env.DB.prepare('DELETE FROM si_comentarios WHERE leitor_id = ?').bind(l.id),
       env.DB.prepare('DELETE FROM si_participantes WHERE leitor_id = ? AND edicao IN (?,?)').bind(l.id, ...EDICOES),
     ]);
     return json({ ok: true });
@@ -215,11 +248,32 @@ export async function apiSpiritPainel(req, env, url, seg, u, { registrar }) {
       q('SELECT dia, SUM(orou) orou FROM si_dias WHERE edicao = ? GROUP BY dia ORDER BY dia', s.prep.id),
       env.DB.prepare('SELECT COUNT(DISTINCT leitor_id) n, SUM(devocionais_email) dev FROM si_participantes WHERE edicao IN (?,?)').bind(...EDICOES).first(),
     ]);
+    const comentarios = await q(`SELECT c.id, c.texto, c.status, c.criado_em, c.removido_em, d.titulo, d.liberar_em, l.id leitor_id, l.nome, l.email, l.bloqueado, ru.nome removido_por_nome
+       FROM si_comentarios c JOIN si_devocionais d ON d.id = c.devocional_id JOIN leitores l ON l.id = c.leitor_id LEFT JOIN usuarios ru ON ru.id = c.removido_por
+       WHERE d.edicao = ? ORDER BY c.criado_em DESC, c.id DESC LIMIT 500`, s.id);
     const orados = (await env.DB.prepare('SELECT edicao, SUM(orou) n FROM si_dias WHERE edicao IN (?,?) GROUP BY edicao').bind(...EDICOES).all()).results;
     const so = (ed) => (orados.find((x) => x.edicao === ed) || { n: 0 }).n || 0;
     return json({ edicao: s, participantes: part.n, participantes_prep: partPrep.n, total_pessoas: total.n, com_email: part.dev || 0,
-      por_dia: porDia, por_dia_prep: porDiaPrep, devocionais: devs, testemunhos: tes,
+      por_dia: porDia, por_dia_prep: porDiaPrep, devocionais: devs, testemunhos: tes, comentarios,
       dias_orados_total: so(s.id), dias_orados_prep: so(s.prep.id), na_fila: fila.n, email_servico: emailConfigurado(env) });
+  }
+
+  if (seg[0] === 'comentarios' && seg[1]) {
+    const id = parseInt(seg[1], 10);
+    const c = await env.DB.prepare('SELECT c.*, d.titulo, l.nome FROM si_comentarios c JOIN si_devocionais d ON d.id = c.devocional_id JOIN leitores l ON l.id = c.leitor_id WHERE c.id = ?').bind(id).first();
+    if (!c) return erro('Comentário não encontrado.', 404);
+    if (seg[2] === 'status' && m === 'POST') {
+      const remover = !!(await corpo(req)).remover;
+      if (remover) await env.DB.prepare("UPDATE si_comentarios SET status = 'removido', removido_em = datetime('now'), removido_por = ? WHERE id = ?").bind(u.id, id).run();
+      else await env.DB.prepare("UPDATE si_comentarios SET status = 'publicado', removido_em = NULL, removido_por = NULL WHERE id = ?").bind(id).run();
+      await registrar(env, u, remover ? 'tirou do ar um comentário do Spirit Immersion' : 'devolveu ao ar um comentário do Spirit Immersion', c.titulo, c.nome);
+      return json({ ok: true });
+    }
+    if (!seg[2] && m === 'DELETE') {
+      await env.DB.prepare('DELETE FROM si_comentarios WHERE id = ?').bind(id).run();
+      await registrar(env, u, 'apagou um comentário do Spirit Immersion', c.titulo, c.nome);
+      return json({ ok: true });
+    }
   }
 
   if (seg[0] === 'devocionais') {
