@@ -11,6 +11,8 @@ for(const [id,handle] of [['test-personal','ocantarino'],['test-institutional','
  await processEvent(e,env,()=>{throw new Error('No network allowed');});
  await processEvent(e,env,()=>{throw new Error('No network allowed');});
 }
+await processEvent({account:'test-personal',comment:'wrong-post',media:'unselected-post',text:'SPIRIT',at:Date.now()/1000},env,()=>{throw new Error('No network allowed');});
+await processEvent({account:'unknown-account',comment:'wrong-account',media:'test-post',text:'SPIRIT',at:Date.now()/1000},env,()=>{throw new Error('No network allowed');});
 const rows=db.prepare('SELECT * FROM deliveries').all();
 if(rows.length!==2 || rows.some(r=>r.status!=='simulated')) throw new Error('Simulation failed');
 console.log(JSON.stringify({result:'passed',accounts:2,simulated:rows.length,duplicateSends:0,networkCalls:0},null,2));
