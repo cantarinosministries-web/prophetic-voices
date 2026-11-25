@@ -53,6 +53,29 @@ export async function processEvent(e, env, fetcher=fetch) {
 export default {
   async fetch(req,env) {
     const url = new URL(req.url);
+    if (url.pathname === '/admin/inspect' && req.method === 'POST') {
+      const parts=[]; let size=0; const reader=req.body?.getReader();
+      if (!reader) return json({error:'body'},400);
+      while(true) {const {done,value}=await reader.read();if(done)break;size+=value.length;if(size>1024){await reader.cancel();return json({error:'too_large'},413);}parts.push(value);}
+      const raw=new TextDecoder().decode(Uint8Array.from(parts.flatMap(c=>Array.from(c))));
+      if (raw.length > 1024 || !await signed(raw,env.ADMIN_TOKEN,req.headers.get('x-admin-signature'))) return json({error:'forbidden'},403);
+      let input; try { input=JSON.parse(raw); } catch { return json({error:'payload'},400); }
+      if (Math.abs(Date.now()/1000-Number(input.ts))>300 || !Number.isFinite(Number(input.ts))) return json({error:'expired'},403);
+      const account=await env.DB.prepare('SELECT * FROM accounts WHERE id=?').bind(String(input.account)).first();
+      if (!account || !env[account.token_binding]) return json({error:'token_missing'},409);
+      const host=env.META_API_HOST || 'graph.facebook.com';
+      if (!['graph.facebook.com','graph.instagram.com'].includes(host) || !/^v\d+\.\d+$/.test(env.GRAPH_VERSION)) return json({error:'configuration'},409);
+      const headers={Authorization:`Bearer ${env[account.token_binding]}`};
+      const base=`https://${host}/${env.GRAPH_VERSION}/${encodeURIComponent(account.id)}`;
+      const profile=await fetch(base+'?fields=id,username',{headers,signal:AbortSignal.timeout(10000)});
+      if (!profile.ok) return json({error:'meta_profile',status:profile.status},502);
+      const identity=await profile.json();
+      if (identity.username!==account.handle || String(identity.id)!==account.id) return json({error:'identity_mismatch'},409);
+      const media=await fetch(base+'/media?fields=id,permalink,caption,timestamp&limit=25',{headers,signal:AbortSignal.timeout(10000)});
+      if (!media.ok) return json({error:'meta_media',status:media.status},502);
+      const result=await media.json();
+      return json({account:identity,media:(result.data || []).map(({id,permalink,caption,timestamp})=>({id,permalink,caption,timestamp}))});
+    }
     if (url.pathname === '/health') return json({service:'pv-instagram',mode:env.MODE,sendEnabled:env.SEND_ENABLED==='true'});
     if (url.pathname !== '/webhook') return json({error:'not_found'},404);
     if (req.method === 'GET') {
