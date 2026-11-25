@@ -35,7 +35,10 @@
       te_h: 'Testemunhos', te_p: 'Conte o que Deus tem feito durante esta jornada. Diferente do Diário de Oração, o testemunho é para ser compartilhado: você escolhe quem pode lê-lo.', te_novo: 'Novo testemunho', te_editando: 'Editando testemunho', te_texto: 'Seu testemunho', te_ph: 'O que Deus fez? Uma cura, uma resposta, uma mudança, um encontro…', te_salvar: 'Salvar testemunho', te_salvo: 'Testemunho salvo.', te_vazio: 'Você ainda não escreveu nenhum testemunho.', te_apagar_conf: 'Apagar este testemunho?', te_aut_nota: 'A equipe lê os testemunhos com cuidado e oração. Nada é publicado fora da autorização marcada, e você pode mudá-la ou apagar o testemunho quando quiser.',
       dv_h: 'Devocional', dv_hoje: 'Devocional de hoje', dv_ler: 'Ler o devocional de hoje', dv_dia: 'Ler o devocional deste dia', dv_ant: '‹ Dia anterior', dv_prox: 'Próximo dia ›',
       dv_tranc: 'Libera em {d}', dv_antes: 'O primeiro devocional chega em 1º de dezembro. Cada dia libera um novo, à meia-noite; os anteriores continuam aqui para reler.', dv_nav: 'Devocionais da preparação',
-      dv_check: 'Sim, orei {m} neste dia ✓', dv_check_j: 'Sim, orei 1 hora neste dia ✓', dv_ok: 'Você marcou a oração deste dia ✓', dv_idx: 'Índice · os 31 devocionais da preparação', dv_idx_j: 'Índice dos devocionais', dv_libera: 'libera em {d}',
+      dv_check: 'Sim, orei {m} neste dia ✓', dv_check_j: 'Sim, orei 1 hora neste dia ✓', dv_ok: 'Você marcou a oração deste dia ✓', dv_idx: 'Índice · os 31 devocionais da preparação',
+      cm_h: 'Comentários', cm_vazio: 'Ninguém comentou ainda. Seja o primeiro a contar o que Deus falou com você neste devocional.', cm_ph: 'O que Deus falou com você neste devocional?',
+      cm_env: 'Comentar', cm_nota: 'Seu comentário aparece na hora, com o seu nome, para quem participa do Spirit Immersion. Não é um espaço de debate: escreva com amor e edificação.',
+      cm_apagar: 'Apagar', cm_conf: 'Apagar este comentário?', cm_carr: 'Carregando os comentários…', cm_voce: 'você', dv_idx_j: 'Índice dos devocionais', dv_libera: 'libera em {d}',
       dev_h: 'Devocionais', dev_vazio: 'Os devocionais aparecem aqui assim que forem liberados.', dev_abrir: 'Abrir PDF', dev_de: 'Liberado em {d}',
       cfg_h: 'Preferências', dev_email_on: 'Você recebe os devocionais também no e-mail', dev_email_off: 'Você não recebe os devocionais por e-mail (eles continuam aqui)', dev_email_srv: 'Os e-mails ainda estão sendo ligados; enquanto isso, os devocionais ficam aqui.',
       ligar: 'Receber por e-mail', desligar: 'Parar de receber', sair_p: 'Sair do Spirit Immersion apaga a sua inscrição, os dias marcados (preparação e 100 dias) e todo o seu diário desta edição.', sair: 'Sair e apagar meu registro', sair_conf: 'Confirmar: sair e apagar',
@@ -71,7 +74,10 @@
       te_h: 'Testimonies', te_p: 'Tell what God has been doing during this journey. Unlike the Prayer Journal, a testimony is meant to be shared: you choose who may read it.', te_novo: 'New testimony', te_editando: 'Editing testimony', te_texto: 'Your testimony', te_ph: 'What did God do? A healing, an answer, a change, an encounter…', te_salvar: 'Save testimony', te_salvo: 'Testimony saved.', te_vazio: 'You have not written any testimony yet.', te_apagar_conf: 'Delete this testimony?', te_aut_nota: 'The team reads testimonies with care and prayer. Nothing is published beyond the permission you choose, and you can change it or delete the testimony anytime.',
       dv_h: 'Devotional', dv_hoje: 'Today’s devotional', dv_ler: 'Read today’s devotional', dv_dia: 'Read this day’s devotional', dv_ant: '‹ Previous day', dv_prox: 'Next day ›',
       dv_tranc: 'Opens on {d}', dv_antes: 'The first devotional arrives on December 1. A new one opens each day at midnight; earlier ones stay here to reread.', dv_nav: 'Preparation devotionals',
-      dv_check: 'Yes, I prayed {m} on this day ✓', dv_check_j: 'Yes, I prayed 1 hour on this day ✓', dv_ok: 'You marked your prayer for this day ✓', dv_idx: 'Index · the 31 preparation devotionals', dv_idx_j: 'Devotionals index', dv_libera: 'opens on {d}',
+      dv_check: 'Yes, I prayed {m} on this day ✓', dv_check_j: 'Yes, I prayed 1 hour on this day ✓', dv_ok: 'You marked your prayer for this day ✓', dv_idx: 'Index · the 31 preparation devotionals',
+      cm_h: 'Comments', cm_vazio: 'No comments yet. Be the first to share what God spoke to you in this devotional.', cm_ph: 'What did God speak to you in this devotional?',
+      cm_env: 'Comment', cm_nota: 'Your comment appears right away, with your name, to Spirit Immersion participants. This is not a place for debate: write to build others up.',
+      cm_apagar: 'Delete', cm_conf: 'Delete this comment?', cm_carr: 'Loading comments…', cm_voce: 'you', dv_idx_j: 'Devotionals index', dv_libera: 'opens on {d}',
       dev_h: 'Devotionals', dev_vazio: 'Devotionals appear here as soon as they are released.', dev_abrir: 'Open PDF', dev_de: 'Released on {d}',
       cfg_h: 'Preferences', dev_email_on: 'You also receive the devotionals by e-mail', dev_email_off: 'You do not receive the devotionals by e-mail (they stay here)', dev_email_srv: 'E-mails are still being set up; meanwhile, the devotionals stay here.',
       ligar: 'Receive by e-mail', desligar: 'Stop receiving', sair_p: 'Leaving the Spirit Immersion erases your enrollment, the days you marked (preparation and 100 days) and your whole journal for this edition.', sair: 'Leave and erase my record', sair_conf: 'Confirm: leave and erase',
@@ -85,7 +91,7 @@
   var vazioT = function (data) { return { id: 0, data: data || '', texto: '', autorizacao: 'equipe' }; };
 
   // rascunho do diário sobrevive às re-renderizações (troca de idioma, salvar um dia etc.)
-  var rasc = vazio(), rascT = vazioT(), filtro = '', busca = '', lendo = 0; // lendo = id do devocional aberto
+  var rasc = vazio(), rascT = vazioT(), filtro = '', busca = '', lendo = 0, coms = {}, rascCom = {}; // coms[id do devocional] = lista de comentários // lendo = id do devocional aberto
 
   // texto do devocional (marcações simples, ver worker/spirit.js): '> ' epígrafe, '>> ' autor, '» ' versículo,
   // '»» ' referência, '- ' lista, 'Oração: ' oração final; parágrafos separados por linha em branco
@@ -118,6 +124,10 @@
     var dataDia = function (c, n) { return new Date(Date.parse(C(c).inicio + 'T12:00:00Z') + (n - 1) * 864e5); };
     var isoDia = function (c, n) { return dataDia(c, n).toISOString().slice(0, 10); };
     var diaDeIso = function (c, iso) { return Math.round((Date.parse(iso + 'T12:00:00Z') - Date.parse(C(c).inicio + 'T12:00:00Z')) / 864e5) + 1; };
+    var fmtQuando = function (iso) { // 'AAAA-MM-DD HH:MM:SS' em UTC (D1) → data e hora locais
+      var dt = new Date(String(iso).replace(' ', 'T') + 'Z'); if (isNaN(dt)) return '';
+      return dt.toLocaleDateString(en() ? 'en-US' : 'pt-BR', { day: 'numeric', month: 'short' }) + ' · ' + dt.toLocaleTimeString(en() ? 'en-US' : 'pt-BR', { hour: '2-digit', minute: '2-digit' });
+    };
     var fmtData = function (d, longo) { return d.toLocaleDateString(en() ? 'en-US' : 'pt-BR', longo ? { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' } : { day: 'numeric', month: 'short' }); };
     var fmtIso = function (iso, longo) { return fmtData(new Date(iso + 'T12:00:00Z'), longo); };
     var mapa = function (lista) { var m = {}; lista.forEach(function (x) { m[x.dia] = x; }); return m; };
@@ -229,6 +239,17 @@
           h += '<div class="sj-dv-check">' + (feito ? '<p class="sj-ok">' + esc(t('dv_ok')) + '</p>'
             : '<button type="button" class="btn btn-creme" data-dvcheck="' + x.c + ':' + x.n + '">' + esc(x.c === 'prep' ? t('dv_check').replace('{m}', tempo(blocoDe(x.n).minutos)) : t('dv_check_j')) + '</button>') + '</div>';
         }
+        // comentários: abertos (sem aprovação), só para inscritos; carregados quando o devocional é aberto
+        var lc = coms[d.id];
+        h += '<div class="sj-dv-com" id="sjCom" data-dev="' + d.id + '"><h4>' + esc(t('cm_h')) + (lc ? ' · ' + lc.length : (d.comentarios ? ' · ' + d.comentarios : '')) + '</h4>';
+        if (!lc) h += '<p class="sj-mudo">' + esc(t('cm_carr')) + '</p>';
+        else if (!lc.length) h += '<p class="sj-mudo">' + esc(t('cm_vazio')) + '</p>';
+        else h += '<ul>' + lc.map(function (c) {
+          return '<li><div class="sj-cm-cab"><b>' + esc(c.nome || '—') + (c.meu ? ' <span>(' + esc(t('cm_voce')) + ')</span>' : '') + '</b><small>' + esc(fmtQuando(c.criado_em)) + '</small>' +
+            (c.meu ? '<button type="button" class="sj-cm-del" data-cmdel="' + c.id + '">' + esc(t('cm_apagar')) + '</button>' : '') + '</div><p>' + esc(c.texto).replace(/\n/g, '<br>') + '</p></li>';
+        }).join('') + '</ul>';
+        h += '<form class="sj-cm-form" id="sjComF"><textarea id="sjComT" rows="3" maxlength="2000" placeholder="' + esc(t('cm_ph')) + '">' + esc(rascCom[d.id] || '') + '</textarea>' +
+          '<div class="sj-cm-acoes"><small>' + esc(t('cm_nota')) + '</small><button class="btn btn-creme" type="submit">' + esc(t('cm_env')) + '</button></div></form></div>';
         h += '<div class="sj-dv-pe"><button type="button" class="btn btn-ghost sm" data-dvir="' + (i > 0 ? L2[i - 1].id : '') + '"' + (i > 0 ? '' : ' disabled') + '>' + esc(t('dv_ant')) + '</button>' +
 
           '<button type="button" class="btn btn-ghost sm" data-dvir="' + (i < L2.length - 1 ? L2[i + 1].id : '') + '"' + (i < L2.length - 1 ? '' : ' disabled') + '>' + esc(t('dv_prox')) + '</button></div>';
@@ -378,6 +399,27 @@
     }
 
     function ligar() {
+      var cm = document.getElementById('sjCom');
+      if (cm) {
+        var did = parseInt(cm.getAttribute('data-dev'), 10);
+        if (!coms[did]) L.api('/conta/spirit/comentarios/' + did).then(function (r) { coms[did] = r.comentarios; desenhar(); }).catch(function () { coms[did] = []; desenhar(); });
+        var ta = document.getElementById('sjComT');
+        ta.oninput = function () { rascCom[did] = ta.value; };
+        document.getElementById('sjComF').onsubmit = function (ev) {
+          ev.preventDefault();
+          var texto = ta.value.trim(); if (!texto) { ta.focus(); return; }
+          var bt = this.querySelector('button[type=submit]'); bt.disabled = true;
+          L.api('/conta/spirit/comentarios/' + did, 'POST', { texto: texto }).then(function (r) { coms[did] = r.comentarios; rascCom[did] = ''; desenhar(); })
+            .catch(function (er) { bt.disabled = false; alert(er.message); });
+        };
+        Array.prototype.forEach.call(cm.querySelectorAll('[data-cmdel]'), function (b) {
+          b.onclick = function () {
+            if (!confirm(t('cm_conf'))) return;
+            L.api('/conta/spirit/comentarios/' + b.getAttribute('data-cmdel'), 'DELETE').then(function () { coms[did] = coms[did].filter(function (c) { return String(c.id) !== b.getAttribute('data-cmdel'); }); desenhar(); })
+              .catch(function (er) { alert(er.message); });
+          };
+        });
+      }
       Array.prototype.forEach.call(alvo.querySelectorAll('[data-dvir]'), function (b) {
         b.onclick = function (ev) {
           ev.preventDefault();
