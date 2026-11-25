@@ -10,9 +10,10 @@ export function matches(text, keyword) {
   return normalize(text).split(/[^\p{L}\p{N}]+/u).includes(normalize(keyword));
 }
 export function events(payload) {
+  if (Array.isArray(payload)) return payload.flatMap(events);
   if (payload.object !== 'instagram') return [];
-  return (payload.entry || []).flatMap(entry => (entry.changes || []).filter(c => c.field === 'comments').map(c => ({
-    account:String(entry.id), comment:String(c.value?.id || ''), media:String(c.value?.media?.id || ''),
+  return (payload.entry || []).flatMap(entry => (entry.changes || (entry.field ? [{field:entry.field,value:entry.value}] : [])).filter(c => c.field === 'comments').map(c => ({
+    account:String(entry.id), comment:String(c.value?.id || c.value?.comment_id || ''), media:String(c.value?.media?.id || ''),
     text:String(c.value?.text || '').slice(0,2000), at:Number(c.value?.created_time || entry.time),
     self:String(c.value?.from?.id) === String(entry.id), type:c.value?.media?.media_product_type
   }))).filter(e => e.comment && e.media && !e.self && ['FEED','REELS'].includes(e.type) && Number.isFinite(e.at));
