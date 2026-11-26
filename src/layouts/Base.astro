@@ -25,7 +25,7 @@ const isHome = page === 'home';
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{title}</title>
   <meta name="description" content={description} />
-  <link rel="icon" type="image/png" href="/media/symbol-creme.png" />
+  <link rel="icon" type="image/png" href="/app/PV_Logo-07%20(1).png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200;300;400&family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -33,6 +33,11 @@ const isHome = page === 'home';
   <meta name="theme-color" content="#0b0a08" />
   <link rel="apple-touch-icon" href="/app/PV_Logo-07%20(1).png" />
   <link rel="stylesheet" href="/app/install.css" />
+  <meta property="og:image" content="https://thepropheticvoices.com.br/app/PV_Logo-07%20(1).png" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:alt" content="The Prophetic Voices" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:image" content="https://thepropheticvoices.com.br/app/PV_Logo-07%20(1).png" />
   <slot name="head" />
 </head>
 <body class={isHome ? 'locked' : 'ready'}>
