@@ -301,7 +301,8 @@
       if (msg) h += '<p class="conta-ok" role="status">' + esc(msg) + '</p>';
 
       h += '<section class="conta-card sj-playlist" aria-labelledby="sjPlaylistTitulo"><h2 id="sjPlaylistTitulo">' + esc(t('playlist_h')) + '</h2><p>' + esc(t('playlist_p')) + '</p>' +
-        '<a class="btn btn-ghost sm" href="https://open.spotify.com/playlist/1cbUlhTj9opJTtPyZkowXD" target="_blank" rel="noopener noreferrer">' + esc(t('playlist_b')) + ' ↗</a></section>';
+        '<div class="conta-perigo"><a class="btn btn-ghost sm" href="https://open.spotify.com/playlist/1cbUlhTj9opJTtPyZkowXD" target="_blank" rel="noopener noreferrer">soaking ↗</a>' +
+        '<a class="btn btn-ghost sm" href="https://open.spotify.com/playlist/0vv32HhALCtegBPESb5mnK" target="_blank" rel="noopener noreferrer">praying in tongues ↗</a></div></section>';
 
       // convite para os 100 dias
       if (D.pode_aceitar) {
