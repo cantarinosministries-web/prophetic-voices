@@ -29,6 +29,10 @@ const isHome = page === 'home';
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200;300;400&family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <meta name="theme-color" content="#0b0a08" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/app/apple-touch-icon.png" />
+  <link rel="stylesheet" href="/app/install.css" />
   <slot name="head" />
 </head>
 <body class={isHome ? 'locked' : 'ready'}>
@@ -108,11 +112,18 @@ const isHome = page === 'home';
       <div class="legal">
         <span>THE PROPHETIC VOICES · 2026</span>
         {isHome ? <button type="button" id="replay" data-i18n="replay">↺ REVER ABERTURA</button> : <span></span>}
-        <span class="legal-links"><a href="/termos.html" data-i18n="f_terms">TERMOS</a> · <a href="/privacidade.html" data-i18n="f_privacy">PRIVACIDADE</a></span>
+        <span class="legal-links"><a href="/instalar.html">INSTALAR NO CELULAR</a> · <a href="/termos.html" data-i18n="f_terms">TERMOS</a> · <a href="/privacidade.html" data-i18n="f_privacy">PRIVACIDADE</a></span>
       </div>
     </div>
   </footer>
 
+  <dialog id="pvInstallDialog" class="pwa-dialog" aria-labelledby="pvInstallTitle">
+    <h2 id="pvInstallTitle">Instalar no celular</h2>
+    <p id="pvInstallHelp"></p>
+    <p>O aplicativo é gratuito e precisa de internet. Use o mesmo login do site.</p>
+    <button type="button" class="btn btn-creme sm" data-pwa-close>Entendi</button>
+  </dialog>
+  <script is:inline src="/app/install.js" defer></script>
   <slot name="scripts" />
 
   <script>
