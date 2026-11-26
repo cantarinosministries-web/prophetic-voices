@@ -1,0 +1,8 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import '../public/conta/historico.js';
+const H = globalThis.PV_SPIRIT_HISTORY;
+const data = {edicao:{hoje:'2026-11-26'},diario:[{id:1,data:'2026-11-20',tipo:'oracao',texto:'Registro fictício',referencia:'Salmo 23'},{id:2,data:'2026-11-25',tipo:'testemunho',texto:'Testemunho fictício'}],devocionais:[{id:1,liberar_em:'2026-11-24',titulo:'Devocional passado',texto:'Texto fictício'},{id:2,liberar_em:'2026-12-01',titulo:'Futuro',texto:'Não exibir'}]};
+test('history combines only provided account records and already released devotionals, newest first',()=>{const items=H.entries(data);assert.equal(items.length,3);assert.deepEqual(items.map(x=>x.kind),['testemunho','devocional','diario']);assert.ok(!JSON.stringify(items).includes('Não exibir'));assert.equal(data.diario[0].tipo,'oracao');});
+test('history filters type, text and biblical reference with inclusive date bounds',()=>{const items=H.entries(data);assert.equal(H.filter(items,{kind:'diario'}).length,1);assert.equal(H.filter(items,{term:'SALMO 23'}).length,1);assert.equal(H.filter(items,{from:'2026-11-24',to:'2026-11-25'}).length,2);assert.equal(H.filter(items,{kind:'diario',from:'2026-11-24'}).length,0);});
+test('future encrypted journals fail closed and unsafe PDF destinations are not rendered',()=>{const items=H.entries({edicao:data.edicao,diario:[{id:9,encrypted:true,data:'2026-11-20',texto:'never render'}],devocionais:[{id:3,liberar_em:'2026-11-24',titulo:'PDF',pdf_url:'javascript:alert(1)'}]});assert.equal(items.length,1);assert.equal(items[0].pdf,'');assert.ok(!JSON.stringify(items).includes('never render'));});

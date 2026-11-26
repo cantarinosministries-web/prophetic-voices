@@ -299,6 +299,8 @@
       }
       h += '</div></section>';
       if (msg) h += '<p class="conta-ok" role="status">' + esc(msg) + '</p>';
+      h += '<details class="conta-card sj-history" id="sjHistorico"><summary>' + (en() ? 'My history' : 'Meu histórico') + '<span>' + (en() ? 'Read your earlier journal entries, testimonies and released devotionals.' : 'Consulte seus registros anteriores do diário, testemunhos e devocionais já liberados.') + '</span></summary><p>' + (en() ? 'Edition ' : 'Edição ') + esc(e.id) + ' · ' + (en() ? 'Your saved records remain available after this edition ends, unless you delete them, leave this edition or delete your account.' : 'Seus registros salvos continuam disponíveis após o fim desta edição, enquanto você não os apagar, sair desta edição ou excluir a conta.') + '</p><div class="sj-history-links"><a class="btn btn-ghost sm" href="#sjDiario">' + (en() ? 'Write in my journal' : 'Escrever no diário') + '</a><a class="btn btn-ghost sm" href="#sjTes">' + (en() ? 'Share a testimony' : 'Compartilhar testemunho') + '</a></div><div id="sjHistoryBody"></div></details>';
+
 
       h += '<section class="conta-card sj-playlist" aria-labelledby="sjPlaylistTitulo"><h2 id="sjPlaylistTitulo">' + esc(t('playlist_h')) + '</h2><p>' + esc(t('playlist_p')) + '</p>' +
         '<div class="conta-perigo"><a class="btn btn-ghost sm" href="https://open.spotify.com/playlist/1cbUlhTj9opJTtPyZkowXD" target="_blank" rel="noopener noreferrer">soaking ↗</a>' +
@@ -373,7 +375,9 @@
         '<p>' + esc(t('sair_p')) + '</p><button type="button" class="btn btn-ghost sm" id="sjSair">' + esc(t('sair')) + '</button></section></div></div>';
 
       alvo.innerHTML = h;
+      if (window.PV_SPIRIT_HISTORY) window.PV_SPIRIT_HISTORY.mount(document.getElementById('sjHistoryBody'), D, { esc: esc, en: en(), typeLabel: function (type) { return t('t_' + type); }, devotional: function (text) { return htmlDevocional(text, esc); } });
       ligar();
+      if (location.hash === '#sjHistorico') { var history = document.getElementById('sjHistorico'); history.open = true; history.scrollIntoView({block:'start'}); }
     }
 
     function irDiario(data) {
