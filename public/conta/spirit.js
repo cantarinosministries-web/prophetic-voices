@@ -6,6 +6,7 @@
 (function () {
   var T = {
     pt: {
+      playlist_h: 'Playlist para os seus momentos de oração', playlist_p: 'Uma indicação de playlist no Spotify que pode cooperar com as suas horas de oração.', playlist_b: 'Ouvir no Spotify',
       e_antes: 'A preparação começa em', e_antes_1: 'A preparação começa amanhã', dias: 'dias',
       e_prep: 'Preparação · dia {d} de {t}', e_jornada: 'Dia {d} de {t}', e_espera: 'Os 100 dias começam em 1º de janeiro', e_aberta: 'Os 100 dias começaram', e_fim: 'Jornada encerrada',
       bloco: '{n}ª jornada · {m} por dia', bloco_c: '{n}ª jornada · {m}', min: '{m} minutos', hora: '1 hora',
@@ -42,6 +43,7 @@
       priv: 'Seu registro é pessoal: só você vê os dias marcados e o diário que não liberar. <a href="/privacidade.html#spirit">Como cuidamos dos seus dados</a>.', sobre: 'Sobre o movimento'
     },
     en: {
+      playlist_h: 'A playlist for your prayer time', playlist_p: 'A suggested Spotify playlist to accompany your hours of prayer.', playlist_b: 'Listen on Spotify',
       e_antes: 'Preparation begins in', e_antes_1: 'Preparation begins tomorrow', dias: 'days',
       e_prep: 'Preparation · day {d} of {t}', e_jornada: 'Day {d} of {t}', e_espera: 'The 100 days begin on January 1', e_aberta: 'The 100 days have begun', e_fim: 'Journey completed',
       bloco: 'Journey {n} · {m} a day', bloco_c: 'Journey {n} · {m}', min: '{m} minutes', hora: '1 hour',
@@ -297,6 +299,9 @@
       }
       h += '</div></section>';
       if (msg) h += '<p class="conta-ok" role="status">' + esc(msg) + '</p>';
+
+      h += '<section class="conta-card sj-playlist" aria-labelledby="sjPlaylistTitulo"><h2 id="sjPlaylistTitulo">' + esc(t('playlist_h')) + '</h2><p>' + esc(t('playlist_p')) + '</p>' +
+        '<a class="btn btn-ghost sm" href="https://open.spotify.com/playlist/1cbUlhTj9opJTtPyZkowXD" target="_blank" rel="noopener noreferrer">' + esc(t('playlist_b')) + ' ↗</a></section>';
 
       // convite para os 100 dias
       if (D.pode_aceitar) {
