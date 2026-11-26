@@ -16,8 +16,8 @@
     var help = document.getElementById('pvInstallHelp');
     var embedded = /Instagram|FBAN|FBAV/i.test(navigator.userAgent);
     help.textContent = english()
-      ? (embedded ? 'First open this page in Safari on iPhone or Chrome on Android, outside Instagram. ' : '') + (ios ? 'In Safari, open Share, choose Add to Home Screen and confirm Add. Enable Open as Web App if that option is shown.' : 'In Chrome or Edge, open the browser menu and look for Install app or Add to Home screen. Available wording depends on your device and browser.')
-      : (embedded ? 'Primeiro, abra esta página no Safari do iPhone ou no Chrome do Android, fora do Instagram. ' : '') + (ios ? 'No Safari, toque em Compartilhar, escolha Adicionar à Tela de Início e confirme em Adicionar. Ative Abrir como App da Web, se essa opção aparecer.' : 'No Chrome ou Edge, abra o menu do navegador e procure Instalar aplicativo ou Adicionar à tela inicial. O nome da opção varia conforme o aparelho e o navegador.');
+      ? (embedded ? 'First open this page in your phone’s browser, outside Instagram. ' : '') + (ios ? 'In your browser, open Share, choose Add to Home Screen and confirm Add. Enable Open as Web App if that option is shown.' : 'Open your browser menu and look for Install app or Add to Home screen. Available wording depends on your device and browser.')
+      : (embedded ? 'Primeiro, abra esta página no navegador do celular, fora do Instagram. ' : '') + (ios ? 'No navegador, toque em Compartilhar, escolha Adicionar à Tela de Início e confirme em Adicionar. Ative Abrir como App da Web, se essa opção aparecer.' : 'Abra o menu do navegador e procure Instalar aplicativo ou Adicionar à tela inicial. O nome da opção varia conforme o aparelho e o navegador.');
     if (!dialog.open) dialog.showModal();
   }
   window.addEventListener('beforeinstallprompt', function (event) { event.preventDefault(); deferred = event; });
