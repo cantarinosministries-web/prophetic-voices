@@ -6,6 +6,7 @@
 (function () {
   var T = {
     pt: {
+      esp_h: 'Seu espaço na jornada', esp_di: 'Impressões, o que ouviu de Deus, leituras e orações. Só você vê.', esp_te: 'Conte o que Deus fez, com a autorização que você escolher.', esp_hi: 'Meu histórico', esp_hi_p: 'Diário, testemunhos e devocionais já liberados, com busca e datas.', esp_abrir: 'Abrir', voltar: '← Voltar à jornada', hi_p: 'Seus registros salvos continuam disponíveis após o fim desta edição, enquanto você não os apagar, sair desta edição ou excluir a conta.',
       playlist_h: 'Playlist para os seus momentos de oração', playlist_p: 'Uma indicação de playlist no Spotify que pode cooperar com as suas horas de oração.', playlist_b: 'Ouvir no Spotify',
       e_antes: 'A preparação começa em', e_antes_1: 'A preparação começa amanhã', dias: 'dias',
       e_prep: 'Preparação · dia {d} de {t}', e_jornada: 'Dia {d} de {t}', e_espera: 'Os 100 dias começam em 1º de janeiro', e_aberta: 'Os 100 dias começaram', e_fim: 'Jornada encerrada',
@@ -43,6 +44,7 @@
       priv: 'Seu registro é pessoal: só você vê os dias marcados e o diário que não liberar. <a href="/privacidade.html#spirit">Como cuidamos dos seus dados</a>.', sobre: 'Sobre o movimento'
     },
     en: {
+      esp_h: 'Your space in the journey', esp_di: 'Impressions, what you heard from God, readings and prayers. Only you can see it.', esp_te: 'Tell what God has done, with the permission you choose.', esp_hi: 'My history', esp_hi_p: 'Journal, testimonies and released devotionals, with search and dates.', esp_abrir: 'Open', voltar: '← Back to the journey', hi_p: 'Your saved records remain available after this edition ends, unless you delete them, leave this edition or delete your account.',
       playlist_h: 'A playlist for your prayer time', playlist_p: 'A suggested Spotify playlist to accompany your hours of prayer.', playlist_b: 'Listen on Spotify',
       e_antes: 'Preparation begins in', e_antes_1: 'Preparation begins tomorrow', dias: 'days',
       e_prep: 'Preparation · day {d} of {t}', e_jornada: 'Day {d} of {t}', e_espera: 'The 100 days begin on January 1', e_aberta: 'The 100 days have begun', e_fim: 'Journey completed',
@@ -114,6 +116,18 @@
     var L = window.PV_LOGIN, esc = L.esc;
     var t = function (k) { var l = L.lingua(); return (T[l] && T[l][k]) || T.pt[k] || k; };
     var D = null, aberto = null, msg = ''; // aberto = { c: 'prep' | 'jor', n }
+    // subpáginas da aba: #spirit (jornada), #spirit/diario, #spirit/testemunhos, #spirit/historico
+    var VISTAS = ['diario', 'testemunhos', 'historico'];
+    var vistaDoHash = function () { var m = /^#spirit\/([a-z]+)$/.exec(location.hash); if (location.hash === '#sjHistorico') return 'historico'; return m && VISTAS.indexOf(m[1]) >= 0 ? m[1] : 'inicio'; };
+    var vista = vistaDoHash();
+    function irVista(v, foco) {
+      vista = v; msg = '';
+      try { history.pushState(null, '', location.pathname + location.search + '#spirit' + (v === 'inicio' ? '' : '/' + v)); } catch (e) {}
+      desenhar();
+      var top = alvo.getBoundingClientRect().top + window.scrollY - 110; window.scrollTo({ top: Math.max(top, 0) });
+      if (foco) { var ta = alvo.querySelector(foco + ' textarea'); if (ta) setTimeout(function () { ta.focus({ preventScroll: true }); }, 200); }
+    }
+    window.addEventListener('popstate', function () { if (!document.body.contains(alvo) || !D) return; var v = vistaDoHash(); if (v !== vista) { vista = v; desenhar(); } });
 
     var en = function () { return L.lingua() === 'en'; };
     var C = function (c) { return c === 'prep' ? D.edicao.prep : D.edicao; };
@@ -299,12 +313,7 @@
       }
       h += '</div></section>';
       if (msg) h += '<p class="conta-ok" role="status">' + esc(msg) + '</p>';
-      h += '<details class="conta-card sj-history" id="sjHistorico"><summary>' + (en() ? 'My history' : 'Meu histórico') + '<span>' + (en() ? 'Read your earlier journal entries, testimonies and released devotionals.' : 'Consulte seus registros anteriores do diário, testemunhos e devocionais já liberados.') + '</span></summary><p>' + (en() ? 'Edition ' : 'Edição ') + esc(e.id) + ' · ' + (en() ? 'Your saved records remain available after this edition ends, unless you delete them, leave this edition or delete your account.' : 'Seus registros salvos continuam disponíveis após o fim desta edição, enquanto você não os apagar, sair desta edição ou excluir a conta.') + '</p><div class="sj-history-links"><a class="btn btn-ghost sm" href="#sjDiario">' + (en() ? 'Write in my journal' : 'Escrever no diário') + '</a><a class="btn btn-ghost sm" href="#sjTes">' + (en() ? 'Share a testimony' : 'Compartilhar testemunho') + '</a></div><div id="sjHistoryBody"></div></details>';
-
-
-      h += '<section class="conta-card sj-playlist" aria-labelledby="sjPlaylistTitulo"><h2 id="sjPlaylistTitulo">' + esc(t('playlist_h')) + '</h2><p>' + esc(t('playlist_p')) + '</p>' +
-        '<div class="conta-perigo"><a class="btn btn-ghost sm" href="https://open.spotify.com/playlist/1cbUlhTj9opJTtPyZkowXD" target="_blank" rel="noopener noreferrer">soaking ↗</a>' +
-        '<a class="btn btn-ghost sm" href="https://open.spotify.com/playlist/0vv32HhALCtegBPESb5mnK" target="_blank" rel="noopener noreferrer">praying in tongues ↗</a></div></section>';
+      if (vista !== 'inicio') return desenharSub(h, e);
 
       // convite para os 100 dias
       if (D.pode_aceitar) {
@@ -319,8 +328,44 @@
       if (emJornada || (e.etapa === 'fim' && naJor)) h += cartaoJornada(mj, pd);
       if (D.na_preparacao) h += cartaoPrep(mp, pd);
 
-      // diário
-      var DI = diario(), TE = testemunhos();
+      // seu espaço: diário, testemunhos e histórico em subpáginas
+      var nDI = diario().length, nTE = testemunhos().length;
+      var tile = function (v, tit, n, p) { return '<a class="sj-esp-it" href="#spirit/' + v + '" data-vista="' + v + '"><b>' + esc(tit) + (n ? ' <small>' + n + '</small>' : '') + '</b><span>' + esc(p) + '</span><i>' + esc(t('esp_abrir')) + ' →</i></a>'; };
+      h += '<section class="conta-card sj-esp"><h3>' + esc(t('esp_h')) + '</h3><div class="sj-esp-grade">' +
+        tile('diario', t('di_h'), nDI, t('esp_di')) + tile('testemunhos', t('te_h'), nTE, t('esp_te')) + tile('historico', t('esp_hi'), 0, t('esp_hi_p')) + '</div></section>';
+      h += '<section class="conta-card sj-playlist" aria-labelledby="sjPlaylistTitulo"><h3 id="sjPlaylistTitulo">' + esc(t('playlist_h')) + '</h3><p>' + esc(t('playlist_p')) + '</p>' +
+        '<div class="conta-perigo"><a class="btn btn-ghost sm" href="https://open.spotify.com/playlist/1cbUlhTj9opJTtPyZkowXD" target="_blank" rel="noopener noreferrer">soaking ↗</a>' +
+        '<a class="btn btn-ghost sm" href="https://open.spotify.com/playlist/0vv32HhALCtegBPESb5mnK" target="_blank" rel="noopener noreferrer">praying in tongues ↗</a></div></section>';
+
+      // devocionais + preferências
+      var pdfs = D.devocionais.filter(function (d) { return d.pdf_url; });
+      h += '<div class="sj-cols">' + (pdfs.length || !textos().length ? '<section class="conta-card"><h3>' + esc(t('dev_h')) + '</h3>' + (pdfs.length ? '<ul class="sj-devs">' + pdfs.map(function (d) {
+        return '<li><div><b>' + esc(d.titulo) + '</b>' + (d.resumo ? '<p>' + esc(d.resumo) + '</p>' : '') + '<small>' + esc(t('dev_de').replace('{d}', fmtIso(d.liberar_em))) + '</small></div><a class="btn btn-creme sm" href="' + esc(d.pdf_url) + '" target="_blank" rel="noopener">' + esc(t('dev_abrir')) + ' ↗</a></li>';
+      }).join('') + '</ul>' : '<p>' + esc(t('dev_vazio')) + '</p>') + '</section>' : '');
+      h += '<section class="conta-card"><h3>' + esc(t('cfg_h')) + '</h3><p>' + esc(D.devocionais_email ? t('dev_email_on') : t('dev_email_off')) + (D.devocionais_email && D.email ? '<br><small>' + esc(D.email) + '</small>' : '') + (D.devocionais_email && !D.email_servico ? '<br><small>' + esc(t('dev_email_srv')) + '</small>' : '') + '</p>' +
+        '<button type="button" class="btn btn-ghost sm" id="sjDevEmail">' + esc(D.devocionais_email ? t('desligar') : t('ligar')) + '</button>' +
+        '<p style="margin-top:22px">' + t('priv') + ' · <a href="/spirit-immersion.html">' + esc(t('sobre')) + '</a></p>' +
+        '<p>' + esc(t('sair_p')) + '</p><button type="button" class="btn btn-ghost sm" id="sjSair">' + esc(t('sair')) + '</button></section></div></div>';
+
+      alvo.innerHTML = h;
+      ligar();
+    }
+
+    // subpáginas: o painel do topo continua, e abaixo vem só a área escolhida
+    function desenharSub(h, e) {
+      h += '<p class="sj-voltar"><a class="btn btn-ghost sm" href="#spirit" data-vista="inicio">' + esc(t('voltar')) + '</a></p>';
+      if (vista === 'diario') h += secaoDiario(e);
+      else if (vista === 'testemunhos') h += secaoTes(e);
+      else h += '<section class="conta-card sj-history" id="sjHistorico"><h3>' + esc(t('esp_hi')) + '</h3><p>' + esc(t('hi_p')) + '</p><div id="sjHistoryBody"></div></section>';
+      h += '</div>';
+      alvo.innerHTML = h;
+      if (vista === 'historico' && window.PV_SPIRIT_HISTORY) window.PV_SPIRIT_HISTORY.mount(document.getElementById('sjHistoryBody'), D, { esc: esc, en: en(), typeLabel: function (type) { return t('t_' + type); }, devotional: function (text) { return htmlDevocional(text, esc); } });
+      ligar();
+    }
+
+    function secaoDiario(e) {
+      var h = '';
+      var DI = diario();
       var cont = {}; DI.forEach(function (r) { cont[r.tipo] = (cont[r.tipo] || 0) + 1; });
       var q = busca.trim().toLowerCase();
       var lista = DI.filter(function (r) { return (!filtro || r.tipo === filtro) && (!q || (r.texto + ' ' + (r.referencia || '')).toLowerCase().indexOf(q) >= 0); });
@@ -354,6 +399,10 @@
       } else h += '<p class="sj-mudo">' + esc(t('di_vazio')) + '</p>';
       h += '</section>';
 
+      return h;
+    }
+    function secaoTes(e) {
+      var h = '', TE = testemunhos();
       // testemunhos (área separada, com autorização)
       h += '<section class="conta-card sj-diario sj-tes" id="sjTes"><h3>' + esc(t('te_h')) + (TE.length ? ' · ' + TE.length : '') + '</h3><p>' + esc(t('te_p')) + '</p>' +
         '<form id="sjTeF" class="sj-di-form"><h4>' + esc(rascT.id ? t('te_editando') : t('te_novo')) + '</h4>' +
@@ -364,27 +413,16 @@
         '<div class="conta-perigo"><button class="btn btn-creme sm" type="submit">' + esc(t('te_salvar')) + '</button>' + (rascT.id ? '<button type="button" class="lnk-x" id="sjTeCanc">' + esc(t('di_cancelar')) + '</button>' : '') + '</div></form>' +
         (TE.length ? '<ul class="sj-regs">' + TE.map(function (x) { return itemTes(x, true); }).join('') + '</ul>' : '<p class="sj-mudo">' + esc(t('te_vazio')) + '</p>') + '</section>';
 
-      // devocionais + preferências
-      var pdfs = D.devocionais.filter(function (d) { return d.pdf_url; });
-      h += '<div class="sj-cols">' + (pdfs.length || !textos().length ? '<section class="conta-card"><h3>' + esc(t('dev_h')) + '</h3>' + (pdfs.length ? '<ul class="sj-devs">' + pdfs.map(function (d) {
-        return '<li><div><b>' + esc(d.titulo) + '</b>' + (d.resumo ? '<p>' + esc(d.resumo) + '</p>' : '') + '<small>' + esc(t('dev_de').replace('{d}', fmtIso(d.liberar_em))) + '</small></div><a class="btn btn-creme sm" href="' + esc(d.pdf_url) + '" target="_blank" rel="noopener">' + esc(t('dev_abrir')) + ' ↗</a></li>';
-      }).join('') + '</ul>' : '<p>' + esc(t('dev_vazio')) + '</p>') + '</section>' : '');
-      h += '<section class="conta-card"><h3>' + esc(t('cfg_h')) + '</h3><p>' + esc(D.devocionais_email ? t('dev_email_on') : t('dev_email_off')) + (D.devocionais_email && D.email ? '<br><small>' + esc(D.email) + '</small>' : '') + (D.devocionais_email && !D.email_servico ? '<br><small>' + esc(t('dev_email_srv')) + '</small>' : '') + '</p>' +
-        '<button type="button" class="btn btn-ghost sm" id="sjDevEmail">' + esc(D.devocionais_email ? t('desligar') : t('ligar')) + '</button>' +
-        '<p style="margin-top:22px">' + t('priv') + ' · <a href="/spirit-immersion.html">' + esc(t('sobre')) + '</a></p>' +
-        '<p>' + esc(t('sair_p')) + '</p><button type="button" class="btn btn-ghost sm" id="sjSair">' + esc(t('sair')) + '</button></section></div></div>';
-
-      alvo.innerHTML = h;
-      if (window.PV_SPIRIT_HISTORY) window.PV_SPIRIT_HISTORY.mount(document.getElementById('sjHistoryBody'), D, { esc: esc, en: en(), typeLabel: function (type) { return t('t_' + type); }, devotional: function (text) { return htmlDevocional(text, esc); } });
-      ligar();
-      if (location.hash === '#sjHistorico') { var history = document.getElementById('sjHistorico'); history.open = true; history.scrollIntoView({block:'start'}); }
+      return h;
     }
 
     function irDiario(data) {
       if (data) rasc.data = data;
-      desenhar();
-      var f = document.getElementById('sjDiario');
-      if (f) { f.scrollIntoView({ behavior: 'smooth', block: 'start' }); var ta = f.querySelector('textarea'); if (ta) setTimeout(function () { ta.focus({ preventScroll: true }); }, 400); }
+      aberto = null; irVista('diario', '#sjDi');
+    }
+    function irTes(data) {
+      if (data) rascT.data = data;
+      aberto = null; irVista('testemunhos', '#sjTeF');
     }
 
     function ligar() {
@@ -474,8 +512,7 @@
       if (tc) tc.onclick = function () { rascT = vazioT(D.edicao.hoje); desenhar(); };
       alvo.querySelectorAll('[data-irtes]').forEach(function (a) {
         a.onclick = function (ev) {
-          ev.preventDefault(); rascT.data = a.getAttribute('data-irtes'); aberto = null; desenhar();
-          var s = document.getElementById('sjTes'); if (s) { s.scrollIntoView({ behavior: 'smooth', block: 'start' }); var ta = s.querySelector('textarea'); if (ta) setTimeout(function () { ta.focus({ preventScroll: true }); }, 400); }
+          ev.preventDefault(); irTes(a.getAttribute('data-irtes'));
         };
       });
       alvo.querySelectorAll('[data-edittes]').forEach(function (b) {
@@ -483,8 +520,7 @@
           var x = D.diario.filter(function (y) { return y.id === +b.getAttribute('data-edittes'); })[0];
           if (!x) return;
           rascT = { id: x.id, data: x.data, texto: x.texto, autorizacao: x.autorizacao === 'privado' ? 'equipe' : x.autorizacao };
-          aberto = null; desenhar();
-          var s = document.getElementById('sjTes'); if (s) s.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          irTes();
         };
       });
       alvo.querySelectorAll('[data-deltes]').forEach(function (b) {
@@ -501,9 +537,11 @@
         var nb = document.getElementById('sjBusca'); if (nb) { nb.focus(); try { nb.setSelectionRange(pos, pos); } catch (e) {} }
       };
 
-      document.getElementById('sjDevEmail').onclick = function () { L.api('/conta/spirit/devocionais', 'POST', { receber: !D.devocionais_email }).then(carregar).catch(function (er) { alert(er.message); }); };
+      alvo.querySelectorAll('[data-vista]').forEach(function (a) { a.onclick = function (ev) { ev.preventDefault(); aberto = null; irVista(a.getAttribute('data-vista')); }; });
+      var de = document.getElementById('sjDevEmail');
+      if (de) de.onclick = function () { L.api('/conta/spirit/devocionais', 'POST', { receber: !D.devocionais_email }).then(carregar).catch(function (er) { alert(er.message); }); };
       var sa = document.getElementById('sjSair');
-      sa.onclick = function () {
+      if (sa) sa.onclick = function () {
         if (!sa.dataset.conf) { sa.dataset.conf = '1'; sa.textContent = t('sair_conf'); sa.classList.remove('btn-ghost'); sa.classList.add('btn-cobre'); return; }
         L.api('/conta/spirit/sair', 'POST').then(function () { if (opcoes && opcoes.aoSair) opcoes.aoSair(); }).catch(function (er) { alert(er.message); });
       };

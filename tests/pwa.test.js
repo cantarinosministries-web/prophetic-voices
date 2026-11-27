@@ -5,7 +5,7 @@ import vm from 'node:vm';
 const manifest = JSON.parse(readFileSync(new URL('../public/manifest.webmanifest', import.meta.url), 'utf8'));
 function worker(fetch) {
   const events = {};
-  const self = { location: { origin: 'https://example.invalid' }, addEventListener(name, fn) { events[name] = fn; }, skipWaiting() {}, clients: { claim() {} } };
+  const self = { location: { origin: 'https://example.invalid' }, addEventListener(name, fn) { events[name] = fn; }, skipWaiting() {}, clients: { claim() {} }, registration: {} };
   vm.runInNewContext(readFileSync(new URL('../public/sw.js', import.meta.url), 'utf8'), { self, URL, Response, fetch });
   return events;
 }
@@ -26,8 +26,8 @@ test('worker leaves authentication, APIs, writes and cross-origin requests untou
     assert.equal(intercepted, false, path);
   }
 });
-test('account navigation always uses network without cache', async () => {
-  const events = worker(async (_, options) => { assert.equal(options.cache, 'no-store'); return new Response('fresh page'); });
+test('navigation goes to the network and keeps normal browser caching (no forced no-store)', async () => {
+  const events = worker(async (_, options) => { assert.equal(options, undefined); return new Response('fresh page'); });
   let response;
   events.fetch({ request: { url: 'https://example.invalid/conta.html', method: 'GET', mode: 'navigate' }, respondWith(promise) { response = promise; } });
   assert.equal(await (await response).text(), 'fresh page');

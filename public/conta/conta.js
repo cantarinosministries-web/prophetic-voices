@@ -121,7 +121,7 @@
       (l.recebe_email ? '<button type="button" class="btn btn-ghost sm" data-email="0">' + esc(t('em_desligar')) + '</button>' : '<button type="button" class="btn btn-creme sm" data-email="1">' + esc(t('em_ligar')) + '</button>') + '</div>';
   }
 
-  var aba = /^#(dados)$/.test(location.hash) || params.get('bemvindo') || params.get('ok') ? 'dados' : /^#(spirit|sjHistorico)$/.test(location.hash) ? 'spirit' : 'biblioteca';
+  var aba = /^#(dados)$/.test(location.hash) || params.get('bemvindo') || params.get('ok') ? 'dados' : /^#(spirit(\/[a-z]+)?|sjHistorico)$/.test(location.hash) ? 'spirit' : 'biblioteca';
   var B = null, filtroCol = 0;
 
   function telaConta() {
