@@ -3,7 +3,7 @@
 import Base from '../layouts/Base.astro';
 ---
 <Base page="conta" title="Minha conta — The Prophetic Voices">
-  <Fragment slot="head"><meta name="robots" content="noindex" /></Fragment>
-  <section class="pad conta-sec"><div class="wrap" id="conta" data-pagina="conta"><p class="conta-carregando">…</p></div></section>
-  <Fragment slot="scripts"><script is:inline src="/conta/botoes.js"></script><script is:inline src="/conta/spirit.js"></script><script is:inline src="/conta/conta.js"></script></Fragment>
+  <Fragment slot="head"><meta name="robots" content="noindex" /><link rel="stylesheet" href="/conta/historico.css" /></Fragment>
+  <section class="pad conta-sec"><div class="wrap"><aside class="pwa-card" data-pwa-hide-installed aria-label="Aplicativo no celular"><img src="/app/icon-192.png" alt="" width="56" height="56" /><div><strong data-i18n="inst_card_h">The Prophetic Voices no seu celular</strong><p data-i18n="inst_card_p">Adicione à tela inicial e abra sua jornada pelo ícone.</p></div><button type="button" class="btn btn-ghost sm" data-pwa-install data-i18n="inst_btn">Instalar no celular</button></aside></div><div class="wrap" id="conta" data-pagina="conta"><p class="conta-carregando">…</p></div></section>
+  <Fragment slot="scripts"><script is:inline src="/conta/botoes.js"></script><script is:inline src="/conta/historico.js"></script><script is:inline src="/conta/spirit.js"></script><script is:inline src="/conta/conta.js"></script></Fragment>
 </Base>

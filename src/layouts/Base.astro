@@ -25,10 +25,21 @@ const isHome = page === 'home';
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{title}</title>
   <meta name="description" content={description} />
-  <link rel="icon" type="image/png" href="/media/symbol-creme.png" />
+  <link rel="icon" type="image/png" href="/app/favicon-64.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200;300;400&family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <meta name="theme-color" content="#000000" />
+  <link rel="apple-touch-icon" href="/app/apple-touch-icon.png" />
+  <link rel="stylesheet" href="/app/install.css" />
+  <meta property="og:image" content="https://thepropheticvoices.com.br/app/icone.png" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="1200" />
+  <meta property="og:image:alt" content="The Prophetic Voices" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:image" content="https://thepropheticvoices.com.br/app/icone.png" />
   <slot name="head" />
 </head>
 <body class={isHome ? 'locked' : 'ready'}>
@@ -108,11 +119,18 @@ const isHome = page === 'home';
       <div class="legal">
         <span>THE PROPHETIC VOICES · 2026</span>
         {isHome ? <button type="button" id="replay" data-i18n="replay">↺ REVER ABERTURA</button> : <span></span>}
-        <span class="legal-links"><a href="/termos.html" data-i18n="f_terms">TERMOS</a> · <a href="/privacidade.html" data-i18n="f_privacy">PRIVACIDADE</a></span>
+        <span class="legal-links"><a href="/instalar.html" data-i18n="f_install">INSTALAR NO CELULAR</a> · <a href="/termos.html" data-i18n="f_terms">TERMOS</a> · <a href="/privacidade.html" data-i18n="f_privacy">PRIVACIDADE</a></span>
       </div>
     </div>
   </footer>
 
+  <dialog id="pvInstallDialog" class="pwa-dialog" aria-labelledby="pvInstallTitle">
+    <h2 id="pvInstallTitle" data-i18n="inst_dlg_h">Instalar no celular</h2>
+    <p id="pvInstallHelp"></p>
+    <p data-i18n="inst_dlg_p">O aplicativo é gratuito e precisa de internet. Use o mesmo login do site.</p>
+    <button type="button" class="btn btn-creme sm" data-pwa-close data-i18n="inst_ok">Entendi</button>
+  </dialog>
+  <script is:inline src="/app/install.js" defer></script>
   <slot name="scripts" />
 
   <script>
@@ -121,7 +139,7 @@ const isHome = page === 'home';
     // na própria home, links "/index.html#secao" só rolam até a seção (sem recarregar)
     document.addEventListener('click', (e) => {
       const a = (e.target as HTMLElement).closest('a[href*="#"]') as HTMLAnchorElement | null;
-      if (!a || a.target === '_blank') return;
+      if (e.defaultPrevented || !a || a.target === '_blank') return;
       const url = new URL(a.href, location.href);
       const here = location.pathname.replace(/index\.html$/, '');
       const there = url.pathname.replace(/index\.html$/, '');
