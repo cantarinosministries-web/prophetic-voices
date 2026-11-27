@@ -6,6 +6,7 @@
 (function () {
   var T = {
     pt: {
+      playlist_h: 'Playlist para os seus momentos de oração', playlist_p: 'Uma indicação de playlist no Spotify que pode cooperar com as suas horas de oração.', playlist_b: 'Ouvir no Spotify',
       e_antes: 'A preparação começa em', e_antes_1: 'A preparação começa amanhã', dias: 'dias',
       e_prep: 'Preparação · dia {d} de {t}', e_jornada: 'Dia {d} de {t}', e_espera: 'Os 100 dias começam em 1º de janeiro', e_aberta: 'Os 100 dias começaram', e_fim: 'Jornada encerrada',
       bloco: '{n}ª jornada · {m} por dia', bloco_c: '{n}ª jornada · {m}', min: '{m} minutos', hora: '1 hora',
@@ -42,6 +43,7 @@
       priv: 'Seu registro é pessoal: só você vê os dias marcados e o diário que não liberar. <a href="/privacidade.html#spirit">Como cuidamos dos seus dados</a>.', sobre: 'Sobre o movimento'
     },
     en: {
+      playlist_h: 'A playlist for your prayer time', playlist_p: 'A suggested Spotify playlist to accompany your hours of prayer.', playlist_b: 'Listen on Spotify',
       e_antes: 'Preparation begins in', e_antes_1: 'Preparation begins tomorrow', dias: 'days',
       e_prep: 'Preparation · day {d} of {t}', e_jornada: 'Day {d} of {t}', e_espera: 'The 100 days begin on January 1', e_aberta: 'The 100 days have begun', e_fim: 'Journey completed',
       bloco: 'Journey {n} · {m} a day', bloco_c: 'Journey {n} · {m}', min: '{m} minutes', hora: '1 hour',
@@ -297,6 +299,12 @@
       }
       h += '</div></section>';
       if (msg) h += '<p class="conta-ok" role="status">' + esc(msg) + '</p>';
+      h += '<details class="conta-card sj-history" id="sjHistorico"><summary>' + (en() ? 'My history' : 'Meu histórico') + '<span>' + (en() ? 'Read your earlier journal entries, testimonies and released devotionals.' : 'Consulte seus registros anteriores do diário, testemunhos e devocionais já liberados.') + '</span></summary><p>' + (en() ? 'Edition ' : 'Edição ') + esc(e.id) + ' · ' + (en() ? 'Your saved records remain available after this edition ends, unless you delete them, leave this edition or delete your account.' : 'Seus registros salvos continuam disponíveis após o fim desta edição, enquanto você não os apagar, sair desta edição ou excluir a conta.') + '</p><div class="sj-history-links"><a class="btn btn-ghost sm" href="#sjDiario">' + (en() ? 'Write in my journal' : 'Escrever no diário') + '</a><a class="btn btn-ghost sm" href="#sjTes">' + (en() ? 'Share a testimony' : 'Compartilhar testemunho') + '</a></div><div id="sjHistoryBody"></div></details>';
+
+
+      h += '<section class="conta-card sj-playlist" aria-labelledby="sjPlaylistTitulo"><h2 id="sjPlaylistTitulo">' + esc(t('playlist_h')) + '</h2><p>' + esc(t('playlist_p')) + '</p>' +
+        '<div class="conta-perigo"><a class="btn btn-ghost sm" href="https://open.spotify.com/playlist/1cbUlhTj9opJTtPyZkowXD" target="_blank" rel="noopener noreferrer">soaking ↗</a>' +
+        '<a class="btn btn-ghost sm" href="https://open.spotify.com/playlist/0vv32HhALCtegBPESb5mnK" target="_blank" rel="noopener noreferrer">praying in tongues ↗</a></div></section>';
 
       // convite para os 100 dias
       if (D.pode_aceitar) {
@@ -367,7 +375,9 @@
         '<p>' + esc(t('sair_p')) + '</p><button type="button" class="btn btn-ghost sm" id="sjSair">' + esc(t('sair')) + '</button></section></div></div>';
 
       alvo.innerHTML = h;
+      if (window.PV_SPIRIT_HISTORY) window.PV_SPIRIT_HISTORY.mount(document.getElementById('sjHistoryBody'), D, { esc: esc, en: en(), typeLabel: function (type) { return t('t_' + type); }, devotional: function (text) { return htmlDevocional(text, esc); } });
       ligar();
+      if (location.hash === '#sjHistorico') { var history = document.getElementById('sjHistorico'); history.open = true; history.scrollIntoView({block:'start'}); }
     }
 
     function irDiario(data) {
