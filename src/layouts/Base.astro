@@ -139,7 +139,7 @@ const isHome = page === 'home';
     // na própria home, links "/index.html#secao" só rolam até a seção (sem recarregar)
     document.addEventListener('click', (e) => {
       const a = (e.target as HTMLElement).closest('a[href*="#"]') as HTMLAnchorElement | null;
-      if (!a || a.target === '_blank') return;
+      if (e.defaultPrevented || !a || a.target === '_blank') return;
       const url = new URL(a.href, location.href);
       const here = location.pathname.replace(/index\.html$/, '');
       const there = url.pathname.replace(/index\.html$/, '');

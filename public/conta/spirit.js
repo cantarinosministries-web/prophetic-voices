@@ -334,7 +334,7 @@
       }
       h += '</div></section>';
       if (msg) h += '<p class="conta-ok" role="status">' + esc(msg) + '</p>';
-      if (vista !== 'inicio') return desenharSub(h, e);
+      if (vista !== 'inicio') return desenharSub('<div class="sj">' + (msg ? '<p class="conta-ok" role="status">' + esc(msg) + '</p>' : ''), e);
 
       // convite para os 100 dias
       if (D.pode_aceitar) {
