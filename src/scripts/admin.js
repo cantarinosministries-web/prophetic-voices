@@ -748,7 +748,25 @@ async function telaSpirit() {
     <p class="small muted">Testemunhos escritos pelos participantes na área de Testemunhos da conta. O Diário de Oração deles é sempre privado e nunca aparece aqui. Só publique (aba Testemunhos) os que trazem autorização para isso, respeitando o nível escolhido; “só a equipe” fica restrito ao ministério.</p>
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">${[['', 'Todos'], ['equipe', AUT_SI.equipe], ['anonimo', AUT_SI.anonimo], ['nome', AUT_SI.nome]].map(([k, v]) => `<button class="btn sm${filtro === k ? ' pri' : ''}" data-faut="${k}">${esc(v)} (${k ? r.testemunhos.filter((t) => t.autorizacao === k).length : r.testemunhos.length})</button>`).join('')}</div>
     <div class="stack">${tes.map((t) => `<div style="border-top:1px solid rgba(248,233,183,.12);padding-top:12px"><div class="small muted">${t.data ? esc(t.data.split('-').reverse().join('/')) + ' · ' : ''}${esc(TIPO_SI[t.tipo] || 'Testemunho')}${t.referencia ? ' · ' + esc(t.referencia) : ''} · ${esc(t.nome)}${t.email ? ' · ' + esc(t.email) : ''} · <b>${esc(AUT_SI[t.autorizacao])}</b> · ${data(t.atualizado_em)}</div><p style="white-space:pre-wrap;margin:6px 0 0">${esc(t.testemunho)}</p></div>`).join('') || '<p class="muted" style="margin:0">Nenhum testemunho ainda.</p>'}</div>
+  </div>
+  <div class="card" style="margin-top:16px"><h3>Comentários nos devocionais · ${(r.comentarios || []).filter((c) => c.status === 'publicado').length}</h3>
+    <p class="small muted">Os comentários dos devocionais são abertos: aparecem na hora, sem aprovação, só para quem está inscrito no Spirit Immersion (nunca no site público). Aqui a equipe acompanha e, se preciso, tira do ar, apaga ou bloqueia o leitor (o bloqueio vale também para os comentários dos artigos).</p>
+    <div class="stack">${(r.comentarios || []).map((c) => `<div style="border-top:1px solid rgba(248,233,183,.12);padding-top:12px${c.status === 'removido' ? ';opacity:.55' : ''}"><div class="small muted">${data(c.criado_em)} · ${esc(c.titulo)} · ${esc(c.nome)}${c.email ? ' · ' + esc(c.email) : ''}${c.status === 'removido' ? ` · <b>fora do ar</b>${c.removido_por_nome ? ' (por ' + esc(c.removido_por_nome) + ')' : ''}` : ''}${c.bloqueado ? ' · <b>leitor bloqueado</b>' : ''}</div><p style="white-space:pre-wrap;margin:6px 0 8px">${esc(c.texto)}</p>
+      <div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn sm" data-cmst="${c.id}" data-rem="${c.status === 'removido' ? 0 : 1}">${c.status === 'removido' ? 'Devolver ao ar' : 'Tirar do ar'}</button> <button class="btn sm" data-cmdel="${c.id}">Apagar</button> <button class="btn sm" data-cmbloq="${c.leitor_id}" data-bloq="${c.bloqueado ? 0 : 1}">${c.bloqueado ? 'Desbloquear leitor' : 'Bloquear leitor'}</button></div></div>`).join('') || '<p class="muted" style="margin:0">Nenhum comentário ainda.</p>'}</div>
   </div>`;
+
+  $$('[data-cmst]').forEach((b) => b.addEventListener('click', async () => {
+    try { await api(`/spirit/comentarios/${b.dataset.cmst}/status`, { method: 'POST', body: { remover: b.dataset.rem === '1' } }); toast(b.dataset.rem === '1' ? 'Comentário tirado do ar.' : 'Comentário de volta ao ar.'); telaSpirit(); } catch (er) { toast(er.message, true); }
+  }));
+  $$('[data-cmdel]').forEach((b) => b.addEventListener('click', async () => {
+    if (!confirm('Apagar este comentário de vez?')) return;
+    try { await api(`/spirit/comentarios/${b.dataset.cmdel}`, { method: 'DELETE' }); toast('Comentário apagado.'); telaSpirit(); } catch (er) { toast(er.message, true); }
+  }));
+  $$('[data-cmbloq]').forEach((b) => b.addEventListener('click', async () => {
+    const bloquear = b.dataset.bloq === '1';
+    if (bloquear && !b.dataset.conf) { b.dataset.conf = '1'; b.textContent = 'Confirmar bloqueio'; return; }
+    try { await api('/moderacao/leitor/' + b.dataset.cmbloq, { method: 'POST', body: { bloquear } }); toast(bloquear ? 'Leitor bloqueado: não comenta mais nos artigos nem nos devocionais.' : 'Leitor desbloqueado.'); telaSpirit(); } catch (er) { toast(er.message, true); }
+  }));
 
   $$('[data-faut]').forEach((b) => b.addEventListener('click', () => { sessionStorage.setItem('si-aut', b.dataset.faut); telaSpirit(); }));
   const fDev = $('#fDev');
